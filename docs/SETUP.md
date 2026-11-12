@@ -35,21 +35,12 @@ The site will be at **https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/
 
 ## 3. Load the tree and make yourself admin
 
-1. In Supabase, open **SQL Editor** → **New query**.
-2. Open [`supabase/schema.sql`](../supabase/schema.sql) in GitHub, click **Copy raw file**, paste it into the editor, and click **Run**. It should say *Success. No rows returned*.
-3. New query again. Do the same with [`supabase/seed.sql`](../supabase/seed.sql). This adds the 70 people from the two PDFs.
-4. New query again. Paste this, **put your own email address in it**, and run it:
+1. Open [`supabase/setup.sql`](../supabase/setup.sql) on GitHub and click **Copy raw file** (the copy icon above the file).
+2. In Supabase, open **SQL Editor** → **New query**, and paste.
+3. Near the top, change `YOUR-EMAIL@example.com` to your own email (keep the quotes).
+4. Click **Run**. The result should say *Setup finished: 70 people loaded, admin invite for …*.
 
-   ```sql
-   insert into public.invites (email, role, person_id)
-   values (
-     lower('YOUR-EMAIL@example.com'),
-     'admin',
-     (select id from public.people where given_name = 'Sunil Kumar' and surname = 'Jaggi')
-   );
-   ```
-
-   This makes you the admin and links your login to *Sunil Kumar Jaggi* in the tree (that decides which branch's private details you see; as admin you see everything anyway).
+This creates the tables and privacy rules, adds the 70 people from the PDFs, and makes you the admin, linked to *Sunil Kumar Jaggi* in the tree. (`schema.sql` and `seed.sql` are the same thing in two parts, for reference.)
 
 ## 4. Point the site at Supabase
 

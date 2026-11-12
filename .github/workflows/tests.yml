@@ -21,7 +21,7 @@ jobs:
       - name: Seed files are up to date
         run: |
           node scripts/build-seed.mjs
-          git diff --exit-code -- site/data/seed.json supabase/seed.sql
+          git diff --exit-code -- site/data/seed.json supabase/seed.sql supabase/setup.sql
       - name: Schema, privacy and approval tests
         env:
           PGHOST: localhost
