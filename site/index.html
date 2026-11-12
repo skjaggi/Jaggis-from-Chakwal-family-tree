@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Jaggis of Chakwal</title>
+  <meta name="description" content="The Jaggi family tree, descending from Bakhshi Bhanna Mal Jaggi of Chakwal.">
+  <meta name="theme-color" content="#7a3b12">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='22' r='18' fill='%232f6b3a'/%3E%3Crect x='28' y='34' width='8' height='24' rx='2' fill='%237a3b12'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body data-view="tree">
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" width="28" height="28" aria-hidden="true"><circle cx="32" cy="22" r="18" fill="var(--leaf)"/><rect x="28" y="34" width="8" height="24" rx="2" fill="var(--bark)"/></svg>
+      <a href="#/" id="site-title" class="site-title">Jaggis of Chakwal</a>
+    </div>
+    <div class="search-wrap" role="combobox" aria-haspopup="listbox" aria-owns="search-results">
+      <input id="search" type="search" placeholder="Search the family…" autocomplete="off" aria-label="Search for a person" aria-controls="search-results">
+      <ul id="search-results" role="listbox" hidden></ul>
+    </div>
+    <nav id="nav" aria-label="Main"></nav>
+  </header>
+  <div id="preview-banner" class="banner" hidden>
+    Preview: this is the starting tree from the family PDFs. Sign-in, edits and photos turn on once the database is connected.
+  </div>
+  <div id="who" class="who"></div>
+
+  <main>
+    <div id="loading" class="loading">Loading the family tree…</div>
+    <section id="tree-area" hidden>
+      <div id="crumbs" class="crumbs"></div>
+      <div class="tree-wrap">
+        <div id="tree-canvas" class="tree-canvas"></div>
+        <div id="outline" class="outline-wrap" hidden></div>
+        <div id="tree-tools" class="tree-tools" role="toolbar" aria-label="Tree controls">
+          <button id="zoom-in" class="icon-btn" type="button" aria-label="Zoom in">+</button>
+          <button id="zoom-out" class="icon-btn" type="button" aria-label="Zoom out">−</button>
+          <button id="zoom-fit" class="icon-btn" type="button" aria-label="Fit to screen" title="Fit to screen">⤢</button>
+          <button id="expand-all" class="icon-btn" type="button" aria-label="Open every branch" title="Open every branch">⊞</button>
+          <button id="collapse-all" class="icon-btn" type="button" aria-label="Close every branch" title="Close every branch">⊟</button>
+        </div>
+      </div>
+    </section>
+    <aside id="panel" class="panel" hidden aria-label="Person details"></aside>
+    <section id="page" class="page" hidden></section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

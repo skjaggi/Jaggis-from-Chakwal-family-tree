@@ -1,0 +1,46 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seed files are up to date
+        run: |
+          node scripts/build-seed.mjs
+          git diff --exit-code -- site/data/seed.json supabase/seed.sql
+      - name: Schema, privacy and approval tests
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: supabase/tests/run.sh
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        working-directory: tests/browser
+        run: |
+          echo '{"name":"browser-tests","private":true}' > package.json
+          npm i --silent playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: Run browser tests
+        run: tests/browser/run.sh
