@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 if [ ! -f .vendor/d3.esm.js ]; then
   # The site loads d3 and supabase-js from a CDN; tests serve local copies.
   mkdir -p .vendor && cd .vendor
-  echo "{\"name\":\"vendor\",\"private\":true}" > package.json && npm i --silent d3@7.9.0 @supabase/supabase-js@2.45.4 esbuild >/dev/null
+  echo "{\"name\":\"vendor\",\"private\":true}" > package.json && npm i --silent d3@7.9.0 @supabase/supabase-js@2.89.0 esbuild >/dev/null
   npx esbuild --bundle --format=esm node_modules/d3/src/index.js --outfile=d3.esm.js --log-level=warning
   echo "export * from '@supabase/supabase-js';" > sb.js
   npx esbuild --bundle --format=esm sb.js --outfile=supabase.esm.js --log-level=warning

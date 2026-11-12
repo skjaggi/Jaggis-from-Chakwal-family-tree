@@ -4,7 +4,7 @@ const fs = require('fs');
 const V = __dirname + '/.vendor/';
 async function setup(ctx) {
   await ctx.route('https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(V + 'd3.esm.js') }));
-  await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(V + 'supabase.esm.js') }));
+  await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(V + 'supabase.esm.js') }));
 }
 (async () => {
   const b = await chromium.launch();

@@ -6,8 +6,8 @@
 // While these are empty the site runs in preview mode: it shows the starting
 // tree from the family PDFs, read-only, with no sign-in.
 export const config = {
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  supabaseUrl: 'https://nxsaixeotbijfizievoq.supabase.co',
+  supabaseAnonKey: 'sb_publishable_XML5JQRvgIV_WHdvn4CGTQ_jjgAlCyH',
   siteTitle: 'Jaggis of Chakwal',
   adminName: 'Sunil',
 };

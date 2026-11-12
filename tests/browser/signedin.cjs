@@ -5,7 +5,7 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
   for (const role of ['member', 'admin']) {
     const ctx = await b.newContext(role === 'member' ? devices['iPhone 13'] : { viewport: { width: 1280, height: 800 } });
     await ctx.route('https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/.vendor/d3.esm.js') }));
-    await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
+    await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
     await ctx.route('**/js/config.js', r => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k', siteTitle: 'Jaggis of Chakwal', adminName: 'Sunil' };" }));
     await ctx.addInitScript(r => { window.__FAKE_ROLE__ = r; }, role);
     const pg = await ctx.newPage();

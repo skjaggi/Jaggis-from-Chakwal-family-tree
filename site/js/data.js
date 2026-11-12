@@ -2,7 +2,7 @@
 import { config } from './config.js';
 import { buildFamily, fullName } from './model.js';
 
-const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm';
 
 export const store = {
   preview: !(config.supabaseUrl && config.supabaseAnonKey),
