@@ -1,0 +1,93 @@
+{
+  "_about": "Seed data for the Jaggi family tree, transcribed from the two family tree PDFs (Jaggi_Family_Tree.pdf and Bakhshi_Hari_Singh_Jaggi_Final_Family_Tree-v2.pdf). Edit this file, then run `node scripts/build-seed.mjs` to regenerate site/data/seed.json and supabase/seed.sql. Gender is only set where the PDFs say son/daughter or 'married to'. Generation 6 surnames are taken from the father and may differ today.",
+  "sources": {
+    "A": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)",
+    "B": "Bakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives"
+  },
+  "people": [
+    { "slug": "bhanna-mal", "title": "Bakhshi", "given": "Bhanna Mal", "surname": "Jaggi", "gender": "male", "gen": 1, "living": false, "birth_place": "Chakwal, Punjab (pre-Partition)", "notes": "Founding patriarch of the Jaggi family of Chakwal.", "src": "A,B" },
+
+    { "slug": "kesar-mal", "title": "Bakhshi", "given": "Kesar Mal", "surname": "Jaggi", "gender": "male", "gen": 2, "living": false, "parents": ["bhanna-mal"], "notes": "Honoured in the 1933 founding of Arya High School, Chakwal. Had four sons: Prabh Dyal, Shoba Ram, Kalu Ram and Hari Singh.", "src": "A,B" },
+
+    { "slug": "prabh-dyal", "title": "Bakhshi", "given": "Prabh Dyal", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "src": "A,B" },
+    { "slug": "shoba-ram", "given": "Shoba Ram", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "src": "A,B" },
+    { "slug": "kalu-ram", "given": "Kalu Ram", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "src": "A,B" },
+    { "slug": "hari-singh", "title": "Bakhshi", "given": "Hari Singh", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "notes": "Head of the Bakhshi Hari Singh Jaggi branch.", "src": "A,B" },
+
+    { "slug": "bir-chand", "given": "Bir Chand", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["prabh-dyal"], "notes": "With Gian Parkash Jaggi, funded the construction of the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.", "src": "A" },
+    { "slug": "gian-parkash", "given": "Gian Parkash", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["prabh-dyal"], "notes": "With Bir Chand Jaggi, funded the construction of the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.", "src": "A" },
+    { "slug": "gokal-chand", "given": "Gokal Chand", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["shoba-ram"], "src": "A" },
+    { "slug": "chunni-lal", "given": "Chunni Lal", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["shoba-ram"], "src": "A" },
+    { "slug": "chatter", "given": "Chatter", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["kalu-ram"], "src": "A" },
+    { "slug": "prem-singh", "given": "Prem Singh", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["kalu-ram"], "src": "A" },
+    { "slug": "tara-chand", "given": "Tara Chand", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["hari-singh"], "notes": "Eldest son of Bakhshi Hari Singh Jaggi.", "src": "A,B" },
+    { "slug": "tapashi-ram", "given": "Tapashi Ram", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["hari-singh"], "spouses": ["sita-wanti"], "src": "A,B" },
+    { "slug": "sita-wanti", "given": "Sita Wanti", "gender": "female", "gen": 4, "src": "B" },
+    { "slug": "gobind-ram", "given": "Gobind Ram", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["hari-singh"], "spouses": ["ishvari-devi"], "src": "A,B" },
+    { "slug": "ishvari-devi", "given": "Ishvari Devi", "gender": "female", "gen": 4, "src": "B" },
+
+    { "slug": "yog-raj", "given": "Yog Raj", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["bir-chand"], "src": "A" },
+    { "slug": "dharam-vir", "given": "Dharam Vir", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["bir-chand"], "src": "A" },
+    { "slug": "om-parkash", "given": "Om Parkash", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["gian-parkash"], "src": "A" },
+    { "slug": "deepak", "given": "Deepak", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["gian-parkash"], "src": "A" },
+    { "slug": "ram-lal", "given": "Ram Lal", "surname": "Jaggi", "gender": "male", "gen": 5, "uncertainParents": ["gokal-chand", "chunni-lal"], "uncertainty": "Parent unconfirmed: Gokal Chand Jaggi or Chunni Lal Jaggi.", "src": "A" },
+    { "slug": "agya-lal", "given": "Agya Lal", "surname": "Jaggi", "gender": "male", "gen": 5, "uncertainParents": ["gokal-chand", "chunni-lal"], "uncertainty": "Parent unconfirmed: Gokal Chand Jaggi or Chunni Lal Jaggi.", "src": "A" },
+
+    { "slug": "ram-parkash", "given": "Ram Parkash", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["soma-rani"], "src": "A,B" },
+    { "slug": "soma-rani", "given": "Soma Rani", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "ram-avtar", "given": "Ram Avtar", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["pushpa-rani"], "src": "A,B" },
+    { "slug": "pushpa-rani", "given": "Pushpa Rani", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "harbans-lal", "given": "Harbans Lal", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["shakuntala-rani"], "src": "A,B" },
+    { "slug": "shakuntala-rani", "given": "Shakuntala Rani", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "tirlok-nath", "given": "Tirlok Nath", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["chander-kanta"], "src": "A,B" },
+    { "slug": "chander-kanta", "given": "Chander Kanta", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "khushbash-chander", "given": "Khushbash Chander", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["lily"], "src": "A,B" },
+    { "slug": "lily", "given": "Lily", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "gulshan-lal", "given": "Gulshan Lal", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["lalita"], "src": "A,B" },
+    { "slug": "lalita", "given": "Lalita", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "suraj-parkash", "given": "Suraj Parkash", "surname": "Jaggi", "gender": "male", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["madhu"], "src": "A,B" },
+    { "slug": "madhu", "given": "Madhu", "gender": "female", "gen": 5, "src": "B" },
+    { "slug": "vira-wali", "given": "Vira Wali", "surname": "Jaggi", "other_names": "Vira Wali Ghai (married name)", "gender": "female", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["sri-krishan-ghai"], "src": "A,B" },
+    { "slug": "sri-krishan-ghai", "given": "Sri Krishan", "surname": "Ghai", "gender": "male", "gen": 5, "src": "B" },
+    { "slug": "motia-rani", "given": "Motia Rani", "surname": "Jaggi", "other_names": "Motia Rani Talwar (married name)", "gender": "female", "gen": 5, "parents": ["tapashi-ram", "sita-wanti"], "spouses": ["raj-kumar-talwar"], "src": "A,B" },
+    { "slug": "raj-kumar-talwar", "given": "Raj Kumar", "surname": "Talwar", "gender": "male", "gen": 5, "src": "B" },
+
+    { "slug": "veena", "given": "Veena", "surname": "Jaggi", "gen": 6, "parents": ["ram-parkash", "soma-rani"], "src": "B" },
+    { "slug": "gulsher-bhadhur", "given": "Gulsher Bhadhur", "surname": "Jaggi", "gen": 6, "parents": ["ram-parkash", "soma-rani"], "src": "B" },
+    { "slug": "surinder-kumar", "given": "Surinder Kumar", "surname": "Jaggi", "gen": 6, "parents": ["ram-parkash", "soma-rani"], "src": "B" },
+    { "slug": "bhushan-kumar", "given": "Bhushan Kumar", "surname": "Jaggi", "gen": 6, "parents": ["ram-parkash", "soma-rani"], "src": "B" },
+    { "slug": "ruchika", "given": "Ruchika", "surname": "Jaggi", "gen": 6, "parents": ["ram-parkash", "soma-rani"], "src": "B" },
+    { "slug": "sonia", "given": "Sonia", "surname": "Jaggi", "gen": 6, "parents": ["ram-parkash", "soma-rani"], "src": "B" },
+
+    { "slug": "harinder-kumar", "given": "Harinder Kumar", "surname": "Jaggi", "gen": 6, "parents": ["ram-avtar", "pushpa-rani"], "src": "B" },
+    { "slug": "krishan-kumar", "given": "Krishan Kumar", "surname": "Jaggi", "gen": 6, "parents": ["ram-avtar", "pushpa-rani"], "src": "B" },
+    { "slug": "rajeev-kumar", "given": "Rajeev Kumar", "surname": "Jaggi", "gen": 6, "parents": ["ram-avtar", "pushpa-rani"], "src": "B" },
+    { "slug": "sanjeev-kumar", "given": "Sanjeev Kumar", "surname": "Jaggi", "gen": 6, "parents": ["ram-avtar", "pushpa-rani"], "src": "B" },
+    { "slug": "sangita", "given": "Sangita", "surname": "Jaggi", "gen": 6, "parents": ["ram-avtar", "pushpa-rani"], "src": "B" },
+
+    { "slug": "harjeet-kumar", "given": "Harjeet Kumar", "surname": "Jaggi", "gen": 6, "parents": ["harbans-lal", "shakuntala-rani"], "src": "B" },
+    { "slug": "gurjeet-kumar", "given": "Gurjeet Kumar", "surname": "Jaggi", "gen": 6, "parents": ["harbans-lal", "shakuntala-rani"], "src": "B" },
+    { "slug": "sunil-kumar", "given": "Sunil Kumar", "surname": "Jaggi", "gen": 6, "parents": ["harbans-lal", "shakuntala-rani"], "src": "B" },
+
+    { "slug": "navneet-kumar", "given": "Navneet Kumar", "surname": "Jaggi", "gen": 6, "parents": ["tirlok-nath", "chander-kanta"], "src": "B" },
+    { "slug": "nanita", "given": "Nanita", "surname": "Jaggi", "gen": 6, "parents": ["tirlok-nath", "chander-kanta"], "src": "B" },
+
+    { "slug": "satyen", "given": "Satyen", "surname": "Jaggi", "gen": 6, "parents": ["khushbash-chander", "lily"], "src": "B" },
+    { "slug": "shalini", "given": "Shalini", "surname": "Jaggi", "gen": 6, "parents": ["khushbash-chander", "lily"], "src": "B" },
+
+    { "slug": "richie", "given": "Richie", "surname": "Jaggi", "gen": 6, "parents": ["gulshan-lal", "lalita"], "src": "B" },
+    { "slug": "robin", "given": "Robin", "surname": "Jaggi", "gen": 6, "parents": ["gulshan-lal", "lalita"], "src": "B" },
+
+    { "slug": "reety", "given": "Reety", "surname": "Jaggi", "gen": 6, "parents": ["suraj-parkash", "madhu"], "src": "B" },
+    { "slug": "raman-deep", "given": "Raman Deep", "surname": "Jaggi", "gen": 6, "parents": ["suraj-parkash", "madhu"], "src": "B" },
+
+    { "slug": "rekha", "given": "Rekha", "surname": "Ghai", "gen": 6, "parents": ["vira-wali", "sri-krishan-ghai"], "src": "B" },
+    { "slug": "renu", "given": "Renu", "surname": "Ghai", "gen": 6, "parents": ["vira-wali", "sri-krishan-ghai"], "src": "B" },
+    { "slug": "rita", "given": "Rita", "surname": "Ghai", "gen": 6, "parents": ["vira-wali", "sri-krishan-ghai"], "src": "B" },
+    { "slug": "joginder", "given": "Joginder", "surname": "Ghai", "gen": 6, "parents": ["vira-wali", "sri-krishan-ghai"], "src": "B" },
+
+    { "slug": "vinod-kumar", "given": "Vinod Kumar", "surname": "Talwar", "gen": 6, "parents": ["motia-rani", "raj-kumar-talwar"], "src": "B" },
+    { "slug": "anju", "given": "Anju", "surname": "Talwar", "gen": 6, "parents": ["motia-rani", "raj-kumar-talwar"], "src": "B" },
+    { "slug": "ajay", "given": "Ajay", "surname": "Talwar", "gen": 6, "parents": ["motia-rani", "raj-kumar-talwar"], "src": "B" }
+  ]
+}
