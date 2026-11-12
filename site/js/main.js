@@ -15,8 +15,8 @@ let tree;
 
 // Routes: #/tree/<rootId>, #/outline/<rootId>, #/review, #/mine, #/members; ?p=<personId>
 function parseHash() {
-  const raw = location.hash.replace(/^#\/?/, '');
-  if (/^(access_token|error|type)=/.test(raw)) return; // sign-in redirect, handled by Supabase
+  let raw = location.hash.replace(/^#\/?/, '');
+  if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
   state.view = ['tree', 'outline', 'review', 'mine', 'members'].includes(view) ? view : 'tree';
@@ -249,7 +249,22 @@ async function renderHeader() {
 
 // ---------------------------------------------------------------- start
 
+// After tapping a sign-in link, Supabase sends people back with either a
+// session or an error in the address. Read it before Supabase tidies it away.
+function readSignInResult() {
+  const params = new URLSearchParams(location.hash.slice(1) + '&' + location.search.slice(1));
+  if (params.get('access_token')) return { ok: true };
+  const code = params.get('error_code') || params.get('error');
+  if (!code) return null;
+  const desc = (params.get('error_description') || '').replace(/\+/g, ' ');
+  if (code === 'otp_expired' || /expired|invalid/i.test(desc)) {
+    return { error: 'That sign-in link has expired or was already used. Please ask for a new one.' };
+  }
+  return { error: `Sign-in did not work: ${desc || code}` };
+}
+
 async function start() {
+  const signIn = readSignInResult();
   document.title = config.siteTitle;
   $('site-title').textContent = config.siteTitle;
   try {
@@ -260,6 +275,9 @@ async function start() {
     return;
   }
   $('loading').remove();
+  if (signIn?.error) toast(signIn.error, 'error');
+  else if (signIn?.ok) toast(store.signedIn ? 'You are signed in.' : 'The sign-in link could not be used. Please ask for a new one.', store.signedIn ? 'ok' : 'error');
+  if (location.search.includes('error')) history.replaceState(null, '', location.pathname + location.hash);
   tree = new TreeView($('tree-canvas'), { onSelect: selectPerson });
   await tree.mount();
   $('zoom-in').onclick = () => tree.zoomBy(1.3);

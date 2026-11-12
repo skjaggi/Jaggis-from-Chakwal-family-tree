@@ -3,6 +3,8 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
 const fs = require('fs');
 const V = __dirname + '/.vendor/';
 async function setup(ctx) {
+  // Preview mode: no database, whatever site/js/config.js says.
+  await ctx.route('**/js/config.js', r => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: '', supabaseAnonKey: '', siteTitle: 'Jaggis of Chakwal', adminName: 'Sunil' };" }));
   await ctx.route('https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(V + 'd3.esm.js') }));
   await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(V + 'supabase.esm.js') }));
 }
