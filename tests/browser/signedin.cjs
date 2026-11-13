@@ -75,6 +75,7 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.fill('.invite-form .picker input', 'Om Parkash'); await pg.locator('.invite-form .pick-list button').first().click();
     await pg.locator('.invite-form button[type=submit]').click(); await pg.waitForSelector('.send-invite');
     console.log(role, 'invite list:', (await pg.locator('#page section').innerText()).replace(/\n/g, ' | '), '| invites:', await pg.evaluate(() => JSON.stringify(window.__db.invites.map(i => [i.email, i.role, i.invited_by, !!i.person_id]))));
+    console.log(role, 'invite email:', await pg.evaluate(() => JSON.stringify(window.__invoked)), '|', await pg.locator('#toast').innerText());
     console.log(role, 'mailto ok:', /^mailto:cousin@example\.com\?subject=/.test(await pg.locator('.send-invite a').first().getAttribute('href')));
     const wa = decodeURIComponent(await pg.locator('.send-invite a', { hasText: 'WhatsApp' }).first().getAttribute('href'));
     console.log(role, 'whatsapp text has site + email:', wa.includes('http://localhost:8765/') && wa.includes('cousin@example.com'), '| greets:', wa.includes('Dear Neha,'));

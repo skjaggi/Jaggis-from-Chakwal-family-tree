@@ -21,6 +21,12 @@ do $$ begin
   end;
 end $$;
 select pg_temp.expect((select role from public.profiles where email = 'admin@example.com') = 'admin', 'admin profile created from invite');
+-- Login created by an invitation email: not "signed in" until they sign in
+insert into public.invites (email, role) values ('emailed@example.com', 'member');
+insert into auth.users (id, email, invited_at) values ('00000000-0000-0000-0000-0000000000e1', 'emailed@example.com', now());
+select pg_temp.expect((select accepted_at from public.invites where email = 'emailed@example.com') is null, 'invite email alone does not count as signed in');
+update auth.users set last_sign_in_at = now() where email = 'emailed@example.com';
+select pg_temp.expect((select accepted_at from public.invites where email = 'emailed@example.com') is not null, 'first sign-in marks the invite as used');
 
 -- Anonymous visitor
 begin;

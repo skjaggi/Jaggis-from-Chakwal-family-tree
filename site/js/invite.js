@@ -2,7 +2,7 @@
 // invite works at once (as a member); the inviter then sends a ready-made
 // message from their own email, WhatsApp or text. The admin sees every invite
 // and who sent it on the Members page.
-import { store, inviteRelative, listMyInvites, personLabel } from './data.js';
+import { store, inviteRelative, listMyInvites, sendInviteEmail, personLabel } from './data.js';
 import { config } from './config.js';
 import { fullName } from './model.js';
 import { h, clear, toast, field, confirmDialog, formatWhen } from './ui.js';
@@ -46,8 +46,18 @@ export function sendButtons(invite) {
   const from = firstName(store.profile?.display_name) || '';
   const text = inviteMessage(invite, from);
   const enc = encodeURIComponent;
+  const resend = h('button.btn.small', { type: 'button', onclick: async () => {
+    resend.disabled = true;
+    try {
+      toast(await sendInviteEmail(invite.email), 'ok');
+    } catch (e) {
+      toast(e.message, 'error');
+    }
+    resend.disabled = false;
+  } }, 'Resend invitation email');
   const buttons = [
-    h('a.btn.small', { href: `mailto:${invite.email}?subject=${enc(SUBJECT)}&body=${enc(text)}` }, 'Email'),
+    resend,
+    h('a.btn.small', { href: `mailto:${invite.email}?subject=${enc(SUBJECT)}&body=${enc(text)}` }, 'Email it myself'),
     h('a.btn.small', { href: `https://wa.me/?text=${enc(text)}`, target: '_blank', rel: 'noopener' }, 'WhatsApp'),
     h('button.btn.small', { type: 'button', onclick: async () => {
       try {
@@ -108,7 +118,11 @@ export async function renderInvite(container) {
       form.reset();
       chosen = null;
       chosenLabel.textContent = 'Nobody chosen yet.';
-      toast(`${email} can now sign in. Send them the invitation with a button below.`, 'ok');
+      try {
+        toast(`Invited. ${await sendInviteEmail(email)}`, 'ok');
+      } catch (mailErr) {
+        toast(`${email} can sign in now, but the email didn't go out (${mailErr.message}). Use the Email or WhatsApp button below.`, 'error');
+      }
       await showMine(email);
     } catch (err) {
       toast(err.message, 'error');
@@ -119,7 +133,7 @@ export async function renderInvite(container) {
 
   clear(container,
     h('h1', 'Invite a relative'),
-    h('p', 'Know someone in the family who should be able to add photos, dates and stories? Add their email here. They can sign in straight away. Then send them the invitation from your own email, WhatsApp or text with the buttons that appear.'),
+    h('p', 'Know someone in the family who should be able to add photos, dates and stories? Add their email here and the site emails them an invitation with a sign-in link. You can also send it yourself by WhatsApp or text with the buttons that appear.'),
     form, mine);
   showMine();
 }

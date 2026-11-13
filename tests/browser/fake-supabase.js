@@ -46,6 +46,7 @@ export function createClient() {
       onAuthStateChange: () => {}, signInWithOtp: async () => ({ error: null }), verifyOtp: async () => ({ error: null }), signOut: async () => ({}),
     },
     from: t => new Q(t),
+    functions: { invoke: async (name, { body }) => { (window.__invoked ||= []).push([name, body.email]); return { data: { sent: true }, error: null }; } },
     rpc: async (name, args) => {
       if (name === 'invite_relative') {
         if (db.invites.some(i => i.email === args.email)) return { data: null, error: { message: `${args.email} has already been invited` } };

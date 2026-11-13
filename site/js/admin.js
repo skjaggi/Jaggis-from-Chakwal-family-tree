@@ -2,7 +2,7 @@
 // (their own submitted changes).
 import {
   store, listRequests, approveChange, rejectChange, withdrawRequest, pendingPhotoUrl,
-  listInvites, addInvite, removeInvite, listProfiles, updateProfile, personLabel,
+  listInvites, addInvite, removeInvite, sendInviteEmail, listProfiles, updateProfile, personLabel,
 } from './data.js';
 import { config } from './config.js';
 import { fullName } from './model.js';
@@ -176,7 +176,11 @@ export async function renderAdmin(container) {
     if (!email.includes('@')) return toast('Please enter an email address.', 'error');
     try {
       await addInvite({ email, display_name: form.display_name.value.trim(), person_id: chosen?.id, role: form.role.value });
-      toast(`Invite added. Use the Email or WhatsApp button next to ${email} to send them the invitation.`, 'ok');
+      try {
+        toast(`Invite added. ${await sendInviteEmail(email.toLowerCase())}`, 'ok');
+      } catch (mailErr) {
+        toast(`Invite added, but the email didn't go out (${mailErr.message}). Use the Email or WhatsApp button next to ${email}.`, 'error');
+      }
       renderAdmin(container);
     } catch (err) {
       toast(err.message, 'error');
@@ -210,7 +214,7 @@ export async function renderAdmin(container) {
   clear(container,
     h('h1', 'Family members and invites'),
     h('section', h('h2', 'Invite someone'),
-      h('p.muted', 'Only invited emails can sign in. After adding them here, use the Email or WhatsApp button to send the invitation. Family members can also invite relatives from Invite in the menu; you will see who invited whom below, and can remove any invite.'),
+      h('p.muted', 'Only invited emails can sign in. After you add them here, the site emails them an invitation; the WhatsApp and Copy buttons are there if you would rather send it yourself. Family members can also invite relatives from Invite in the menu; you will see who invited whom below, and can remove any invite.'),
       form),
     h('section', h('h2', `Invites (${invites.length})`),
       invites.length ? h('ul.history', invites.map((i) => h('li',

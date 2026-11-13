@@ -276,6 +276,18 @@ export async function inviteRelative({ email, display_name, person_id }) {
   if (error) throw error;
 }
 
+// Asks the server to send the invitation email (through the site's own email
+// sender). Returns a short message to show.
+export async function sendInviteEmail(email) {
+  const { data, error } = await store.sb.functions.invoke('send-invite', { body: { email } });
+  if (error) {
+    let msg = error.message;
+    try { msg = (await error.context.json()).error || msg; } catch { /* keep the generic message */ }
+    throw new Error(msg);
+  }
+  return data?.sent ? `Invitation email sent to ${email}.` : (data?.message || 'No email was sent.');
+}
+
 export async function listMyInvites() {
   const { data, error } = await store.sb.from('invites').select('*').eq('invited_by', store.session.user.id).order('created_at', { ascending: false });
   if (error) throw error;
