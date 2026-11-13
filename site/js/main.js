@@ -186,25 +186,37 @@ function openSignIn() {
     toast('Sign-in turns on once the database is connected.');
     return;
   }
-  const email = h('input', { type: 'email', name: 'email', required: true, autocomplete: 'email', placeholder: 'you@example.com' });
-  const code = h('input', { type: 'text', name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: '6-digit code' });
+  let remembered = '';
+  try { remembered = localStorage.getItem('signin-email') || ''; } catch {}
+  const email = h('input', { type: 'email', name: 'email', required: true, autocomplete: 'email', placeholder: 'you@example.com', value: remembered });
+  const code = h('input', { type: 'text', name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: '6-digit code', maxlength: 10 });
+  const codeBtn = h('button.btn.primary', { type: 'button', onclick: async () => {
+    if (!email.value.includes('@')) return toast('Please enter your email address first.', 'error');
+    if (!/^\d{6,10}$/.test(code.value.trim())) return toast('Please type the code from the newest email.', 'error');
+    codeBtn.disabled = true;
+    try {
+      await verifyCode(email.value, code.value);
+      m.close();
+      toast('You are signed in.', 'ok');
+    } catch (e) {
+      toast(e.message, 'error');
+    }
+    codeBtn.disabled = false;
+  } }, 'Sign in with code');
   const step2 = h('div', { hidden: true },
-    h('p.form-note', 'Check your email and tap the sign-in link. If the email shows a code, you can type it here instead.'),
+    h('p.form-note', 'Open the newest email from us. Either type its code here, or tap its link on this same phone or computer. Only the newest email works.'),
     field('Code from the email', code),
-    h('div.form-actions', h('button.btn.primary', { type: 'button', onclick: async () => {
-      try {
-        await verifyCode(email.value, code.value);
-        m.close();
-        toast('Signed in.', 'ok');
-      } catch (e) {
-        toast(e.message, 'error');
-      }
-    } }, 'Sign in with code')));
+    h('div.form-actions', codeBtn));
   const sendBtn = h('button.btn.primary', { type: 'submit' }, 'Email me a sign-in link');
+  const haveCode = h('button.link', { type: 'button', onclick: () => {
+    step2.hidden = false;
+    haveCode.hidden = true;
+    code.focus();
+  } }, 'I already have a code');
   const form = h('form.form',
     h('p.form-note', `Signing in is for invited family members. If you haven't been invited, ask ${config.adminName}.`),
     field('Your email', email),
-    h('div.form-actions', sendBtn),
+    h('div.form-actions', haveCode, sendBtn),
     step2);
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -212,9 +224,11 @@ function openSignIn() {
     sendBtn.disabled = true;
     try {
       await sendLoginLink(email.value);
+      try { localStorage.setItem('signin-email', email.value.trim().toLowerCase()); } catch {}
       step2.hidden = false;
-      sendBtn.textContent = 'Send again';
-      toast('Sign-in email sent.', 'ok');
+      haveCode.hidden = true;
+      sendBtn.textContent = 'Send a new email';
+      toast('Sign-in email sent. Use the newest one.', 'ok');
     } catch (err) {
       toast(err.message, 'error');
     }

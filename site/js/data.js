@@ -38,14 +38,17 @@ export async function init() {
   const { data } = await store.sb.auth.getSession();
   store.session = data.session;
   await loadProfile();
-  store.sb.auth.onAuthStateChange(async (event, session) => {
+  store.sb.auth.onAuthStateChange((event, session) => {
     const changed = (session?.user?.id || null) !== (store.session?.user?.id || null);
     store.session = session;
-    if (changed) {
+    if (!changed) return;
+    // Supabase holds its sign-in lock while this callback runs, so database
+    // calls made here would wait on it forever. Do the work just afterwards.
+    setTimeout(async () => {
       await loadProfile();
       await loadData();
       store.emit();
-    }
+    }, 0);
   });
   await loadData();
 }

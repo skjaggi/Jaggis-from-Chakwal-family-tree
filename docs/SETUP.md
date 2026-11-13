@@ -65,11 +65,13 @@ Family members sign in with their email: they type it in, get an email, and tap 
    - **Site URL**: `https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/`
    - **Redirect URLs**: add the same address.
 2. Open **Authentication → Sign In / Providers** (or **Providers → Email**). Make sure **Email** is enabled and **Allow new users to sign up** is **on**. Don't worry: the database only lets invited emails create a login. Everyone else sees "This email hasn't been invited yet".
-3. Optional but handy on phones: open **Authentication → Email Templates → Magic Link** and add this line to the message, so people can type a code instead of tapping the link:
+3. **Add the sign-in code to the emails** (strongly recommended). Open **Authentication → Emails → Templates**. In **both** the **Confirm signup** template (used the first time someone signs in) and the **Magic Link** template (used after that), add this line under the link and save:
 
    ```html
-   <p>Or enter this code: <strong>{{ .Token }}</strong></p>
+   <p>Or type this code on the sign-in screen: <strong>{{ .Token }}</strong></p>
    ```
+
+   The code works on any phone or computer. The link only works if it opens in the same browser that asked for it, which often isn't the case when a phone's mail app opens links in its own browser.
 
 4. **Before inviting many people**, set up your own email sender. Supabase's built-in sender only sends a handful of emails per hour, which is fine for testing but not for the whole family at Thanksgiving.
    - Free option: create an account at <https://resend.com> (free tier: 3,000 emails/month), add and verify `sjaggi.com` as a sending domain, and create an API key.
