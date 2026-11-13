@@ -36,7 +36,7 @@ src.people.forEach((p, order) => {
     generation: p.gen,
     birth_order: order + 1,
     is_living: p.living ?? null,
-    photo_path: null,
+    photo_path: p.photo ?? null,
     photo_visibility: 'public',
   });
   const sources = (p.src || '').split(',').filter(Boolean).map((k) => src.sources[k]).join('\n');

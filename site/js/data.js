@@ -93,10 +93,15 @@ export async function loadData() {
 
 async function loadPhotoUrls(people) {
   store.photoUrls = new Map();
+  // Historical pictures that ship with the site (e.g. "img/arya-school-plaque-1933.jpg")
+  // are public and are served from the site itself rather than from storage.
+  for (const p of people) {
+    if (p.photo_path?.startsWith('img/')) store.photoUrls.set(p.id, p.photo_path);
+  }
   if (store.preview) return;
   const branch = [];
   for (const p of people) {
-    if (!p.photo_path) continue;
+    if (!p.photo_path || p.photo_path.startsWith('img/')) continue;
     if (p.photo_visibility === 'public') {
       store.photoUrls.set(p.id, store.sb.storage.from('photos-public').getPublicUrl(p.photo_path).data.publicUrl);
     } else if (store.signedIn) {

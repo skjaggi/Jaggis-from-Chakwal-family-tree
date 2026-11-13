@@ -46,7 +46,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
   clear(container,
     h('div.panel-head',
       h('button.icon-btn', { type: 'button', 'aria-label': 'Close', onclick: onClose }, '✕')),
-    h('div.panel-photo', photo ? h('img', { src: photo, alt: `Photo of ${shortName(p)}` }) : h('div.avatar-lg', initials(p.given_name)),
+    h('div.panel-photo', photo ? h('a', { href: photo, target: '_blank', rel: 'noopener', title: 'Open full size' }, h('img', { src: photo, alt: `Photo of ${shortName(p)}` })) : h('div.avatar-lg', initials(p.given_name)),
       canEdit ? h('button.btn.small', { type: 'button', onclick: () => openPhotoForm(p) }, photo ? 'Change photo' : 'Add photo') : null,
       !photo && p.photo_path && p.photo_visibility === 'branch' ? h('p.muted.small', 'Photo visible to this branch only.') : null),
     h('h2.panel-name', fullName(p)),
