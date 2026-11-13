@@ -291,6 +291,15 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 @media (max-width: 480px) {
   .wide-only { display: none; }
   .site-title { white-space: normal; line-height: 1.15; }
+  /* Signed in, the menu is too long to share a line with the title: give it
+     its own row, scrolling sideways if needed. */
+  .topbar:has(nav > :nth-child(5)) .site-title { white-space: nowrap; }
+  .topbar:has(nav > :nth-child(5)) .brand { flex: 1 0 100%; }
+  .topbar:has(nav > :nth-child(5)) nav {
+    order: 2; flex-basis: 100%; justify-content: flex-start; flex-wrap: nowrap;
+    overflow-x: auto; scrollbar-width: none; margin: 0 -6px;
+  }
+  .topbar:has(nav > :nth-child(5)) nav > * { flex: none; }
 }
 
 /* Invite a relative */

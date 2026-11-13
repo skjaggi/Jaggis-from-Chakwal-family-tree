@@ -4,7 +4,7 @@ const ADMIN = window.__FAKE_ROLE__ !== 'member';
 const uid = 'u-1';
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
-  profiles: [{ id: uid, email: 'me@example.com', display_name: 'Tester', role: ADMIN ? 'admin' : 'member', person_id: seed.people.find(p => p.given_name === 'Sunil Kumar').id, created_at: new Date().toISOString() }],
+  profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: seed.people.find(p => p.given_name === 'Sunil Kumar').id, created_at: new Date().toISOString() }],
   invites: [], change_requests: [],
 };
 window.__db = db;
@@ -39,7 +39,7 @@ class Q {
 }
 const files = new Map();
 export function createClient() {
-  const session = { user: { id: uid, email: 'me@example.com' } };
+  const session = window.__FAKE_ROLE__ === 'anon' ? null : { user: { id: uid, email: 'me@example.com' } };
   return {
     auth: {
       getSession: async () => ({ data: { session } }),

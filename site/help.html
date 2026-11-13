@@ -20,6 +20,11 @@
     .help .toc a { display: block; padding: 4px 0; }
     .help .back { display: inline-block; margin-top: 2em; }
     kbd, .ui { font-weight: 600; }
+    .help .shot { margin: 16px auto; max-width: 300px; text-align: center; }
+    .help .shot img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); display: block; }
+    .help .shot figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+    .help .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
+    .help .shots .shot { margin: 16px auto; }
   </style>
 </head>
 <body>
@@ -54,6 +59,7 @@
       <li>Open the email from <span class="ui">Sunil Jaggi</span>. It arrives within a minute. If not, look in your Spam folder.</li>
       <li><strong>Easiest:</strong> go back to the site and type the <strong>6-digit code</strong> from the email into the box, then tap <span class="ui">Sign in with code</span>.<br>Or tap the link in the email.</li>
     </ol>
+    <figure class="shot"><img src="img/help/sign-in.jpg" width="390" height="760" loading="lazy" alt="The sign-in box. Type your email, then the 6-digit code from the email."><figcaption>The sign-in box. Type your email, then the 6-digit code from the email.</figcaption></figure>
     <div class="tip"><strong>Only the newest email works.</strong> Each email works once. If you asked for more than one, use the newest. If you already have an email with a code, tap <span class="ui">I already have a code</span> instead of asking for another.</div>
 
     <h2 id="stay">2. Staying signed in</h2>
@@ -82,6 +88,11 @@
       <li><strong>Start the tree from one person:</strong> open their details and tap <span class="ui">Show tree from here</span>. The line at the top shows their ancestors; tap any name there to go back up, or <span class="ui">Whole tree</span>.</li>
       <li><strong>List view:</strong> tap <span class="ui">List</span> at the top for a simple indented list, which is easier to read on a small phone.</li>
     </ul>
+    <div class="shots">
+      <figure class="shot"><img src="img/help/tree.jpg" width="390" height="760" loading="lazy" alt="The tree. Drag to move around; tap the round button under a card to open a family."><figcaption>The tree. Drag to move around; tap the round button under a card to open a family.</figcaption></figure>
+      <figure class="shot"><img src="img/help/person-card.jpg" width="390" height="760" loading="lazy" alt="Tap a card to see that person's details."><figcaption>Tap a card to see that person's details.</figcaption></figure>
+    </div>
+    <figure class="shot"><img src="img/help/list.jpg" width="390" height="760" loading="lazy" alt="The List view: easier to read on a small phone."><figcaption>The List view: easier to read on a small phone.</figcaption></figure>
     <p>A card marked <strong>?</strong>, and a dashed line, means the parent isn't confirmed. If you know the answer, please tell us.</p>
 
     <h2 id="edit">4. Adding or correcting information</h2>
@@ -91,8 +102,16 @@
       <li><span class="ui">Add: Child / Spouse / Parent</span>: add someone who is missing.</li>
       <li><span class="ui">Link to someone already in the tree</span>: connect two people who are both already there.</li>
     </ul>
+    <div class="shots">
+      <figure class="shot"><img src="img/help/card-actions.jpg" width="390" height="760" loading="lazy" alt="The buttons at the bottom of a person's card."><figcaption>The buttons at the bottom of a person's card.</figcaption></figure>
+      <figure class="shot"><img src="img/help/suggest-edit.jpg" width="390" height="760" loading="lazy" alt="Suggesting an edit. Nothing changes until Sunil approves it."><figcaption>Suggesting an edit. Nothing changes until Sunil approves it.</figcaption></figure>
+    </div>
     <p>For births and deaths, only the <strong>year</strong> is recorded, never the full date. Years can be approximate, for example <em>c. 1925</em> or <em>1930s</em>. Use <strong>Sources</strong> to say where the information came from (for example "Dadi's memory" or "school records"), and <strong>What's uncertain</strong> for anything you're not sure about.</p>
     <p>After you tap <span class="ui">Send for approval</span>, your change waits for Sunil. <strong>It won't show in the tree until he approves it.</strong> While it waits, you can see it on that person's card in a yellow <strong>Waiting for Sunil's approval</strong> box (only you see this), and under <span class="ui">My changes</span>, where you can also withdraw it. Don't worry about making a mistake; nothing changes until it's approved.</p>
+    <div class="shots">
+      <figure class="shot"><img src="img/help/pending-card.jpg" width="390" height="760" loading="lazy" alt="Your change, waiting for approval, on the person's card. Only you see it."><figcaption>Your change, waiting for approval, on the person's card. Only you see it.</figcaption></figure>
+      <figure class="shot"><img src="img/help/my-changes.jpg" width="390" height="760" loading="lazy" alt="My changes: everything you sent, with what you changed."><figcaption>My changes: everything you sent, with what you changed.</figcaption></figure>
+    </div>
 
     <h2 id="photo">5. Adding a photo</h2>
     <ol>
@@ -101,6 +120,7 @@
       <li><strong>Center it:</strong> drag the photo with your finger or mouse, and use the slider to zoom, so the face sits inside the circle.</li>
       <li>Choose who can see it, then tap <span class="ui">Send for approval</span>.</li>
     </ol>
+    <figure class="shot"><img src="img/help/photo-center.jpg" width="390" height="760" loading="lazy" alt="Drag the photo and use the slider so the face sits in the circle."><figcaption>Drag the photo and use the slider so the face sits in the circle.</figcaption></figure>
     <p>To move a photo that's already there, tap <span class="ui">Change or center photo</span>, drag it into place and send it. To take a photo off, tap <span class="ui">Remove photo</span>.</p>
     <p>Each person has one profile photo. The site makes the picture smaller automatically, so any photo from your phone is fine.</p>
 
@@ -112,6 +132,10 @@
       <li>Tap <span class="ui">Invite</span>. The site emails them an invitation with a button that signs them in.</li>
       <li>If you like, also tap <span class="ui">WhatsApp</span> or <span class="ui">Copy message</span> to send them a ready-made message from your own phone.</li>
     </ol>
+    <div class="shots">
+      <figure class="shot"><img src="img/help/invite-form.jpg" width="390" height="760" loading="lazy" alt="Inviting a relative: their email, name and who they are in the tree."><figcaption>Inviting a relative: their email, name and who they are in the tree.</figcaption></figure>
+      <figure class="shot"><img src="img/help/invite-sent.jpg" width="390" height="760" loading="lazy" alt="After inviting: the email has gone out, and you can also send it by WhatsApp."><figcaption>After inviting: the email has gone out, and you can also send it by WhatsApp.</figcaption></figure>
+    </div>
     <p>The people you invited are listed on the same page, with <span class="ui">Resend invitation email</span> in case it got lost.</p>
 
     <h2 id="privacy">7. Who can see what</h2>

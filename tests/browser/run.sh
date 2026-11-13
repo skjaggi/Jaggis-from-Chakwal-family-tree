@@ -16,5 +16,6 @@ fi
 (cd ../../site && python3 -m http.server 8765 >/dev/null 2>&1) & SERVER=$!
 trap 'kill $SERVER' EXIT
 sleep 1
+if [ "${1:-}" = shots ]; then node help-shots.cjs; exit; fi  # retake the help page pictures
 node smoke.cjs
 node signedin.cjs
