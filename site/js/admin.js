@@ -22,7 +22,7 @@ function valueText(k, v) {
   return v === null || v === undefined || v === '' ? '(empty)' : String(v);
 }
 
-function describe(req, emailOf) {
+export function describe(req, emailOf) {
   const fam = store.fam;
   const p = req.payload || {};
   const rows = [];
@@ -129,6 +129,7 @@ export async function renderMine(container) {
     h('span.tag' + (r.status === 'approved' ? '.ok' : r.status === 'rejected' ? '.warn' : ''), r.status === 'rejected' ? 'declined' : r.status),
     ' ', r.summary || KIND_TITLE[r.kind], h('span.muted', ` · ${formatWhen(r.submitted_at)}`),
     r.review_note ? h('div.muted.small', `${config.adminName}'s note: ${r.review_note}`) : null,
+    r.status === 'pending' ? h('details.pending-detail', h('summary', 'See what you changed'), describe(r, () => 'You')) : null,
     r.status === 'pending' ? h('button.btn.small.ghost', { type: 'button', onclick: async () => {
       if (!(await confirmDialog('Withdraw this change?', 'Withdraw'))) return;
       try {
@@ -140,7 +141,7 @@ export async function renderMine(container) {
     } }, 'Withdraw') : null);
   clear(container,
     h('h1', 'My changes'),
-    h('p.muted', `Every change is checked by ${config.adminName} before it appears in the tree.`),
+    h('p.muted', `Your changes are not visible in the tree until ${config.adminName} approves them. Until then you can see them here, and on the person's card.`),
     h('h2', 'Waiting'), pending.length ? h('ul.history', pending.map(item)) : h('p.muted', 'Nothing waiting.'),
     h('h2', 'Decided'), done.length ? h('ul.history', done.map(item)) : h('p.muted', 'Nothing yet.'));
 }

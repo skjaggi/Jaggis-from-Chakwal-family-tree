@@ -1,5 +1,6 @@
 // The person card that slides in when someone is tapped.
-import { store } from './data.js';
+import { store, listRequests } from './data.js';
+import { describe } from './admin.js';
 import { config } from './config.js';
 import { fullName, shortName, KIND_LABEL, relationHint, birthYear } from './model.js';
 import { h, clear, initials } from './ui.js';
@@ -40,6 +41,23 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
         : h('p.notice', "This person's details are only visible to their branch of the family.");
   }
 
+  // A member's own changes to this person that are still waiting for approval.
+  const pendingBox = h('div.pending-mine', { hidden: true });
+  if (store.signedIn && !store.isAdmin && !store.preview) {
+    listRequests({ status: 'pending', mine: true }).then((reqs) => {
+      const pl = (r) => r.payload || {};
+      const mine = reqs.filter((r) => [r.target_person_id, pl(r).person_id, pl(r).link?.of, pl(r).link?.other_parent,
+        pl(r).parent_id, pl(r).child_id, pl(r).partner_a, pl(r).partner_b].includes(id));
+      if (!mine.length) return;
+      clear(pendingBox,
+        h('h3', `Waiting for ${config.adminName}'s approval`),
+        h('p.muted.small', 'Only you can see these until they are approved.'),
+        mine.map((r) => h('details', h('summary', r.summary || 'Change'), describe(r, () => 'You'))),
+        h('a.small', { href: '#/mine' }, 'See all my changes'));
+      pendingBox.hidden = false;
+    }).catch(() => {});
+  }
+
   const status = p.is_living === false ? 'Deceased' : p.is_living === true ? 'Living' : null;
   const pl = fam.primaryParentLink(id);
 
@@ -58,6 +76,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
       status ? h('span.tag', status) : null,
       d?.visibility === 'branch' ? h('span.tag.lock', 'Details: branch only') : null,
       pl?.confidence === 'uncertain' ? h('span.tag.warn', 'Parent not confirmed') : null),
+    pendingBox,
     detailRows.length ? h('dl.details', detailRows) : null,
     hiddenNote,
     d?.uncertainty ? h('div.uncertain', h('strong', 'Uncertain: '), d.uncertainty) : null,

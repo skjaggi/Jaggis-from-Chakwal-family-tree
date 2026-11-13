@@ -31,6 +31,14 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.fill('dialog input[name=profession]', 'Engineer');
     await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(400);
     console.log(role, 'edit payload:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.at(-1).payload)), await pg.evaluate(() => window.__db.change_requests.at(-1).summary));
+    if (role === 'member') {
+      await pg.waitForSelector('#panel .pending-mine:not([hidden])');
+      console.log(role, 'pending on card:', (await pg.locator('#panel .pending-mine').innerText()).replace(/\n/g, ' | '));
+      await pg.locator('#panel .pending-mine summary').last().click();
+      console.log(role, 'pending detail:', (await pg.locator('#panel .pending-mine details').last().innerText()).replace(/\n/g, ' | '));
+      await pg.screenshot({ path: `${SHOTS}member-pending-card.png` });
+    }
+    if (role === 'admin') console.log(role, 'no pending box for admin:', await pg.locator('#panel .pending-mine:not([hidden])').count() === 0);
     // photo
     await pg.click('.panel-photo button');
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR42mP8z8DwnwEJMDKgCxAMAAB0sAX9i8b6ZwAAAABJRU5ErkJggg==', 'base64');

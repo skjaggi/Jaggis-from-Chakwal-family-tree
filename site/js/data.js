@@ -165,6 +165,7 @@ export async function submitChange(kind, payload, { target = null, summary = '' 
     const result = await approveChange(data, 'Made by admin');
     return { applied: true, result };
   }
+  store.emit(); // redraw so the member sees their change waiting on the card
   return { applied: false, request: data };
 }
 

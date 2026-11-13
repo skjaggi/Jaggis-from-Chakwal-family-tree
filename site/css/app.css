@@ -306,3 +306,9 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .zoom-row { display: flex; align-items: center; gap: 8px; width: 260px; max-width: 100%; }
 .zoom-row input { flex: 1; }
 .photo-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+
+/* A member's own changes waiting for approval */
+.pending-mine { border: 1px dashed var(--warn-ink); background: var(--warn-bg); border-radius: var(--radius); padding: 10px 12px; margin: 10px 0; }
+.pending-mine h3 { margin: 0 0 4px; font-size: 0.95rem; }
+.pending-mine details { margin: 6px 0; }
+.pending-mine summary, .pending-detail summary { cursor: pointer; }
