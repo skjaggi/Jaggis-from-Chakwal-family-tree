@@ -17,6 +17,20 @@ const JOIN = 30; // gap between a person and their spouse's card
 // them, or as a smaller card beside them. For trying them out, add
 // ?spouses=side, ?spouses=mini or ?spouses=inside to the address (remembered
 // in this browser).
+const RING = 22; // gap between a person and a spouse shown below them
+const STACK_GAP = 16; // gap between cards stacked in a column
+// How wide the tree spreads: 'wide' puts all children side by side; 'stack'
+// puts children with nothing showing below them in a column; 'compact' also
+// puts spouses below the person. Try with ?layout=wide|stack|compact.
+export function layoutMode() {
+  let m = new URLSearchParams(location.search).get('layout') || new URLSearchParams(location.hash.split('?')[1] || '').get('layout');
+  const ok = ['wide', 'stack', 'compact'];
+  try {
+    if (ok.includes(m)) localStorage.setItem('layout', m);
+    else m = localStorage.getItem('layout');
+  } catch { /* storage blocked */ }
+  return ok.includes(m) ? m : 'wide';
+}
 const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 156, h: 56, r: 17 } };
 export function spouseMode() {
   let m = new URLSearchParams(location.search).get('spouses') || new URLSearchParams(location.hash.split('?')[1] || '').get('spouses');
@@ -113,16 +127,25 @@ export class TreeView {
 
   hierarchy() {
     const fam = store.fam;
+    const stack = layoutMode() !== 'wide';
     const seen = new Set();
+    const kidsOf = (id) => fam.treeChildren(id).filter((c) => !seen.has(c.id));
     const build = (id) => {
       seen.add(id);
-      const kids = fam.treeChildren(id).filter((c) => !seen.has(c.id));
-      return {
-        id,
-        hasKids: kids.length > 0,
-        kidCount: kids.length,
-        children: this.expanded.has(id) ? kids.map((c) => build(c.id)) : [],
-      };
+      const kids = kidsOf(id);
+      const node = { id, hasKids: kids.length > 0, kidCount: kids.length, children: [] };
+      if (!this.expanded.has(id)) return node;
+      // Children who have no children showing are stacked in a column under
+      // their parent instead of side by side, which keeps the tree narrow.
+      const leafy = kids.every((c) => !this.expanded.has(c.id) || fam.treeChildren(c.id).length === 0);
+      if (stack && kids.length >= 2 && leafy) {
+        const items = kids.map((c, i) => Object.assign(build(c.id), { stackOf: id, stackIndex: i }));
+        for (let i = 0; i < items.length - 1; i++) items[i].children = [items[i + 1]];
+        node.children = [items[0]];
+      } else {
+        node.children = kids.map((c) => build(c.id));
+      }
+      return node;
     };
     return d3.hierarchy(build(this.rootId));
   }
@@ -131,40 +154,69 @@ export class TreeView {
     if (!this.g || !this.rootId) return;
     const fam = store.fam;
     const mode = spouseMode();
+    const below = layoutMode() === 'compact';
     const root = this.hierarchy();
     // Each blood relative is a "unit": their own card plus, unless spouses are
-    // shown inside the card, a card for each spouse to the right.
+    // shown inside the card, a card for each spouse beside them (or below
+    // them in the compact layout).
     const S = SPOUSE[mode];
     for (const n of root.descendants()) {
       n.spouses = S ? fam.spouses(n.data.id) : [];
-      n.w = W + n.spouses.length * (S?.w + JOIN || 0);
+      const k = n.spouses.length;
+      n.w = below ? W : W + k * (S?.w + JOIN || 0);
+      n.h = below && k ? H + k * (S.h + RING) : H;
     }
-    d3.tree().nodeSize([1, H + GAP_Y])
+    d3.tree().nodeSize([1, 1])
       .separation((a, b) => ((a.w + b.w) / 2 + GAP_X) * (a.parent === b.parent ? 1 : 1.12))(root);
     this.nodes = root.descendants();
-    // Position of the person's own card and of each couple's join point.
+    // Rows: each generation row is as tall as its tallest unit. Rows that only
+    // continue a stacked column sit closer together.
+    const rowH = [];
+    const rowStackOnly = [];
     for (const n of this.nodes) {
-      n.cx = n.x - n.w / 2 + W / 2;
-      n.joins = n.spouses.map((sp, i) => ({ id: sp.person.id, x: n.cx + W / 2 + i * (S.w + JOIN) + JOIN / 2 }));
+      rowH[n.depth] = Math.max(rowH[n.depth] || 0, n.h);
+      rowStackOnly[n.depth] = (rowStackOnly[n.depth] ?? true) && (n.data.stackIndex ?? 0) > 0;
     }
-    const from = (src, childId) => {
-      if (!src.joins.length) return src.cx;
+    const rowTop = [0];
+    for (let dpt = 1; dpt < rowH.length; dpt++) rowTop[dpt] = rowTop[dpt - 1] + rowH[dpt - 1] + (rowStackOnly[dpt] ? STACK_GAP : GAP_Y);
+    const byId = new Map();
+    for (const n of this.nodes) {
+      n.y = rowTop[n.depth] + H / 2;
+      n.cx = n.x - n.w / 2 + W / 2;
+      n.bottom = n.y - H / 2 + n.h;
+      // Spouse cards and the point their shared children hang from.
+      n.joins = n.spouses.map((sp, i) => below
+        ? { id: sp.person.id, x: n.cx, y: n.y + H / 2 + RING / 2 + i * (S.h + RING), cx: n.cx, cy: n.y + H / 2 + RING + S.h / 2 + i * (S.h + RING) }
+        : { id: sp.person.id, x: n.cx + W / 2 + i * (S.w + JOIN) + JOIN / 2, y: n.y, cx: n.cx + W / 2 + i * (S.w + JOIN) + JOIN + S.w / 2, cy: n.y });
+      byId.set(n.data.id, n);
+    }
+    const anchor = (src, childId) => {
+      if (below || !src.joins.length) return { x: src.cx, y: src.bottom };
       const other = fam.parents(childId).map((q) => q.person.id).find((pid) => pid !== src.data.id);
-      return (src.joins.find((j) => j.id === other) || src.joins[0]).x;
+      return src.joins.find((j) => j.id === other) || src.joins[0];
     };
+    const linkData = this.nodes.filter((n) => n.parent).map((t) => ({ source: t.data.stackOf ? byId.get(t.data.stackOf) : t.parent, target: t }));
 
-    const links = this.g.selectAll('path.link').data(root.links(), (d) => d.target.data.id);
+    const links = this.g.selectAll('path.link').data(linkData, (d) => d.target.data.id);
     links.exit().remove();
     links.enter().insert('path', ':first-child').attr('class', 'link').merge(links)
       .classed('uncertain', (d) => fam.primaryParentLink(d.target.data.id)?.confidence === 'uncertain')
       .classed('nonbio', (d) => !['biological', undefined].includes(fam.primaryParentLink(d.target.data.id)?.kind))
       .attr('d', (d) => {
-        const sx = from(d.source, d.target.data.id);
-        const sy = d.source.y + (d.source.joins.length ? 0 : H / 2 + 12);
-        const tx = d.target.cx;
-        const ty = d.target.y - H / 2;
-        const my = d.source.y + H / 2 + 12 + (ty - d.source.y - H / 2 - 12) / 2;
-        return `M${sx},${sy}V${my}H${tx}V${ty}`;
+        const s = anchor(d.source, d.target.data.id);
+        const out = d.source.bottom + 12;
+        const t = d.target;
+        const ty = t.y - H / 2;
+        if (t.data.stackOf) {
+          // A rail down the left of the column, with a branch into each card.
+          const first = byId.get(t.data.stackOf).children?.[0] || t;
+          const colW = Math.max(...linkData.filter((l) => l.target.data.stackOf === t.data.stackOf).map((l) => l.target.w));
+          const railX = first.x - colW / 2 - 16;
+          const my = out + (first.y - H / 2 - out) / 2;
+          return `M${s.x},${s.y}V${my}H${railX}V${t.y}H${t.cx - W / 2}`;
+        }
+        const my = out + (ty - out) / 2;
+        return `M${s.x},${s.y}V${my}H${t.cx}V${ty}`;
       });
 
     const units = this.g.selectAll('g.unit').data(this.nodes, (d) => d.data.id);
@@ -180,11 +232,17 @@ export class TreeView {
       const off = d.cx - d.x;
       // Marriage lines between the person and each spouse.
       d.spouses.forEach((sp, k) => {
-        const jx = d.joins[k].x - d.x;
-        const left = k === 0 ? off + W / 2 : jx - JOIN / 2;
-        u.append('path').attr('class', `marriage${sp.union.status === 'divorced' ? ' divorced' : ''}`)
-          .attr('d', k === 0 ? `M${left},0H${jx + JOIN / 2}` : `M${off + W / 2 - 14},${-H / 2 - 6}H${jx}V0H${jx + JOIN / 2}`);
-        const ring = u.append('g').attr('class', 'ring').attr('transform', `translate(${jx},0)`);
+        const j = d.joins[k];
+        const jx = j.x - d.x;
+        const jy = j.y - d.y;
+        const cls = `marriage${sp.union.status === 'divorced' ? ' divorced' : ''}`;
+        if (below) u.append('path').attr('class', cls).attr('d', `M${jx},${jy - RING / 2}V${jy + RING / 2}`);
+        else {
+          const left = k === 0 ? off + W / 2 : jx - JOIN / 2;
+          u.append('path').attr('class', cls)
+            .attr('d', k === 0 ? `M${left},0H${jx + JOIN / 2}` : `M${off + W / 2 - 14},${-H / 2 - 6}H${jx}V0H${jx + JOIN / 2}`);
+        }
+        const ring = u.append('g').attr('class', 'ring').attr('transform', `translate(${jx},${jy})`);
         ring.append('circle').attr('cx', -3).attr('r', 4.5);
         ring.append('circle').attr('cx', 3).attr('r', 4.5);
       });
@@ -193,13 +251,14 @@ export class TreeView {
       const spText = mode === 'inside' && sp0 ? `⚭ ${shortName(sp0.person)}${sp0.union.status === 'divorced' ? ' (div.)' : ''}${spouses.length > 1 ? ` +${spouses.length - 1}` : ''}` : '';
       this.card(u, p, off, { w: W, h: H, r: 21, line2: spText, branch: br.of.get(p.id)?.slot });
       d.spouses.forEach((sp, k) => {
-        const x = d.joins[k].x - d.x + JOIN / 2 + S.w / 2;
-        this.card(u, sp.person, x, { w: S.w, h: S.h, r: S.r, spouse: true,
+        const j = d.joins[k];
+        this.card(u, sp.person, j.cx - d.x, { y: j.cy - d.y, w: S.w, h: S.h, r: S.r, spouse: true,
           line2: sp.union.status && sp.union.status !== 'married' ? sp.union.status : '', branch: br.of.get(sp.person.id)?.slot });
       });
       // Show or hide children: under the couple when there is one.
-      const tx = d.joins.length ? d.joins[0].x - d.x : off;
-      const tog = u.append('g').attr('class', 'toggle').attr('transform', `translate(${tx},${H / 2 + 12})`)
+      const side = !below && d.joins.length;
+      const tx = side ? d.joins[0].x - d.x : off;
+      const tog = u.append('g').attr('class', 'toggle').attr('transform', `translate(${tx},${d.bottom - d.y + 12})`)
         .style('display', d.data.hasKids ? null : 'none')
         .attr('role', 'button')
         .attr('aria-label', this.expanded.has(p.id) ? 'Hide children' : `Show ${d.data.kidCount} children`)
@@ -209,16 +268,16 @@ export class TreeView {
           else this.expanded.add(p.id);
           this.render();
         });
-      if (d.joins.length) tog.append('path').attr('class', 'stem').attr('d', `M0,${-H / 2 - 12}V-11`);
+      if (side) tog.append('path').attr('class', 'stem').attr('d', `M0,${-H / 2 - 12}V-11`);
       tog.append('circle').attr('r', 11);
       tog.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').text(this.expanded.has(p.id) ? '−' : String(d.data.kidCount));
     });
   }
 
   // One person's card, centred at x within its unit.
-  card(u, p, x, { w, h, r, line2, branch, spouse }) {
+  card(u, p, x, { y = 0, w, h, r, line2, branch, spouse }) {
     const fam = store.fam;
-    const el = u.append('g').attr('class', `node${spouse ? ' spouse-card' : ''}`).attr('transform', `translate(${x},0)`)
+    const el = u.append('g').attr('class', `node${spouse ? ' spouse-card' : ''}`).attr('transform', `translate(${x},${y})`)
       .attr('data-id', p.id).attr('data-branch', branch ?? null)
       .classed('female', p.gender === 'female').classed('male', p.gender === 'male')
       .classed('selected', p.id === this.selectedId)
@@ -273,11 +332,10 @@ export class TreeView {
   fit() {
     if (!this.nodes?.length) return;
     const { width, height } = this.container.getBoundingClientRect();
-    const ys = this.nodes.map((n) => n.y);
-    const minX = Math.min(...this.nodes.map((n) => n.x - n.w / 2)) - 20;
+    const minX = Math.min(...this.nodes.map((n) => n.x - n.w / 2)) - 40;
     const maxX = Math.max(...this.nodes.map((n) => n.x + n.w / 2)) + 20;
-    const minY = Math.min(...ys) - H / 2 - 20;
-    const maxY = Math.max(...ys) + H / 2 + 40;
+    const minY = Math.min(...this.nodes.map((n) => n.y)) - H / 2 - 20;
+    const maxY = Math.max(...this.nodes.map((n) => n.bottom)) + 40;
     let k = Math.min(width / (maxX - minX), height / (maxY - minY), 1);
     // On a phone a whole wide tree is unreadable; keep cards legible and let people pan.
     k = Math.max(k, Math.min(1, width < 600 ? 0.55 : 0.35));
@@ -291,7 +349,9 @@ export class TreeView {
   centerOn(id) {
     const n = this.nodes?.find((d) => d.data.id === id || d.spouses.some((s) => s.person.id === id));
     if (!n) return;
-    const nx = n.data.id === id ? n.cx : n.joins[n.spouses.findIndex((s) => s.person.id === id)].x + JOIN / 2 + SPOUSE[spouseMode()].w / 2;
+    const j = n.data.id === id ? null : n.joins[n.spouses.findIndex((s) => s.person.id === id)];
+    const nx = j ? j.cx : n.cx;
+    const ny = j ? j.cy : n.y;
     const { width, height } = this.container.getBoundingClientRect();
     const k = Math.max(d3.zoomTransform(this.svg.node()).k, 0.8);
     // On phones the person card covers the lower half, so aim higher.
@@ -301,7 +361,7 @@ export class TreeView {
       const sheetTop = window.innerHeight * 0.45; // the sheet is at most 55% of the screen
       y = Math.max(H / 2 + 8, Math.min(height / 3, (sheetTop - top) / 2));
     }
-    const t = d3.zoomIdentity.translate(width / 2 - nx * k, y - n.y * k).scale(k);
+    const t = d3.zoomIdentity.translate(width / 2 - nx * k, y - ny * k).scale(k);
     this.svg.transition().duration(400).call(this.zoom.transform, t);
   }
 
