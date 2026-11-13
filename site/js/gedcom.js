@@ -2,6 +2,7 @@
 // Exports what the current viewer is allowed to see.
 import { store } from './data.js';
 import { config } from './config.js';
+import { birthYear } from './model.js';
 
 export function buildGedcom() {
   const fam = store.fam;
@@ -69,9 +70,10 @@ export function buildGedcom() {
     if (p.surname) L(2, 'SURN', p.surname);
     if (p.other_names) note(1, 'NOTE', `Other names: ${p.other_names}`);
     L(1, 'SEX', p.gender === 'male' ? 'M' : p.gender === 'female' ? 'F' : 'U');
-    if (d?.birth_date || d?.birth_place) {
+    const by = birthYear(d?.birth_date).replace(/^c\. /, 'ABT ').replace(/s$/, '');
+    if (by || d?.birth_place) {
       L(1, 'BIRT');
-      if (d.birth_date) L(2, 'DATE', d.birth_date);
+      if (by) L(2, 'DATE', by);
       if (d.birth_place) L(2, 'PLAC', d.birth_place);
     }
     if (p.is_living === false || d?.death_date || d?.death_place) {

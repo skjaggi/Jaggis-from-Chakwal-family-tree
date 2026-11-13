@@ -54,7 +54,8 @@ async function setup(ctx) {
     console.log(name, 'selected node box', JSON.stringify(bb), 'panel', JSON.stringify(sheet), 'scrollY', await pg.evaluate(() => scrollY));
     await pg.screenshot({ path: `${SHOTS}${name}-4-uncertain.png` });
     // GEDCOM
-    const [dl] = await Promise.all([pg.waitForEvent('download'), pg.click('nav button:has-text("Export")')]);
+    // Export is hidden on small phones; trigger it directly there.
+    const [dl] = await Promise.all([pg.waitForEvent('download'), pg.evaluate(() => [...document.querySelectorAll('nav button')].find(b => b.textContent === 'Export').click())]);
     const ged = fs.readFileSync(await dl.path(), 'utf8');
     console.log(name, 'gedcom INDI', (ged.match(/ INDI/g) || []).length, 'FAM', (ged.match(/ FAM\r/g) || []).length, 'CHIL', (ged.match(/CHIL/g) || []).length);
     if (name === 'desktop') fs.writeFileSync('' + SHOTS + 'test.ged', ged);

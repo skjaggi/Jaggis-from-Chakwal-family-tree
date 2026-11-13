@@ -114,8 +114,17 @@ export function shortName(p) {
   return [p.given_name, p.surname].filter(Boolean).join(' ');
 }
 
+// The tree shows only the year of birth (never a full date of birth).
+// "1952-03-04" -> "1952", "about 1890" -> "c. 1890", "1930s" stays "1930s".
+export function birthYear(v) {
+  if (!v) return '';
+  const m = String(v).match(/(c\.|ca\.?|circa|about|abt\.?|approx\.?|~)?\s*(\d{4}s?)/i);
+  if (!m) return '';
+  return (m[1] ? 'c. ' : '') + m[2];
+}
+
 export function lifeLine(p, d) {
-  const b = d?.birth_date;
+  const b = birthYear(d?.birth_date);
   const dd = d?.death_date;
   if (b || dd) return `${b || '?'} – ${dd || (p.is_living === false ? '?' : '')}`.trim();
   if (p.is_living === false) return 'Deceased';

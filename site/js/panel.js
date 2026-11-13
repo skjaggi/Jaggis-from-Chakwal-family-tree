@@ -1,7 +1,7 @@
 // The person card that slides in when someone is tapped.
 import { store } from './data.js';
 import { config } from './config.js';
-import { fullName, shortName, KIND_LABEL, relationHint } from './model.js';
+import { fullName, shortName, KIND_LABEL, relationHint, birthYear } from './model.js';
 import { h, clear, initials } from './ui.js';
 import { openPersonForm, openPhotoForm, openLinkForm, requestRemoveLink, requestDelete } from './forms.js';
 
@@ -26,7 +26,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
   const detailRows = [];
   const row = (label, value) => value && detailRows.push(h('div.dl-row', h('dt', label), h('dd', value)));
   if (d) {
-    row('Born', [d.birth_date, d.birth_place].filter(Boolean).join(', '));
+    row('Born', [birthYear(d.birth_date), d.birth_place].filter(Boolean).join(', '));
     row('Died', [d.death_date, d.death_place].filter(Boolean).join(', '));
     row('Profession', d.profession);
   }

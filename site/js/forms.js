@@ -1,7 +1,7 @@
 // Forms for suggesting changes: add or edit a person, photo, links.
 import { store, submitChange, uploadPendingPhoto } from './data.js';
 import { config } from './config.js';
-import { fullName, shortName, searchPeople, relationHint } from './model.js';
+import { fullName, shortName, searchPeople, relationHint, birthYear } from './model.js';
 import { h, modal, toast, field, select, confirmDialog } from './ui.js';
 
 const GENDERS = [['unknown', 'Not recorded'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
@@ -15,7 +15,7 @@ const PERSON_FIELDS = ['title', 'given_name', 'surname', 'other_names', 'gender'
 const DETAIL_FIELDS = ['visibility', 'birth_date', 'birth_place', 'death_date', 'death_place', 'profession', 'notes', 'sources', 'uncertainty'];
 const LABELS = {
   title: 'Title', given_name: 'First name(s)', surname: 'Surname', other_names: 'Other names', gender: 'Gender',
-  is_living: 'Living', visibility: 'Who can see details', birth_date: 'Birth date', birth_place: 'Birth place',
+  is_living: 'Living', visibility: 'Who can see details', birth_date: 'Birth year', birth_place: 'Birth place',
   death_date: 'Death date', death_place: 'Death place', profession: 'Profession', notes: 'Notes', sources: 'Sources',
   uncertainty: "What's uncertain",
 };
@@ -73,7 +73,7 @@ export function openPersonForm({ mode, person = null, relation = null }) {
     relBox.length ? h('fieldset', h('legend', 'Relationship'), relBox) : null,
     h('fieldset', h('legend', 'Life'),
       field('Living?', select('is_living', LIVING, livingVal)),
-      h('div.row2', field('Birth date', textInput('birth_date', d.birth_date, { placeholder: 'e.g. 1952 or c. 1890' })), field('Birth place', textInput('birth_place', d.birth_place))),
+      h('div.row2', field('Birth year', textInput('birth_date', birthYear(d.birth_date), { placeholder: 'e.g. 1952 or c. 1890', inputmode: 'text', maxlength: 12 })), field('Birth place', textInput('birth_place', d.birth_place))),
       h('div.row2', field('Death date', textInput('death_date', d.death_date)), field('Death place', textInput('death_place', d.death_place))),
       field('Profession', textInput('profession', d.profession)),
       field('Notes', textArea('notes', d.notes))),
@@ -106,6 +106,16 @@ export function openPersonForm({ mode, person = null, relation = null }) {
     for (const k of PERSON_FIELDS) newPerson[k] = k === 'is_living' ? (val(k) === '' ? null : val(k) === 'true') : val(k);
     const newDetails = {};
     for (const k of DETAIL_FIELDS) newDetails[k] = val(k);
+    // Year of birth only: keep "1952", "c. 1890" or "1930s".
+    if (newDetails.birth_date) {
+      const y = birthYear(newDetails.birth_date);
+      if (!y) {
+        toast('Please enter just the year of birth, for example 1952 or c. 1890.', 'error');
+        form.birth_date.focus();
+        return;
+      }
+      newDetails.birth_date = y;
+    }
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true;
 

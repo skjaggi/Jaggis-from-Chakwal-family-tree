@@ -22,10 +22,10 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.screenshot({ path: `${SHOTS}${role}-addchild.png` });
     await pg.fill('dialog input[name=given_name]', 'Test Baby');
     await pg.selectOption('dialog select[name=is_living]', 'true');
-    await pg.fill('dialog input[name=birth_date]', '2020');
+    await pg.fill('dialog input[name=birth_date]', '4 March 2020');
     await pg.click('dialog button[type=submit]');
     await pg.waitForTimeout(500);
-    console.log(role, 'toast:', await pg.locator('#toast').innerText(), '| requests:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.map(r => [r.kind, r.summary, r.status, r.payload.link]))));
+    console.log(role, 'birth saved as', await pg.evaluate(() => window.__db.change_requests[0].payload.details.birth_date), 'toast:', await pg.locator('#toast').innerText(), '| requests:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.map(r => [r.kind, r.summary, r.status, r.payload.link]))));
     // edit
     await pg.click('.panel-actions button:has-text("dit")');
     await pg.fill('dialog input[name=profession]', 'Engineer');

@@ -214,7 +214,7 @@ function openSignIn() {
     code.focus();
   } }, 'I already have a code');
   const form = h('form.form',
-    h('p.form-note', `Signing in is for invited family members. If you haven't been invited, ask ${config.adminName}.`),
+    h('p.form-note', `Signing in is for invited family members. You only need to do it once on each phone or computer. `, h('a', { href: 'help.html#sign-in', target: '_blank' }, 'How it works')),
     field('Your email', email),
     h('div.form-actions', haveCode, sendBtn),
     step2);
@@ -249,7 +249,8 @@ async function renderHeader() {
     signed ? h('a', { href: '#/mine', 'data-nav': 'mine' }, 'My changes') : null,
     store.isAdmin ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
-    h('button.linkish', { type: 'button', onclick: downloadGedcom, title: 'Download the tree as a GEDCOM file' }, 'Export'),
+    h('a', { href: 'help.html' }, 'Help'),
+    h('button.linkish.wide-only', { type: 'button', onclick: downloadGedcom, title: 'Download the tree as a GEDCOM file' }, 'Export'),
     signed
       ? h('button.linkish', { type: 'button', onclick: async () => {
         await signOut();
