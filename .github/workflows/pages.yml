@@ -25,6 +25,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Stamp every script and stylesheet link with this commit, so a refresh
+      # always loads the new version instead of a cached old file.
+      - name: Cache-bust script and style links
+        run: |
+          v=${GITHUB_SHA::8}
+          sed -i -E "s#(from '\./[a-z0-9-]+\.js)'#\1?v=$v'#g" site/js/*.js
+          sed -i -E "s#(src=\"js/main\.js)\"#\1?v=$v\"#; s#(href=\"css/app\.css)\"#\1?v=$v\"#" site/*.html
+          grep -c "?v=$v" site/index.html site/js/main.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
