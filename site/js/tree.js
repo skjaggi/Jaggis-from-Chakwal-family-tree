@@ -29,7 +29,7 @@ export function layoutMode() {
     if (ok.includes(m)) localStorage.setItem('layout', m);
     else m = localStorage.getItem('layout');
   } catch { /* storage blocked */ }
-  return ok.includes(m) ? m : 'wide';
+  return ok.includes(m) ? m : 'compact';
 }
 const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 156, h: 56, r: 17 } };
 export function spouseMode() {
