@@ -68,6 +68,31 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.fill('dialog .picker input', 'gokal'); await pg.click('dialog .pick-list button');
     await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(300);
     console.log(role, 'link:', await pg.evaluate(() => window.__db.change_requests.at(-1).summary));
+    // Dashboard
+    await pg.goto('http://localhost:8765/#/dashboard'); await pg.waitForSelector('.stats .stat');
+    await pg.waitForSelector('.q-form', { state: 'attached' });
+    console.log(role, 'dashboard tiles:', (await pg.locator('.stats').first().innerText()).replace(/\n/g, ' | '));
+    console.log(role, 'needs attention:', (await pg.locator('.dash-table tbody').first().innerText()).replace(/\n/g, ' | ').replace(/\t/g, ' '));
+    console.log(role, 'branches:', (await pg.locator('.bars').first().innerText()).replace(/\n/g, ' | '));
+    await pg.locator('.dash-table .row-toggle', { hasText: 'Parent not confirmed' }).click();
+    const firstMissing = pg.locator('.dash-table .names-row:not([hidden]) .dash-people a').first();
+    console.log(role, 'missing-parent list first:', await firstMissing.innerText(), await firstMissing.getAttribute('href'));
+    await pg.locator('summary', { hasText: 'Add a question' }).click();
+    await pg.fill('.q-form textarea[name=question]', 'Who was Kesar Mal’s wife?');
+    await pg.fill('.q-form .picker input', 'Kesar'); await pg.locator('.q-form .pick-list button').first().click();
+    await pg.locator('.q-form button[type=submit]').click(); await pg.waitForSelector('.q-list .q');
+    console.log(role, 'question:', (await pg.locator('.q-list .q').first().innerText()).replace(/\n/g, ' | '));
+    if (role === 'admin') {
+      await pg.waitForSelector('.stat-link');
+      console.log(role, 'admin tiles:', (await pg.locator('.stat-link').allInnerTexts()).join(' / ').replace(/\n/g, ' | '));
+      await pg.locator('.q-actions button', { hasText: 'Mark answered' }).first().click();
+      await pg.fill('.q-actions input', 'Not known yet'); await pg.locator('.q-actions button', { hasText: 'Save' }).click();
+      await pg.waitForTimeout(300);
+      console.log(role, 'after answer:', await pg.evaluate(() => JSON.stringify(window.__db.research_questions.map(q => [q.status, q.answer]))));
+      await pg.screenshot({ path: `${SHOTS}admin-dashboard.png`, fullPage: true });
+    } else {
+      await pg.screenshot({ path: `${SHOTS}member-dashboard.png`, fullPage: true });
+    }
     // Invite a relative (works at once, no approval)
     await pg.goto('http://localhost:8765/#/invite'); await pg.waitForSelector('.invite-form');
     await pg.fill('.invite-form input[name=email]', 'Cousin@Example.com');

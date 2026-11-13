@@ -3,6 +3,7 @@
 import { store } from './data.js';
 import { shortName, lifeLine } from './model.js';
 import { initials } from './ui.js';
+import { branchesOf } from './branches.js';
 
 const D3_ESM = 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 let d3;
@@ -132,7 +133,9 @@ export class TreeView {
     enter.append('title');
 
     const all = enter.merge(nodes);
+    const br = branchesOf(fam);
     all.attr('transform', (d) => `translate(${d.x},${d.y})`)
+      .attr('data-branch', (d) => br.of.get(d.data.id)?.slot ?? null)
       .classed('selected', (d) => d.data.id === this.selectedId)
       .attr('tabindex', 0)
       .on('click', (e, d) => {

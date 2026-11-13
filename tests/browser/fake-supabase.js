@@ -5,7 +5,7 @@ const uid = 'u-1';
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: seed.people.find(p => p.given_name === 'Sunil Kumar').id, created_at: new Date().toISOString() }],
-  invites: [], change_requests: [],
+  invites: [], change_requests: [], research_questions: [],
 };
 window.__db = db;
 class Q {
@@ -25,7 +25,7 @@ class Q {
     const match = r => this.f.every(f => f(r));
     let data = null;
     if (this.op === 'insert' || this.op === 'upsert') {
-      const r = { id: crypto.randomUUID(), status: 'pending', submitted_at: new Date().toISOString(), created_at: new Date().toISOString(), ...this.row };
+      const r = { id: crypto.randomUUID(), status: this.t === 'research_questions' ? 'open' : 'pending', submitted_at: new Date().toISOString(), created_at: new Date().toISOString(), ...this.row };
       if (this.op === 'upsert') { const i = T.findIndex(x => x.email === r.email); if (i >= 0) T.splice(i, 1); }
       T.push(r); data = [r];
     } else if (this.op === 'update') { data = T.filter(match); data.forEach(r => Object.assign(r, this.row)); }

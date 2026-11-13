@@ -303,3 +303,28 @@ export function personLabel(id) {
   const p = store.fam?.byId.get(id);
   return p ? fullName(p) : 'someone no longer in the tree';
 }
+
+// ------------------------------------------------------------------ open questions
+
+export async function listQuestions() {
+  const { data, error } = await store.sb.from('research_questions').select('*').order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function addQuestion({ question, person_id, next_step }) {
+  const { error } = await store.sb.from('research_questions').insert({
+    question, person_id: person_id || null, next_step: next_step || null, created_by: store.session.user.id,
+  });
+  if (error) throw error;
+}
+
+export async function updateQuestion(id, fields) {
+  const { error } = await store.sb.from('research_questions').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteQuestion(id) {
+  const { error } = await store.sb.from('research_questions').delete().eq('id', id);
+  if (error) throw error;
+}

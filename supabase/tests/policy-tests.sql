@@ -173,6 +173,26 @@ select pg_temp.expect((select count(*) from public.person_details) = (select cou
 commit;
 reset role;
 
+-- Open questions
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+insert into public.research_questions (question, person_id) values ('Who was Kesar Mal''s wife?', pg_temp.pid('Kesar Mal'));
+select pg_temp.expect((select count(*) from public.research_questions) = 1, 'member adds and reads a question');
+do $$ begin
+  begin
+    update public.research_questions set status = 'answered';
+    if exists (select 1 from public.research_questions where status = 'answered') then raise exception 'FAILED: member answered a question'; end if;
+    raise notice 'ok: member cannot mark questions answered';
+  end;
+end $$;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+update public.research_questions set status = 'answered', answer = 'Not known yet';
+select pg_temp.expect((select status from public.research_questions) = 'answered', 'admin marks a question answered');
+set local role anon;
+select pg_temp.expect((select count(*) from public.research_questions) = 0, 'visitors cannot read questions');
+rollback;
+
 -- Storage: branch photo readable only by branch
 insert into storage.objects (bucket_id, name) values ('photos-branch', pg_temp.pid('Sunil Kumar')::text || '/a.jpg');
 alter table storage.objects enable row level security;

@@ -15,8 +15,8 @@
     .help h2 { font-size: 1.2rem; margin-top: 2em; padding-top: 0.6em; border-top: 1px solid var(--line); }
     .help ol, .help ul { padding-left: 1.3em; }
     .help li { margin: 0.35em 0; }
-    .help .tip { background: var(--surface-2); border-radius: var(--radius); padding: 12px 14px; margin: 14px 0; }
-    .help .toc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 16px; }
+    .help .tip { background: var(--p-sky); border-radius: var(--radius); padding: 12px 14px; margin: 14px 0; }
+    .help .toc { background: var(--p-butter); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 16px; }
     .help .toc a { display: block; padding: 4px 0; }
     .help .back { display: inline-block; margin-top: 2em; }
     kbd, .ui { font-weight: 600; }
@@ -49,8 +49,9 @@
       <a href="#edit">4. Adding or correcting information</a>
       <a href="#photo">5. Adding a photo</a>
       <a href="#invite">6. Inviting a relative</a>
-      <a href="#privacy">7. Who can see what</a>
-      <a href="#trouble">8. If something isn't working</a>
+      <a href="#dashboard">7. The family dashboard</a>
+      <a href="#privacy">8. Who can see what</a>
+      <a href="#trouble">9. If something isn't working</a>
     </div>
 
     <h2 id="sign-in">1. Signing in</h2>
@@ -140,14 +141,28 @@
     </div>
     <p>The people you invited are listed on the same page, with <span class="ui">Resend invitation email</span> in case it got lost.</p>
 
-    <h2 id="privacy">7. Who can see what</h2>
+    <h2 id="dashboard">7. The family dashboard</h2>
+    <p>Tap <span class="ui">Dashboard</span> at the top to see the whole tree at a glance:</p>
+    <ul>
+      <li><strong>Numbers:</strong> how many people, generations, marriages, branches, photos and sources.</li>
+      <li><strong>Needs attention:</strong> who is missing a birth year, a birthplace, a parent, a photo or a source. Tap a row to see the names, then tap a name to open their card and fill in what you know.</li>
+      <li><strong>People per branch:</strong> each branch has its own colour, which is also the coloured top edge of that branch's cards in the tree.</li>
+      <li><strong>Born by period, birthplaces, earliest ancestors and common first names.</strong></li>
+      <li><strong>Open questions:</strong> things the family is still trying to find out. Anyone signed in can add one.</li>
+    </ul>
+    <div class="shots">
+      <figure class="shot"><img src="img/help/dashboard.jpg" width="390" height="760" loading="lazy" alt="The dashboard: the tree in numbers."><figcaption>The dashboard: the tree in numbers.</figcaption></figure>
+      <figure class="shot"><img src="img/help/dashboard-attention.jpg" width="390" height="760" loading="lazy" alt="Needs attention: tap a row to see who is missing what."><figcaption>Needs attention: tap a row to see who is missing what.</figcaption></figure>
+    </div>
+
+    <h2 id="privacy">8. Who can see what</h2>
     <ul>
       <li><strong>Names and who is related to whom</strong> can be seen by anyone with the link.</li>
       <li><strong>Birth years, places, notes and photos</strong> can be marked <em>Public</em> (anyone) or <em>Branch only</em> (only signed-in family in that branch). Details of living people are <em>Branch only</em> unless you choose otherwise.</li>
       <li>Your branch is set when you are invited, by who you are in the tree. It covers your own line and your spouse's line.</li>
     </ul>
 
-    <h2 id="trouble">8. If something isn't working</h2>
+    <h2 id="trouble">9. If something isn't working</h2>
     <ul>
       <li><strong>"This email hasn't been invited yet":</strong> ask the admin, or the relative who invited you, to invite that exact email address.</li>
       <li><strong>No email arrived:</strong> check Spam, wait a minute, and make sure the address is spelled correctly.</li>

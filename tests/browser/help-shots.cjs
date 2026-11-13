@@ -85,6 +85,12 @@ const quiet = (pg) => pg.evaluate(() => { const t = document.getElementById('toa
   await pg.locator('#page details summary').first().click();
   await shot(pg, 'my-changes');
 
+  await pg.goto(`${SITE}#/dashboard`); await pg.waitForSelector('.stats .stat'); await pg.waitForTimeout(400);
+  await shot(pg, 'dashboard');
+  await pg.locator('.dash-grid').scrollIntoViewIfNeeded();
+  await pg.locator('.dash-table .row-toggle').first().click();
+  await shot(pg, 'dashboard-attention');
+
   await pg.goto(`${SITE}#/outline/${root}`); await pg.waitForTimeout(600);
   await shot(pg, 'list');
   await ctx.close();
