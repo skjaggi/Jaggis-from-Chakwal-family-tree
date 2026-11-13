@@ -42,7 +42,8 @@ export function hoverContent(id) {
   return h('div.hc-inner',
     h('div.hc-photo', photo ? h('img', { src: photo, alt: '' }) : h('span', initials(p.given_name))),
     h('div.hc-text',
-      rel ? h('div.hc-rel', rel) : null,
+      rel ? h('div.hc-rel', rel)
+        : store.signedIn && !store.preview && !store.claimedId ? h('div.hc-hint', 'Tap This is me on your own box to see how you are related.') : null,
       h('div.hc-name', fullName(p)),
       p.other_names ? h('div.hc-muted', `Also known as ${p.other_names}`) : null,
       lifeSummary(p, d) ? h('div.hc-life', lifeSummary(p, d)) : null,

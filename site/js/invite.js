@@ -31,9 +31,12 @@ export function inviteMessage({ email, display_name }, fromName) {
     `2. You'll get an email with a 6-digit code (check Spam if it doesn't arrive in a minute).`,
     `3. Type the code on the site. There is no password.`,
     '',
+    `IMPORTANT, please do this first: claim your box.`,
+    `Find yourself in the tree (search for your name), open your box and tap "This is me". If you're not in the tree yet, add yourself under your father or mother first, then claim that box. Once it's yours, your changes to your own family appear right away and the tree shows how everyone is related to you.`,
+    '',
     `You only sign in once on each phone or computer. A short guide: ${site}help.html`,
     '',
-    `Please note: changes you make are not visible right away. The admin checks each one first, and it appears in the tree once approved. So don't worry about mistakes.`,
+    `Until your box is claimed, changes you make wait for the admin to check them first. So don't worry about mistakes.`,
     '',
     fromName ? `With love,\n${fromName}` : '',
   ].join('\n').trim();

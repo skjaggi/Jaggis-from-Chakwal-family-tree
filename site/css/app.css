@@ -493,3 +493,11 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .hc-branch[data-branch="5"] { border-left-color: var(--branch-5); } .hc-branch[data-branch="6"] { border-left-color: var(--branch-6); }
 .hc-branch[data-branch="7"] { border-left-color: var(--branch-7); } .hc-branch[data-branch="8"] { border-left-color: var(--branch-8); }
 .hc-gen { border-left: none; }
+
+/* Reminder to claim your own box */
+.claim-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: #fdf3d6; color: #5b4310; border-bottom: 2px solid var(--gold, #c49a3a); }
+.claim-banner[hidden] { display: none; }
+.claim-banner.waiting { background: #eef6f4; color: #1d4d49; border-bottom-color: #9cc9c2; }
+.claim-banner .claim-actions { display: inline-flex; gap: 8px; align-items: center; margin-left: auto; }
+@media (prefers-color-scheme: dark) { .claim-banner { background: #3a3018; color: #f3e3b8; } .claim-banner.waiting { background: #1e3633; color: #cfe8e3; } }
+.hovercard .hc-hint { font-size: 0.75rem; color: var(--muted); font-style: italic; margin-bottom: 4px; }

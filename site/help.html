@@ -15,6 +15,7 @@
     .help h2 { font-size: 1.2rem; margin-top: 2em; padding-top: 0.6em; border-top: 1px solid var(--line); }
     .help ol, .help ul { padding-left: 1.3em; }
     .help li { margin: 0.35em 0; }
+    .help .tip.important { background: var(--p-butter); border-left: 4px solid var(--gold, #c49a3a); }
     .help .tip { background: var(--p-sky); border-radius: var(--radius); padding: 12px 14px; margin: 14px 0; }
     .help .toc { background: var(--p-butter); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 16px; }
     .help .toc a { display: block; padding: 4px 0; }
@@ -41,18 +42,19 @@
   <main class="help">
     <h1>How to use the family tree</h1>
     <p>This website is the family tree of the Jaggis of Chakwal, starting from Bakhshi Bhanna Mal Jaggi. Anyone with the link can look at it. Family members who were invited can also add and correct information. <strong>Changes are not visible right away:</strong> the admin checks each one first, and it appears once approved.</p>
+    <div class="tip important"><strong>Most important step after you sign in: claim your own box.</strong> Find yourself in the tree and tap <span class="ui">This is me</span>. <a href="#this-is-me">See how</a>.</div>
 
     <div class="toc">
       <a href="#sign-in">1. Signing in</a>
-      <a href="#stay">2. Staying signed in</a>
-      <a href="#look">3. Looking around the tree</a>
-      <a href="#edit">4. Adding or correcting information</a>
-      <a href="#photo">5. Adding a photo</a>
-      <a href="#this-is-me">Branch admins: "This is me"</a>
-      <a href="#invite">6. Inviting a relative</a>
-      <a href="#dashboard">7. The family dashboard</a>
-      <a href="#privacy">8. Who can see what</a>
-      <a href="#trouble">9. If something isn't working</a>
+      <a href="#this-is-me"><strong>2. Claim your box: "This is me" (important)</strong></a>
+      <a href="#stay">3. Staying signed in</a>
+      <a href="#look">4. Looking around the tree</a>
+      <a href="#edit">5. Adding or correcting information</a>
+      <a href="#photo">6. Adding a photo</a>
+      <a href="#invite">7. Inviting a relative</a>
+      <a href="#dashboard">8. The family dashboard</a>
+      <a href="#privacy">9. Who can see what</a>
+      <a href="#trouble">10. If something isn't working</a>
     </div>
 
     <h2 id="sign-in">1. Signing in</h2>
@@ -66,7 +68,25 @@
     <figure class="shot"><img src="img/help/sign-in.jpg" width="390" height="760" loading="lazy" alt="The sign-in box. Type your email, then the 6-digit code from the email."><figcaption>The sign-in box. Type your email, then the 6-digit code from the email.</figcaption></figure>
     <div class="tip"><strong>Only the newest email works.</strong> Each email works once. If you asked for more than one, use the newest. If you already have an email with a code, tap <span class="ui">I already have a code</span> instead of asking for another.</div>
 
-    <h2 id="stay">2. Staying signed in</h2>
+    <h2 id="this-is-me">2. Claim your box: "This is me" (important)</h2>
+    <div class="tip important"><strong>Please do this first, right after you sign in.</strong> Claiming your own box tells the site who you are. It lets your changes to your own family appear straight away, shows how each person is related to you, and makes you the branch admin for your family. Until you do, a yellow reminder stays at the top of the page.</div>
+    <ol>
+      <li>Tap <span class="ui">Go to my box</span> on the yellow reminder, or type your name in <span class="ui">Search the family</span> and pick yourself.</li>
+      <li>On your card, tap <span class="ui">This is me</span> and confirm.</li>
+      <li><strong>Not in the tree yet?</strong> Open your father's or mother's card, tap <span class="ui">Add: Child</span>, add yourself, and once you appear, claim that box.</li>
+    </ol>
+    <p>Once you are signed in, open your own box in the tree and tap <span class="ui">This is me</span>. You become the <strong>branch admin</strong> for your own family below that box. If your invitation was linked to that box, this happens straight away. Otherwise the person who invited you, or the admin, confirms it first. Each account can claim only one box, and each box belongs to only one person.</p>
+    <p>As a branch admin:</p>
+    <ul>
+      <li><strong>You, your husband or wife, your children, grandchildren and their husbands and wives:</strong> you can edit them, add children and spouses, and change photos. Your changes appear in the tree straight away, with no waiting.</li>
+      <li><strong>Your parents and grandparents who have passed away:</strong> you can correct their details and photo. If a brother or cousin has also claimed their own box, changes to those shared ancestors go to the admin instead.</li>
+      <li><strong>Suggestions from others:</strong> when another family member suggests a change to your part of the tree, it appears under <span class="ui">Review</span> for you to approve or decline.</li>
+      <li><strong>Still checked by the admin:</strong> adding parents, brothers and sisters or cousins, linking or unlinking people, and removing anyone from the tree.</li>
+      <li><strong>If you married into the family,</strong> you can claim your own box, edit your own details and photo, and look after your children's families. Nobody except the admin can add the parents, brothers or sisters of someone who married in, not even as a suggestion, so the tree stays about this family.</li>
+    </ul>
+    <p>Every change records who made it and when, under <span class="ui">Sources</span> on the person's card. The admin can undo any change, and sees every branch admin and their box on the Members page, where they can also remove someone as branch admin.</p>
+
+    <h2 id="stay">3. Staying signed in</h2>
     <p>Once you're signed in, the site remembers you <strong>on that phone or computer, in that browser</strong>. Next time, just open the site; you don't need to sign in again.</p>
     <p>You will be asked to sign in again only if:</p>
     <ul>
@@ -83,7 +103,7 @@
       After that, open the family tree from the home-screen icon and you'll stay signed in.
     </div>
 
-    <h2 id="look">3. Looking around the tree</h2>
+    <h2 id="look">4. Looking around the tree</h2>
     <ul>
       <li><strong>Move around:</strong> drag with your finger or mouse. Pinch, or use the <span class="ui">+</span> and <span class="ui">−</span> buttons, to zoom.</li>
       <li><strong>Open a family:</strong> the small round button under a person shows how many children they have. Tap it to show or hide them.</li>
@@ -102,7 +122,7 @@
     <figure class="shot"><img src="img/help/list.jpg" width="390" height="760" loading="lazy" alt="The List view: easier to read on a small phone."><figcaption>The List view: easier to read on a small phone.</figcaption></figure>
     <p>A card marked <strong>?</strong>, and a dashed line, means the parent isn't confirmed. If you know the answer, please tell us.</p>
 
-    <h2 id="edit">4. Adding or correcting information</h2>
+    <h2 id="edit">5. Adding or correcting information</h2>
     <p>Sign in first, then tap the person's card.</p>
     <ul>
       <li><span class="ui">Suggest an edit</span>: correct a name, add the year of birth or death, places, profession or notes.</li>
@@ -120,7 +140,7 @@
       <figure class="shot"><img src="img/help/my-changes.jpg" width="390" height="760" loading="lazy" alt="My changes: everything you sent, with what you changed."><figcaption>My changes: everything you sent, with what you changed.</figcaption></figure>
     </div>
 
-    <h2 id="photo">5. Adding a photo</h2>
+    <h2 id="photo">6. Adding a photo</h2>
     <ol>
       <li>Sign in and tap the person's card.</li>
       <li>Tap <span class="ui">Add photo</span> and choose a picture.</li>
@@ -131,19 +151,7 @@
     <p>To move a photo that's already there, tap <span class="ui">Change or center photo</span>, drag it into place and send it. To take a photo off, tap <span class="ui">Remove photo</span>.</p>
     <p>Each person has one profile photo. The site makes the picture smaller automatically, so any photo from your phone is fine.</p>
 
-    <h2 id="this-is-me">Branch admins: "This is me"</h2>
-    <p>Once you are signed in, open your own box in the tree and tap <span class="ui">This is me</span>. You become the <strong>branch admin</strong> for your own family below that box. If your invitation was linked to that box, this happens straight away. Otherwise the person who invited you, or the admin, confirms it first. Each account can claim only one box, and each box belongs to only one person.</p>
-    <p>As a branch admin:</p>
-    <ul>
-      <li><strong>You, your husband or wife, your children, grandchildren and their husbands and wives:</strong> you can edit them, add children and spouses, and change photos. Your changes appear in the tree straight away, with no waiting.</li>
-      <li><strong>Your parents and grandparents who have passed away:</strong> you can correct their details and photo. If a brother or cousin has also claimed their own box, changes to those shared ancestors go to the admin instead.</li>
-      <li><strong>Suggestions from others:</strong> when another family member suggests a change to your part of the tree, it appears under <span class="ui">Review</span> for you to approve or decline.</li>
-      <li><strong>Still checked by the admin:</strong> adding parents, brothers and sisters or cousins, linking or unlinking people, and removing anyone from the tree.</li>
-      <li><strong>If you married into the family,</strong> you can claim your own box, edit your own details and photo, and look after your children's families. Nobody except the admin can add the parents, brothers or sisters of someone who married in, not even as a suggestion, so the tree stays about this family.</li>
-    </ul>
-    <p>Every change records who made it and when, under <span class="ui">Sources</span> on the person's card. The admin can undo any change, and sees every branch admin and their box on the Members page, where they can also remove someone as branch admin.</p>
-
-    <h2 id="invite">6. Inviting a relative</h2>
+    <h2 id="invite">7. Inviting a relative</h2>
     <p>Anyone who is signed in can invite another family member.</p>
     <ol>
       <li>Tap <span class="ui">Invite</span> at the top.</li>
@@ -157,7 +165,7 @@
     </div>
     <p>The people you invited are listed on the same page, with <span class="ui">Resend invitation email</span> in case it got lost.</p>
 
-    <h2 id="dashboard">7. The family dashboard</h2>
+    <h2 id="dashboard">8. The family dashboard</h2>
     <p>Tap <span class="ui">Dashboard</span> at the top to see the whole tree at a glance:</p>
     <ul>
       <li><strong>Numbers:</strong> how many people, generations, marriages, branches, photos and sources.</li>
@@ -175,14 +183,14 @@
     <p>Tap <span class="ui">Export</span> at the top, then <span class="ui">Make the PDF</span>. You get a family book: a cover page, the whole tree as an indented chart, and a page for everyone with their years, places and photo. When the print window opens, choose <span class="ui">Save as PDF</span> as the printer. On an iPhone, tap Share, then Print, pinch outwards on the preview, then Share and Save to Files.</p>
     <p>The <span class="ui">.ged</span> file on the same page is for genealogy programs and sites such as Ancestry, FamilySearch or MyHeritage. It is not meant to be opened on its own. Both include only what you are allowed to see.</p>
 
-    <h2 id="privacy">8. Who can see what</h2>
+    <h2 id="privacy">9. Who can see what</h2>
     <ul>
       <li><strong>Names and who is related to whom</strong> can be seen by anyone with the link.</li>
       <li><strong>Birth years, places, notes and photos</strong> can be marked <em>Public</em> (anyone) or <em>Branch only</em> (only signed-in family in that branch). Details of living people are <em>Branch only</em> unless you choose otherwise.</li>
       <li>Your branch is set when you are invited, by who you are in the tree. It covers your own line and your spouse's line.</li>
     </ul>
 
-    <h2 id="trouble">9. If something isn't working</h2>
+    <h2 id="trouble">10. If something isn't working</h2>
     <ul>
       <li><strong>"This email hasn't been invited yet":</strong> ask the admin, or the relative who invited you, to invite that exact email address.</li>
       <li><strong>No email arrived:</strong> check Spam, wait a minute, and make sure the address is spelled correctly.</li>

@@ -36,6 +36,10 @@ The site sends this when the admin adds an invite on the Members page, or a fami
 <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#7a3b12;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Open the family tree and sign in</a></p>
 <p>This button signs you in straight away. It works once, within 24 hours. After that, open <a href="https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/">the family tree</a>, tap <strong>Sign in</strong>, enter this email address, and type the 6-digit code we email you. There is no password.</p>
 <p>You only sign in once on each phone or computer. On a phone, open the site in Safari or Chrome (not inside the Gmail app) and add it to your home screen.</p>
-<p>Please note: changes you make are not visible right away. The admin checks each one first, and it appears in the tree once approved. So don't worry about mistakes.</p>
+<div style="margin:20px 0;padding:14px 16px;background:#faf1c8;border-left:4px solid #c49a3a;border-radius:6px">
+<p style="margin:0 0 8px"><strong>Important, please do this first: claim your box.</strong></p>
+<p style="margin:0">After you sign in, find yourself in the tree (search for your name), open your box and tap <strong>This is me</strong>. A yellow reminder at the top of the page helps you find it. If you're not in the tree yet, add yourself under your father or mother first, then claim that box. Once it's yours, your changes to your own family appear right away and the tree shows how everyone is related to you.</p>
+</div>
+<p>Until your box is claimed, changes you make wait for the admin to check them first. So don't worry about mistakes.</p>
 <p>A short guide: <a href="https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/help.html">How to use the family tree</a></p>
 ```

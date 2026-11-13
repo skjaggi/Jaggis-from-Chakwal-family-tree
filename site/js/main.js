@@ -1,5 +1,5 @@
 // App start-up, routing and the header.
-import { store, init, sendLoginLink, verifyCode, signOut, pendingCount } from './data.js';
+import { store, init, sendLoginLink, verifyCode, signOut, pendingCount, listRequests } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint } from './model.js';
 import { h, clear, toast, modal, field } from './ui.js';
@@ -269,6 +269,41 @@ async function renderHeader() {
   for (const a of nav.querySelectorAll('[data-nav]')) a.classList.toggle('active', a.dataset.nav === state.view);
   $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   $('preview-banner').hidden = !store.preview;
+  await renderClaimBanner();
+}
+
+// Signed-in members who haven't claimed their own box see a reminder at the
+// top of every page until they do. "Later" hides it for this visit only.
+async function renderClaimBanner() {
+  const box = $('claim-banner');
+  const later = (() => { try { return sessionStorage.getItem('claim-later') === '1'; } catch { return false; } })();
+  if (!store.signedIn || store.preview || store.claimedId || later) { box.hidden = true; return; }
+  const mine = await listRequests({ status: 'pending', mine: true }).catch(() => []);
+  const waiting = mine.find((r) => r.kind === 'claim_person');
+  const linked = store.profile?.person_id && store.fam.byId.get(store.profile.person_id);
+  const goTo = (id) => go({ view: 'tree', root: store.fam.primaryParentLink(id)?.parent_id || id, selected: id });
+  const laterBtn = h('button.linkish', { type: 'button', onclick: () => {
+    try { sessionStorage.setItem('claim-later', '1'); } catch { /* ignore */ }
+    box.hidden = true;
+  } }, 'Later');
+  if (waiting) {
+    const p = store.fam.byId.get(waiting.target_person_id);
+    clear(box, h('span', h('strong', 'Almost there: '), `you asked to claim ${p ? fullName(p) : 'your box'}. The person who invited you, or the admin, will confirm it soon.`));
+    box.className = 'banner claim-banner waiting';
+  } else if (linked) {
+    clear(box,
+      h('span', h('strong', 'Important: claim your box. '), `Your invitation is linked to ${fullName(linked)}. Open your box and tap `, h('strong', 'This is me'), '. Then your changes to your own family appear right away.'),
+      h('span.claim-actions', h('button.btn.small.primary', { type: 'button', onclick: () => goTo(linked.id) }, 'Go to my box'), laterBtn));
+    box.className = 'banner claim-banner';
+  } else {
+    clear(box,
+      h('span', h('strong', 'Important: claim your box. '), 'Search for your name, open your box and tap ', h('strong', 'This is me'), '. Not in the tree yet? Add yourself under your parent first, then claim your box.'),
+      h('span.claim-actions',
+        h('button.btn.small.primary', { type: 'button', onclick: () => $('search').focus() }, 'Find my name'),
+        h('a.btn.small', { href: 'help.html#this-is-me' }, 'How'), laterBtn));
+    box.className = 'banner claim-banner';
+  }
+  box.hidden = false;
 }
 
 // ---------------------------------------------------------------- start

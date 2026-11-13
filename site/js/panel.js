@@ -76,7 +76,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
       } else if (waiting?.target_person_id === id) {
         clear(claimBox, h('p.muted', 'Waiting for confirmation that this is you.'));
       } else if (!store.claimedId && !waiting) {
-        const btn = h('button.btn.small', { type: 'button', onclick: async () => {
+        const btn = h('button.btn.small.primary', { type: 'button', onclick: async () => {
           const linked = store.profile?.person_id === id;
           const msg = linked
             ? `Confirm that you are ${fullName(p)}? This is the person your invitation was linked to, so it takes effect right away. You can claim only one box.`
