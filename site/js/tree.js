@@ -298,9 +298,17 @@ export class TreeView {
     const life = lifeLine(p, fam.details.get(p.id)) || (p.generation && !spouse ? `Generation ${p.generation}` : '');
     const name = [p.title === 'Bakhshi' ? 'Bkh.' : p.title, shortName(p)].filter(Boolean).join(' ');
     const lines = [line2, life].filter(Boolean);
-    const top = lines.length === 2 ? -12 : lines.length === 1 ? -4 : 4;
-    el.append('text').attr('class', 'name').attr('x', tx).attr('y', top).text(clip(name, chars - (store.signedIn && this.onEdit ? 2 : 0)));
-    lines.forEach((t, i) => el.append('text').attr('class', 'sub').attr('x', tx).attr('y', top + 17 + i * 16).text(clip(t, chars + 2)));
+    // The name wraps onto a second line when it is too long for the box.
+    const avail = w / 2 - tx - 6;
+    const pencil = store.signedIn && this.onEdit ? 16 : 0;
+    const nameEl = el.append('text').attr('class', 'name').attr('x', tx);
+    const nameLines = fitLines(nameEl, name, [avail - pencil, avail]);
+    const block = (nameLines.length - 1) * 15 + (lines.length ? 17 + (lines.length - 1) * 15 : 0);
+    const top = Math.round(-block / 2 + 4);
+    nameEl.text(null);
+    nameLines.forEach((t, i) => nameEl.append('tspan').attr('x', tx).attr('y', top + i * 15).text(t));
+    const subTop = top + (nameLines.length - 1) * 15 + 17;
+    lines.forEach((t, i) => el.append('text').attr('class', 'sub').attr('x', tx).attr('y', subTop + i * 15).text(clip(t, chars + 2)));
     const pl = spouse ? null : fam.primaryParentLink(p.id);
     const canEdit = store.signedIn && this.onEdit;
     el.append('text').attr('class', 'badge').attr('x', w / 2 - (canEdit ? 26 : 8)).attr('y', -h / 2 + 14).attr('text-anchor', 'end')
@@ -368,6 +376,28 @@ export class TreeView {
   zoomBy(f) {
     this.svg.transition().duration(200).call(this.zoom.scaleBy, f);
   }
+}
+
+// Splits text into lines that fit the given widths (one per line), measuring
+// the real text; the last line ends in "…" if it still doesn't fit.
+function fitLines(el, text, widths) {
+  const fits = (t, wd) => { el.text(t); return el.node().getComputedTextLength() <= wd; };
+  if (fits(text, widths[0])) return [text];
+  const words = text.split(/\s+/);
+  const out = [];
+  let i = 0;
+  for (let li = 0; li < widths.length && i < words.length; li++) {
+    const last = li === widths.length - 1;
+    let line = words[i++];
+    while (i < words.length && fits(`${line} ${words[i]}`, widths[li])) line += ` ${words[i++]}`;
+    if (last && i < words.length) line += ` ${words.slice(i).join(' ')}`, i = words.length;
+    if (!fits(line, widths[li])) {
+      while (line.length > 1 && !fits(`${line}…`, widths[li])) line = line.slice(0, -1);
+      line = `${line.trimEnd()}…`;
+    }
+    out.push(line);
+  }
+  return out;
 }
 
 function clip(s, n) {
