@@ -34,7 +34,7 @@ create table if not exists public.people (
   generation int,                  -- 1 = Bakhshi Bhanna Mal Jaggi
   birth_order int,                 -- order among siblings when birth dates are unknown
   is_living boolean,               -- null = not known (treated as living for privacy)
-  photo_path text,                 -- "<person id>/<file>" inside the photo bucket
+  photo_path text,                 -- "<person id>/<file>" inside the photo bucket, or "img/<file>" shipped with the site
   photo_visibility text not null default 'branch' check (photo_visibility in ('public', 'branch')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

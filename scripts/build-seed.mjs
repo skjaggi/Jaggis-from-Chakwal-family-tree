@@ -36,7 +36,7 @@ src.people.forEach((p, order) => {
     generation: p.gen,
     birth_order: order + 1,
     is_living: p.living ?? null,
-    photo_path: null,
+    photo_path: p.photo ?? null,
     photo_visibility: 'public',
   });
   const sources = (p.src || '').split(',').filter(Boolean).map((k) => src.sources[k]).join('\n');
@@ -48,7 +48,7 @@ src.people.forEach((p, order) => {
     birth_place: p.birth_place ?? null,
     death_date: null,
     death_place: null,
-    profession: null,
+    profession: p.profession ?? null,
     notes: p.notes ?? null,
     sources: sources || null,
     uncertainty: p.uncertainty ?? null,

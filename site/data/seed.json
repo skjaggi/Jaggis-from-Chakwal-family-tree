@@ -24,7 +24,7 @@
    "generation": 2,
    "birth_order": 2,
    "is_living": false,
-   "photo_path": null,
+   "photo_path": "img/arya-school-plaque-1933.jpg",
    "photo_visibility": "public"
   },
   {
@@ -95,9 +95,9 @@
   {
    "id": "98e3dd33-dfbe-5c9a-a0be-50683f47ffda",
    "title": null,
-   "given_name": "Gian Parkash",
+   "given_name": "Gyan Prakash",
    "surname": "Jaggi",
-   "other_names": null,
+   "other_names": "Gian Parkash, Gyan Parkash",
    "gender": "male",
    "generation": 4,
    "birth_order": 8,
@@ -933,8 +933,8 @@
    "death_date": null,
    "death_place": null,
    "profession": null,
-   "notes": "Honoured in the 1933 founding of Arya High School, Chakwal. Had four sons: Prabh Dyal, Shoba Ram, Kalu Ram and Hari Singh.",
-   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)\nBakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives",
+   "notes": "Honoured in the 1933 founding of Arya High School, Chakwal. Had four sons: Prabh Dyal, Shoba Ram, Kalu Ram and Hari Singh. The picture is the April 1933 plaque his grandsons Bir Chand and Gyan Prakash placed at Arya High School in his memory (photo: My Chakwal).",
+   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)\nBakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives\nDonor plaque, Arya High School, Chakwal, April 1933: 'Built in memory of their Grandfather Bakhshi Kesar Mal Jaggi by his grandsons Bir Chand and Gyan Prakash, Sons of Bakhshi Prabh Dyal Jaggi, Timber Merchants, Chakwal.' Photo (My Chakwal Facebook page): https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4tPv3X_BYFh__GlDvXTMabQH_-wPKcVsN5hyO66s5zLrdN899_DD9dCR0xYJvGC79_82jDxGjBYobEHHTftezXSrVT1cCwU5GcUOgrf5oRC_R5fhGq3ehwLTU7_rDCcb1FliIprTHcxQN/s1600/FB_IMG_1522507440460.jpg ; transcribed at http://speakingstones1.blogspot.com/2018/04/arya-high-school-chakwal-punjab-pakistan.html; reported in Dawn (https://www.dawn.com/news/660028, 2011; https://www.dawn.com/news/1472898, 2019) and The Friday Times (https://thefridaytimes.com/03-Apr-2024/arya-high-school-offers-a-glimpse-of-life-in-pre-partition-chakwal, 2024)",
    "uncertainty": null
   },
   {
@@ -945,8 +945,8 @@
    "death_date": null,
    "death_place": null,
    "profession": null,
-   "notes": null,
-   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)\nBakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives",
+   "notes": "Father of Bir Chand and Gyan Prakash; named on their April 1933 Arya High School plaque.",
+   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)\nBakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives\nDonor plaque, Arya High School, Chakwal, April 1933: 'Built in memory of their Grandfather Bakhshi Kesar Mal Jaggi by his grandsons Bir Chand and Gyan Prakash, Sons of Bakhshi Prabh Dyal Jaggi, Timber Merchants, Chakwal.' Photo (My Chakwal Facebook page): https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4tPv3X_BYFh__GlDvXTMabQH_-wPKcVsN5hyO66s5zLrdN899_DD9dCR0xYJvGC79_82jDxGjBYobEHHTftezXSrVT1cCwU5GcUOgrf5oRC_R5fhGq3ehwLTU7_rDCcb1FliIprTHcxQN/s1600/FB_IMG_1522507440460.jpg ; transcribed at http://speakingstones1.blogspot.com/2018/04/arya-high-school-chakwal-punjab-pakistan.html; reported in Dawn (https://www.dawn.com/news/660028, 2011; https://www.dawn.com/news/1472898, 2019) and The Friday Times (https://thefridaytimes.com/03-Apr-2024/arya-high-school-offers-a-glimpse-of-life-in-pre-partition-chakwal, 2024)",
    "uncertainty": null
   },
   {
@@ -992,9 +992,9 @@
    "birth_place": null,
    "death_date": null,
    "death_place": null,
-   "profession": null,
-   "notes": "With Gian Parkash Jaggi, funded the construction of the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.",
-   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)",
+   "profession": "Timber merchant, Chakwal",
+   "notes": "With Gyan Prakash Jaggi, built the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.",
+   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)\nDonor plaque, Arya High School, Chakwal, April 1933: 'Built in memory of their Grandfather Bakhshi Kesar Mal Jaggi by his grandsons Bir Chand and Gyan Prakash, Sons of Bakhshi Prabh Dyal Jaggi, Timber Merchants, Chakwal.' Photo (My Chakwal Facebook page): https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4tPv3X_BYFh__GlDvXTMabQH_-wPKcVsN5hyO66s5zLrdN899_DD9dCR0xYJvGC79_82jDxGjBYobEHHTftezXSrVT1cCwU5GcUOgrf5oRC_R5fhGq3ehwLTU7_rDCcb1FliIprTHcxQN/s1600/FB_IMG_1522507440460.jpg ; transcribed at http://speakingstones1.blogspot.com/2018/04/arya-high-school-chakwal-punjab-pakistan.html; reported in Dawn (https://www.dawn.com/news/660028, 2011; https://www.dawn.com/news/1472898, 2019) and The Friday Times (https://thefridaytimes.com/03-Apr-2024/arya-high-school-offers-a-glimpse-of-life-in-pre-partition-chakwal, 2024)",
    "uncertainty": null
   },
   {
@@ -1004,9 +1004,9 @@
    "birth_place": null,
    "death_date": null,
    "death_place": null,
-   "profession": null,
-   "notes": "With Bir Chand Jaggi, funded the construction of the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.",
-   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)",
+   "profession": "Timber merchant, Chakwal",
+   "notes": "With Bir Chand Jaggi, built the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.",
+   "sources": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)\nDonor plaque, Arya High School, Chakwal, April 1933: 'Built in memory of their Grandfather Bakhshi Kesar Mal Jaggi by his grandsons Bir Chand and Gyan Prakash, Sons of Bakhshi Prabh Dyal Jaggi, Timber Merchants, Chakwal.' Photo (My Chakwal Facebook page): https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4tPv3X_BYFh__GlDvXTMabQH_-wPKcVsN5hyO66s5zLrdN899_DD9dCR0xYJvGC79_82jDxGjBYobEHHTftezXSrVT1cCwU5GcUOgrf5oRC_R5fhGq3ehwLTU7_rDCcb1FliIprTHcxQN/s1600/FB_IMG_1522507440460.jpg ; transcribed at http://speakingstones1.blogspot.com/2018/04/arya-high-school-chakwal-punjab-pakistan.html; reported in Dawn (https://www.dawn.com/news/660028, 2011; https://www.dawn.com/news/1472898, 2019) and The Friday Times (https://thefridaytimes.com/03-Apr-2024/arya-high-school-offers-a-glimpse-of-life-in-pre-partition-chakwal, 2024)",
    "uncertainty": null
   },
   {
