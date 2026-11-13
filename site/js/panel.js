@@ -59,7 +59,11 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
   }
 
   // Who added this person and who updated them, with dates.
-  const historyBox = h('details.sources.person-history', { hidden: true, open: true });
+  // Sources: what was written about where the information came from, followed by
+  // who added this person and who updated them.
+  const historyList = h('div.person-history');
+  const sourcesBox = h('details.sources', { hidden: !d?.sources, open: true },
+    h('summary', 'Sources'), d?.sources ? h('p', d.sources) : null, historyList);
   if (store.signedIn && !store.preview) {
     personHistory(id).then((rows) => {
       if (!rows) return;
@@ -74,8 +78,8 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
       const lines = rows.filter((r) => ['add_person', 'edit_person', 'set_photo', 'remove_photo'].includes(r.kind))
         .map((r) => h('li', `${what(r)} by ${r.by_name} on ${day(r.at)}`));
       if (!rows.some((r) => r.kind === 'add_person')) lines.unshift(h('li.muted', 'From the original family tree documents'));
-      clear(historyBox, h('summary', 'Added and updated by'), h('ul', lines));
-      historyBox.hidden = false;
+      clear(historyList, h('h4', 'Added and updated by'), h('ul', lines));
+      sourcesBox.hidden = false;
     }).catch(() => {});
   }
 
@@ -120,8 +124,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
           removeBtn('parent_child', link, q))))) : null,
       siblings.length ? h('section', h('h3', `Siblings (${siblings.length})`), h('ul', siblings.map((q) => personLink(q)))) : null),
 
-    d?.sources ? h('details.sources', h('summary', 'Sources'), h('p', d.sources)) : null,
-    historyBox,
+    sourcesBox,
 
     h('div.panel-actions',
       h('button.btn', { type: 'button', onclick: () => onRoot(id) }, 'Show tree from here'),
