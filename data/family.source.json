@@ -2,20 +2,21 @@
   "_about": "Seed data for the Jaggi family tree, transcribed from the two family tree PDFs (Jaggi_Family_Tree.pdf and Bakhshi_Hari_Singh_Jaggi_Final_Family_Tree-v2.pdf). Edit this file, then run `node scripts/build-seed.mjs` to regenerate site/data/seed.json and supabase/seed.sql. Gender is only set where the PDFs say son/daughter or 'married to'. Generation 6 surnames are taken from the father and may differ today.",
   "sources": {
     "A": "Jaggi Family Tree PDF: 'The Jaggi Family Lineage, Pre-Partition Chakwal' (five generations from Bakhshi Bhanna Mal Jaggi)",
-    "B": "Bakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives"
+    "B": "Bakhshi Hari Singh Jaggi branch PDF (generations 1 to 6), compiled from family oral history and pre-Partition Chakwal archives",
+    "C": "Donor plaque, Arya High School, Chakwal, April 1933: 'Built in memory of their Grandfather Bakhshi Kesar Mal Jaggi by his grandsons Bir Chand and Gyan Parkash, Sons of Bakhshi Prabh Dyal Jaggi, Timber Merchants, Chakwal.' Transcribed at http://speakingstones1.blogspot.com/2018/04/arya-high-school-chakwal-punjab-pakistan.html; reported in Dawn (https://www.dawn.com/news/660028, 2011; https://www.dawn.com/news/1472898, 2019) and The Friday Times (https://thefridaytimes.com/03-Apr-2024/arya-high-school-offers-a-glimpse-of-life-in-pre-partition-chakwal, 2024)"
   },
   "people": [
     { "slug": "bhanna-mal", "title": "Bakhshi", "given": "Bhanna Mal", "surname": "Jaggi", "gender": "male", "gen": 1, "living": false, "birth_place": "Chakwal, Punjab (pre-Partition)", "notes": "Founding patriarch of the Jaggi family of Chakwal.", "src": "A,B" },
 
-    { "slug": "kesar-mal", "title": "Bakhshi", "given": "Kesar Mal", "surname": "Jaggi", "gender": "male", "gen": 2, "living": false, "parents": ["bhanna-mal"], "notes": "Honoured in the 1933 founding of Arya High School, Chakwal. Had four sons: Prabh Dyal, Shoba Ram, Kalu Ram and Hari Singh.", "src": "A,B" },
+    { "slug": "kesar-mal", "title": "Bakhshi", "given": "Kesar Mal", "surname": "Jaggi", "gender": "male", "gen": 2, "living": false, "parents": ["bhanna-mal"], "notes": "Honoured in the 1933 founding of Arya High School, Chakwal. Had four sons: Prabh Dyal, Shoba Ram, Kalu Ram and Hari Singh.", "src": "A,B,C" },
 
-    { "slug": "prabh-dyal", "title": "Bakhshi", "given": "Prabh Dyal", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "src": "A,B" },
+    { "slug": "prabh-dyal", "title": "Bakhshi", "given": "Prabh Dyal", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "notes": "Father of Bir Chand and Gyan Parkash; named on their April 1933 Arya High School plaque.", "src": "A,B,C" },
     { "slug": "shoba-ram", "given": "Shoba Ram", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "src": "A,B" },
     { "slug": "kalu-ram", "given": "Kalu Ram", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "src": "A,B" },
     { "slug": "hari-singh", "title": "Bakhshi", "given": "Hari Singh", "surname": "Jaggi", "gender": "male", "gen": 3, "living": false, "parents": ["kesar-mal"], "notes": "Head of the Bakhshi Hari Singh Jaggi branch.", "src": "A,B" },
 
-    { "slug": "bir-chand", "given": "Bir Chand", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["prabh-dyal"], "notes": "With Gian Parkash Jaggi, funded the construction of the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.", "src": "A" },
-    { "slug": "gian-parkash", "given": "Gian Parkash", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["prabh-dyal"], "notes": "With Bir Chand Jaggi, funded the construction of the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.", "src": "A" },
+    { "slug": "bir-chand", "given": "Bir Chand", "surname": "Jaggi", "gender": "male", "gen": 4, "profession": "Timber merchant, Chakwal", "parents": ["prabh-dyal"], "notes": "With Gian Parkash Jaggi, built the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.", "src": "A,C" },
+    { "slug": "gian-parkash", "given": "Gian Parkash", "surname": "Jaggi", "gender": "male", "gen": 4, "other_names": "Gyan Parkash, Gyan Prakash", "profession": "Timber merchant, Chakwal", "parents": ["prabh-dyal"], "notes": "With Bir Chand Jaggi, built the Arya High School building in Chakwal in April 1933, in memory of their grandfather Bakhshi Kesar Mal Jaggi.", "src": "A,C" },
     { "slug": "gokal-chand", "given": "Gokal Chand", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["shoba-ram"], "src": "A" },
     { "slug": "chunni-lal", "given": "Chunni Lal", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["shoba-ram"], "src": "A" },
     { "slug": "chatter", "given": "Chatter", "surname": "Jaggi", "gender": "male", "gen": 4, "parents": ["kalu-ram"], "src": "A" },

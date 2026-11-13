@@ -48,7 +48,7 @@ src.people.forEach((p, order) => {
     birth_place: p.birth_place ?? null,
     death_date: null,
     death_place: null,
-    profession: null,
+    profession: p.profession ?? null,
     notes: p.notes ?? null,
     sources: sources || null,
     uncertainty: p.uncertainty ?? null,
