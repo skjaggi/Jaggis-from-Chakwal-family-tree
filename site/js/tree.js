@@ -28,7 +28,8 @@ export function spouseMode() {
 }
 
 export class TreeView {
-  constructor(container, { onSelect, onEdit }) {
+  constructor(container, { onSelect, onEdit, onBackground }) {
+    this.onBackground = onBackground;
     this.container = container;
     this.onSelect = onSelect;
     this.onEdit = onEdit;
@@ -46,6 +47,14 @@ export class TreeView {
     this.g = this.svg.append('g');
     this.zoom = d3.zoom().scaleExtent([0.15, 2.5]).on('zoom', (e) => this.g.attr('transform', e.transform));
     this.svg.call(this.zoom).on('dblclick.zoom', null);
+    // A tap on empty space closes the person's card; a drag to pan does not.
+    let down = null;
+    this.svg.node().addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; }, true);
+    this.svg.on('click.background', (e) => {
+      const moved = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6;
+      if (moved || e.target.closest('g.node, g.toggle, g.edit-btn')) return;
+      this.onBackground?.();
+    });
   }
 
   // Show the tree from rootId, expanding `depth` generations by default.

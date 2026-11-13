@@ -304,6 +304,7 @@ async function start() {
   if (location.search.includes('error')) history.replaceState(null, '', location.pathname + location.hash);
   tree = new TreeView($('tree-canvas'), {
     onSelect: selectPerson,
+    onBackground: () => state.selected && go({ selected: null }),
     // The pencil on a box: open that person and their edit form straight away.
     onEdit: (id) => {
       selectPerson(id);
