@@ -28,9 +28,10 @@ export function spouseMode() {
 }
 
 export class TreeView {
-  constructor(container, { onSelect }) {
+  constructor(container, { onSelect, onEdit }) {
     this.container = container;
     this.onSelect = onSelect;
+    this.onEdit = onEdit;
     this.expanded = new Set();
     this.rootId = null;
     this.selectedId = null;
@@ -230,11 +231,33 @@ export class TreeView {
     const name = [p.title === 'Bakhshi' ? 'Bkh.' : p.title, shortName(p)].filter(Boolean).join(' ');
     const lines = [line2, life].filter(Boolean);
     const top = lines.length === 2 ? -12 : lines.length === 1 ? -4 : 4;
-    el.append('text').attr('class', 'name').attr('x', tx).attr('y', top).text(clip(name, chars));
+    el.append('text').attr('class', 'name').attr('x', tx).attr('y', top).text(clip(name, chars - (store.signedIn && this.onEdit ? 2 : 0)));
     lines.forEach((t, i) => el.append('text').attr('class', 'sub').attr('x', tx).attr('y', top + 17 + i * 16).text(clip(t, chars + 2)));
     const pl = spouse ? null : fam.primaryParentLink(p.id);
-    el.append('text').attr('class', 'badge').attr('x', w / 2 - 8).attr('y', -h / 2 + 14).attr('text-anchor', 'end')
+    const canEdit = store.signedIn && this.onEdit;
+    el.append('text').attr('class', 'badge').attr('x', w / 2 - (canEdit ? 26 : 8)).attr('y', -h / 2 + 14).attr('text-anchor', 'end')
       .text(pl?.confidence === 'uncertain' ? '?' : pl && pl.kind !== 'biological' ? pl.kind[0].toUpperCase() : '');
+    if (canEdit) {
+      // A pencil on the top corner of the box opens the edit form.
+      const label = `${store.isAdmin ? 'Edit' : 'Suggest an edit to'} ${shortName(p)}`;
+      const pen = el.append('g').attr('class', 'edit-btn').attr('transform', `translate(${w / 2 - 6},${-h / 2 + 4})`)
+        .attr('role', 'button').attr('tabindex', 0).attr('aria-label', label)
+        .on('click', (e) => {
+          e.stopPropagation();
+          this.onEdit(p.id);
+        })
+        .on('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            this.onEdit(p.id);
+          }
+        });
+      pen.append('circle').attr('r', 13).attr('class', 'edit-hit');
+      pen.append('circle').attr('r', 10);
+      pen.append('path').attr('d', 'M-4.5,4.5 L-4,1.8 L2.2,-4.4 L4.4,-2.2 L-1.8,4 Z M0.8,-3 L3,-0.8');
+      pen.append('title').text(label);
+    }
     el.append('title').text([shortName(p), spouse ? 'Married into the family' : '', line2, pl?.confidence === 'uncertain' ? 'Parent not confirmed' : ''].filter(Boolean).join('\n'));
   }
 

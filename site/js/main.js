@@ -6,6 +6,7 @@ import { h, clear, toast, modal, field } from './ui.js';
 import { TreeView } from './tree.js';
 import { renderOutline } from './outline.js';
 import { renderPanel } from './panel.js';
+import { openPersonForm } from './forms.js';
 import { renderReview, renderMine, renderAdmin } from './admin.js';
 import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
@@ -301,7 +302,15 @@ async function start() {
   if (signIn?.error) toast(signIn.error, 'error');
   else if (signIn?.ok) toast(store.signedIn ? 'You are signed in.' : 'The sign-in link could not be used. Please ask for a new one.', store.signedIn ? 'ok' : 'error');
   if (location.search.includes('error')) history.replaceState(null, '', location.pathname + location.hash);
-  tree = new TreeView($('tree-canvas'), { onSelect: selectPerson });
+  tree = new TreeView($('tree-canvas'), {
+    onSelect: selectPerson,
+    // The pencil on a box: open that person and their edit form straight away.
+    onEdit: (id) => {
+      selectPerson(id);
+      const person = store.fam.byId.get(id);
+      if (person) openPersonForm({ mode: 'edit', person });
+    },
+  });
   await tree.mount();
   $('zoom-in').onclick = () => tree.zoomBy(1.3);
   $('zoom-out').onclick = () => tree.zoomBy(1 / 1.3);
