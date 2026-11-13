@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>How to use the family tree</title>
   <meta name="description" content="A short guide to the Jaggi family tree website.">
-  <meta name="theme-color" content="#7a3b12">
+  <meta name="theme-color" content="#17706b">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='22' r='18' fill='%232f6b3a'/%3E%3Crect x='28' y='34' width='8' height='24' rx='2' fill='%237a3b12'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/app.css">
   <style>
@@ -20,6 +20,8 @@
     .help .toc a { display: block; padding: 4px 0; }
     .help .back { display: inline-block; margin-top: 2em; }
     kbd, .ui { font-weight: 600; }
+    .help::before { position: fixed; background-position: center 85%; opacity: calc(var(--watermark-opacity) * 0.6); }
+    .help > * { position: relative; }
     .help .shot { margin: 16px auto; max-width: 300px; text-align: center; }
     .help .shot img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); display: block; }
     .help .shot figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.4; }

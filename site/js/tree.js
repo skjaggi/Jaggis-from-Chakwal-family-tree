@@ -120,6 +120,7 @@ export class TreeView {
     nodes.exit().remove();
     const enter = nodes.enter().append('g').attr('class', 'node');
     enter.append('rect').attr('class', 'card').attr('x', -W / 2).attr('y', -H / 2).attr('width', W).attr('height', H).attr('rx', 10);
+    enter.append('path').attr('class', 'card-top').attr('d', `M${-W / 2 + 1.5},${-H / 2 + 10} a8.5,8.5 0 0 1 8.5,-8.5 h${W - 20} a8.5,8.5 0 0 1 8.5,8.5`);
     enter.append('g').attr('class', 'avatar').attr('transform', `translate(${-W / 2 + 28},0)`);
     enter.append('text').attr('class', 'name').attr('x', -W / 2 + 56).attr('y', -12);
     enter.append('text').attr('class', 'sub spouse').attr('x', -W / 2 + 56).attr('y', 6);
