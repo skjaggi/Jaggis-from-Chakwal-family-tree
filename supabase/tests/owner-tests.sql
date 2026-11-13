@@ -174,3 +174,20 @@ select pg_temp.expect(:'ok', 'parents of blood relatives can still be suggested'
 select pg_temp.as_user(:'ADMIN');
 select pg_temp.req(:'ADMIN', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Admin Added'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Shakuntala Rani')))) is not null as ok2 \gset
 select pg_temp.expect(:'ok2', 'the admin can still add them if needed');
+
+-- Member visits: members add only their own, only the admin reads them
+begin;
+set local role authenticated;
+select pg_temp.as_user(:'SUNIL');
+insert into public.page_views (view, person_id) values ('tree', pg_temp.pid('Sunil Kumar'));
+select pg_temp.expect((select count(*) from public.page_views) = 0, 'members cannot read visits, not even their own');
+do $$ begin
+  insert into public.page_views (user_id, view) values ('00000000-0000-0000-0000-00000000000a', 'tree');
+  raise exception 'FAILED: member recorded a visit for someone else';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: members cannot record visits for someone else';
+end $$;
+select pg_temp.as_user(:'ADMIN');
+select pg_temp.expect((select count(*) from public.page_views where user_id = '00000000-0000-0000-0000-00000000000b' and view = 'tree') = 1, 'admin reads member visits');
+commit;

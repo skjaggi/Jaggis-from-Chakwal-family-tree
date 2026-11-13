@@ -2,7 +2,7 @@
 // Everything is worked out from the data this visitor can already see, so it
 // follows the same privacy rules as the rest of the site.
 import {
-  store, pendingCount, listProfiles, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
+  store, pendingCount, listProfiles, listInvites, listViews, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
 } from './data.js';
 import { fullName, birthYear, skeleton, lifeLine } from './model.js';
 import { branchesOf, BRANCH_GEN } from './branches.js';
@@ -125,11 +125,11 @@ function peopleList(list) {
 }
 
 // Horizontal bars, one row per item, value written at the end of each bar.
-function barChart(rows, label, { colour } = {}) {
+function barChart(rows, label, { colour, unit = ['person', 'people'] } = {}) {
   if (!rows.length) return null;
   const max = Math.max(1, ...rows.map((r) => r.count));
   return h('div.bars', { role: 'table', 'aria-label': label },
-    rows.map((r) => h('div.bar-row', { role: 'row', title: `${r.label}: ${r.count} ${r.count === 1 ? 'person' : 'people'}` },
+    rows.map((r) => h('div.bar-row', { role: 'row', title: `${r.label}: ${r.count} ${r.count === 1 ? unit[0] : unit[1]}` },
       h('div.bar-label', { role: 'cell' }, r.href ? h('a', { href: r.href }, r.label) : r.label),
       h('div.bar-track', { role: 'cell' },
         h('div.bar', { style: `width:${(r.count / max) * 100}%;${colour ? `background:${colour(r)}` : ''}` }),
@@ -140,6 +140,113 @@ function branchChart(branches, earlier) {
   const rows = [...branches.map((b) => ({ label: fullName(b.person, { title: false }), count: b.count, href: personHref(b.person.id), slot: b.slot })),
     ...(earlier ? [{ label: 'Generations 1–3', count: earlier, slot: 'gold' }] : [])];
   return barChart(rows, 'People per branch', { colour: (r) => (r.slot === 'gold' ? 'var(--gold)' : `var(--branch-${r.slot})`) });
+}
+
+// ---------------------------------------------------------------- visits
+// Admin only: which signed-in members visit, how often, and what they open.
+// A "visit" is a run of page views with no gap longer than 30 minutes.
+const VISIT_GAP = 30 * 60 * 1000;
+const VIEW_LABEL = { tree: 'Tree', outline: 'List', dashboard: 'Dashboard', mine: 'My changes', invite: 'Invite', review: 'Review', members: 'Members', export: 'Export' };
+
+function ago(iso) {
+  const mins = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (mins < 2) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs} h ago`;
+  const days = Math.round(hrs / 24);
+  return days === 1 ? 'yesterday' : `${days} days ago`;
+}
+
+async function visitsSection() {
+  const box = h('section.dash-card.wide', h('h2', 'Visits by family members'), h('p.muted', 'Loading…'));
+  Promise.all([listViews(90), listProfiles(), listInvites().catch(() => [])]).then(([views, profiles, invites]) => {
+    const me = store.session?.user.id;
+    const rows = views.filter((v) => v.user_id !== me);
+    const byUser = new Map();
+    for (const v of rows) (byUser.get(v.user_id) || byUser.set(v.user_id, []).get(v.user_id)).push(v);
+    const sessions = (list) => {
+      let n = 0, prev = null;
+      for (const v of [...list].sort((a, b) => new Date(a.viewed_at) - new Date(b.viewed_at))) {
+        const t = new Date(v.viewed_at).getTime();
+        if (prev === null || t - prev > VISIT_GAP) n++;
+        prev = t;
+      }
+      return n;
+    };
+    const within = (v, days) => Date.now() - new Date(v.viewed_at) < days * 864e5;
+    const fam = store.fam;
+    const name = (pr) => (pr.person_id && fam.byId.get(pr.person_id) ? fullName(fam.byId.get(pr.person_id), { title: false }) : pr.display_name || pr.email);
+
+    const members = profiles.filter((pr) => pr.id !== me).map((pr) => {
+      const list = byUser.get(pr.id) || [];
+      const counts = new Map();
+      for (const v of list) if (v.person_id) counts.set(v.person_id, (counts.get(v.person_id) || 0) + 1);
+      const fav = [...counts].sort((a, b) => b[1] - a[1])[0];
+      return { pr, list, last: list[0]?.viewed_at, visits: sessions(list), fav: fav && fam.byId.get(fav[0]) };
+    }).sort((a, b) => (b.last ? new Date(b.last) : 0) - (a.last ? new Date(a.last) : 0));
+
+    const active30 = members.filter((m) => m.list.some((v) => within(v, 30))).length;
+    const visits7 = [...byUser.values()].reduce((n, l) => n + sessions(l.filter((v) => within(v, 7))), 0);
+    const people30 = rows.filter((v) => v.person_id && within(v, 30)).length;
+
+    const personCounts = new Map();
+    for (const v of rows) if (v.person_id && fam.byId.has(v.person_id)) personCounts.set(v.person_id, (personCounts.get(v.person_id) || 0) + 1);
+    const topPeople = [...personCounts].sort((a, b) => b[1] - a[1]).slice(0, 10)
+      .map(([id, count]) => ({ label: fullName(fam.byId.get(id)), count, href: personHref(id) }));
+    const br = branchesOf(fam);
+    const branchCounts = new Map();
+    for (const [id, c] of personCounts) {
+      const b = br.of.get(id);
+      const key = b ? b.person.id : 'early';
+      branchCounts.set(key, (branchCounts.get(key) || 0) + c);
+    }
+    const topBranches = [...branchCounts].sort((a, b) => b[1] - a[1]).map(([id, count]) => {
+      const b = br.list.find((x) => x.person.id === id);
+      return b ? { label: fullName(b.person, { title: false }), count, slot: b.slot } : { label: 'Generations 1–3', count, slot: 'gold' };
+    });
+
+    // Visits per week, last 12 weeks.
+    const weeks = [];
+    for (let w = 11; w >= 0; w--) {
+      const end = Date.now() - w * 7 * 864e5, start = end - 7 * 864e5;
+      const inWeek = rows.filter((v) => { const t = new Date(v.viewed_at).getTime(); return t >= start && t < end; });
+      const per = new Map();
+      for (const v of inWeek) (per.get(v.user_id) || per.set(v.user_id, []).get(v.user_id)).push(v);
+      const d = new Date(start);
+      weeks.push({ label: `Week of ${d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`, count: [...per.values()].reduce((n, l) => n + sessions(l), 0) });
+    }
+
+    while (weeks.length > 4 && weeks[0].count === 0) weeks.shift(); // skip quiet weeks before tracking began
+    const notYet = invites.filter((i) => !i.accepted_at);
+    const unit = ['view', 'views'];
+    clear(box,
+      h('h2', 'Visits by family members'),
+      h('p.muted.small', 'Only you can see this. It covers signed-in family members over the last 90 days, not counting your own visits. A visit is one sitting; opening a person counts as a view. Public visitors who don\'t sign in are counted separately and anonymously.'),
+      h('div.stats',
+        tile(active30, 'Members active', 'last 30 days'),
+        tile(visits7, 'Visits', 'last 7 days'),
+        tile(people30, 'People opened', 'last 30 days')),
+      h('h3', 'Members'),
+      members.length ? h('table.dash-table',
+        h('thead', h('tr', h('th', 'Member'), h('th', 'Last seen'), h('th.num', 'Visits'), h('th.num', 'Views'), h('th', 'Looked at most'))),
+        h('tbody', members.map((m) => h('tr',
+          h('td', name(m.pr)),
+          h('td', m.last ? h('span', { title: formatWhen(m.last) }, ago(m.last)) : h('span.muted', 'not since tracking began')),
+          h('td.num', String(m.visits)),
+          h('td.num', String(m.list.length)),
+          h('td', m.fav ? h('a', { href: personHref(m.fav.id) }, fullName(m.fav, { title: false })) : h('span.muted', '—')))))) : h('p.muted', 'No other members have signed in yet.'),
+      notYet.length ? [h('h3', `Invited but not signed in yet (${notYet.length})`),
+        h('ul.dash-people.single', notYet.map((i) => h('li', i.display_name || i.email, h('span.muted', ` · invited ${formatWhen(i.created_at)}`))))] : null,
+      h('div.dash-grid',
+        h('div', h('h3', 'Most viewed people'), topPeople.length ? barChart(topPeople, 'Most viewed people', { unit }) : h('p.muted', 'No one opened yet.')),
+        h('div', h('h3', 'Most viewed branches'), topBranches.length ? barChart(topBranches, 'Most viewed branches', { unit, colour: (r) => (r.slot === 'gold' ? 'var(--gold)' : `var(--branch-${r.slot})`) }) : h('p.muted', 'No one opened yet.')),
+        h('div', h('h3', 'Visits per week'), barChart(weeks, 'Visits per week', { unit: ['visit', 'visits'] }))));
+  }).catch((e) => {
+    clear(box, h('h2', 'Visits by family members'),
+      h('p.muted', /page_views|relation|schema cache/i.test(e.message) ? 'Visit tracking is not switched on yet. Run supabase/updates/2026-11-13-member-visits.sql in the Supabase SQL Editor.' : `Could not load visits: ${e.message}`));
+  });
+  return box;
 }
 
 async function questionsSection() {
@@ -254,6 +361,7 @@ export async function renderDashboard(container) {
     h('h1', 'Family dashboard'),
     h('p.muted', 'The tree at a glance. Tap a row to see who it is about, then tap a name to open their card.'),
     tiles,
+    store.isAdmin ? await visitsSection() : null,
     h('div.dash-grid',
       h('section.dash-card', h('h2', 'Needs attention'),
         attention,

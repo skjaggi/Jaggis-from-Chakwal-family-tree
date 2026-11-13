@@ -6,14 +6,22 @@ const uid = 'u-1';
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' ? SUNIL : null, created_at: new Date().toISOString() }],
-  invites: [], change_requests: [], research_questions: [],
+  invites: [], change_requests: [], research_questions: [], page_views: [],
 };
+// A second member with some visits, for the admin's Visits report.
+if (ADMIN) {
+  db.profiles.push({ id: 'u-2', email: 'cousin@example.com', display_name: 'Cousin', role: 'member', person_id: null, claimed_person_id: null, created_at: new Date().toISOString() });
+  db.invites.push({ email: 'pending@example.com', display_name: 'Not Yet', role: 'member', created_at: new Date().toISOString(), accepted_at: null });
+  const someone = seed.people.find((p) => p.given_name === 'Tapashi Ram').id;
+  for (let i = 0; i < 6; i++) db.page_views.push({ id: i, user_id: 'u-2', viewed_at: new Date(Date.now() - i * 3 * 864e5).toISOString(), view: 'tree', person_id: someone });
+}
 window.__db = db;
 class Q {
   constructor(t) { this.t = t; this.f = []; this.op = 'select'; this.opts = {}; }
   select(c, o = {}) { if (this.op === 'select') this.op = 'select'; this.opts = o; this.ret = true; return this; }
   eq(k, v) { this.f.push(r => r[k] === v); return this; }
   neq(k, v) { this.f.push(r => r[k] !== v); return this; }
+  gte(k, v) { this.f.push(r => r[k] >= v); return this; }
   order() { return this; } limit() { return this; } range(a, b) { this.rg = [a, b]; return this; }
   insert(row) { this.op = 'insert'; this.row = row; return this; }
   upsert(row) { this.op = 'upsert'; this.row = row; return this; }

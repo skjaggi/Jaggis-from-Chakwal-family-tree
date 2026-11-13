@@ -91,6 +91,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 ${body}
 <footer>Part of the <a href="${up}">Jaggi family tree of Chakwal</a>, descending from Bakhshi Bhanna Mal Jaggi. Details of living family members are private and are not shown here.</footer>
 </main>
+<script type="module">import { countView } from '${up}js/count.js'; countView(location.pathname);</script>
 </body>
 </html>
 `;

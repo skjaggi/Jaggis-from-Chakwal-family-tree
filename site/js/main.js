@@ -1,5 +1,5 @@
 // App start-up, routing and the header.
-import { store, init, sendLoginLink, verifyCode, signOut, pendingCount, listRequests } from './data.js';
+import { store, init, sendLoginLink, verifyCode, signOut, pendingCount, listRequests, logView } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint } from './model.js';
 import { h, clear, toast, modal, field } from './ui.js';
@@ -12,6 +12,7 @@ import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
 import { renderExport } from './export.js';
 import { downloadGedcom } from './gedcom.js';
+import { countView } from './count.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { view: 'tree', root: null, selected: null };
@@ -46,6 +47,8 @@ let lastView = null;
 let needsRedraw = false;
 async function route() {
   parseHash();
+  logView(state.view, state.selected);
+  countView(`${location.pathname}#/${state.view}`, `${config.siteTitle}: ${state.view}`);
   const isTreeish = state.view === 'tree' || state.view === 'outline';
   document.body.dataset.view = state.view;
   for (const a of document.querySelectorAll('[data-nav]')) {

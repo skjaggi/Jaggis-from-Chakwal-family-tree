@@ -422,3 +422,29 @@ export async function deleteQuestion(id) {
   const { error } = await store.sb.from('research_questions').delete().eq('id', id);
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------- visits
+// Signed-in members' page and person views, for the admin's Visits report.
+// Quietly does nothing if it fails (for example before the table exists).
+let lastView = { key: '', at: 0 };
+export function logView(view, personId) {
+  if (!store.signedIn || store.preview || !store.sb) return;
+  const key = `${view}|${personId || ''}`;
+  const now = Date.now();
+  if (key === lastView.key && now - lastView.at < 60000) return;
+  lastView = { key, at: now };
+  store.sb.from('page_views').insert({ view: String(view).slice(0, 40), person_id: personId || null })
+    .then(({ error }) => { if (error) console.debug('visit not recorded', error.message); }, () => {});
+}
+
+export async function listViews(days = 90) {
+  const since = new Date(Date.now() - days * 864e5).toISOString();
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await store.sb.from('page_views').select('user_id, viewed_at, view, person_id')
+      .gte('viewed_at', since).order('viewed_at', { ascending: false }).range(from, from + 999);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < 1000 || rows.length >= 20000) return rows;
+  }
+}

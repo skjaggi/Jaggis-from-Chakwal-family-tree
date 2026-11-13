@@ -505,3 +505,8 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .claim-banner .claim-actions { display: inline-flex; gap: 8px; align-items: center; margin-left: auto; }
 @media (prefers-color-scheme: dark) { .claim-banner { background: #3a3018; color: #f3e3b8; } .claim-banner.waiting { background: #1e3633; color: #cfe8e3; } }
 .hovercard .hc-hint { font-size: 0.75rem; color: var(--muted); font-style: italic; margin-bottom: 4px; }
+
+/* Admin: visits report */
+.dash-card.wide { margin: 16px 0; }
+.dash-card.wide h3 { font-size: 1rem; margin: 16px 0 6px; }
+.dash-card.wide .dash-table td { vertical-align: top; }

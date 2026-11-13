@@ -10,4 +10,6 @@ export const config = {
   supabaseAnonKey: 'sb_publishable_XML5JQRvgIV_WHdvn4CGTQ_jjgAlCyH',
   siteTitle: 'Jaggis of Chakwal',
   adminName: 'Sunil',
+  // GoatCounter site code for the anonymous visitor counter ('' = off).
+  goatcounter: '',
 };
