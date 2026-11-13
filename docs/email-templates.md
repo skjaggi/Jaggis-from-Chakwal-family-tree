@@ -36,6 +36,6 @@ The site sends this when the admin adds an invite on the Members page, or a fami
 <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#7a3b12;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Open the family tree and sign in</a></p>
 <p>This button signs you in straight away. It works once, within 24 hours. After that, open <a href="https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/">the family tree</a>, tap <strong>Sign in</strong>, enter this email address, and type the 6-digit code we email you. There is no password.</p>
 <p>You only sign in once on each phone or computer. On a phone, open the site in Safari or Chrome (not inside the Gmail app) and add it to your home screen.</p>
-<p>Please note: changes you make are not visible right away. Sunil, the administrator, checks each one first, and it appears in the tree once approved. So don't worry about mistakes.</p>
+<p>Please note: changes you make are not visible right away. The admin checks each one first, and it appears in the tree once approved. So don't worry about mistakes.</p>
 <p>A short guide: <a href="https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/help.html">How to use the family tree</a></p>
 ```

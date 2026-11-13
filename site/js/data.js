@@ -138,7 +138,7 @@ export async function verifyCode(email, token) {
 function friendlyAuthError(error) {
   const msg = error.message || String(error);
   if (/database error|not been invited/i.test(msg)) {
-    return new Error(`This email hasn't been invited yet. Ask ${config.adminName} to invite you.`);
+    return new Error(`This email hasn't been invited yet. Ask the admin, or a relative who is already signed in, to invite you.`);
   }
   if (/rate limit|security purposes/i.test(msg)) {
     return new Error('Too many sign-in emails were sent. Please wait a minute and try again.');

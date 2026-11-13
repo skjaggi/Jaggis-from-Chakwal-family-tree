@@ -50,7 +50,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
         pl(r).parent_id, pl(r).child_id, pl(r).partner_a, pl(r).partner_b].includes(id));
       if (!mine.length) return;
       clear(pendingBox,
-        h('h3', `Waiting for ${config.adminName}'s approval`),
+        h('h3', 'Waiting for admin approval'),
         h('p.muted.small', 'Only you can see these until they are approved.'),
         mine.map((r) => h('details', h('summary', r.summary || 'Change'), describe(r, () => 'You'))),
         h('a.small', { href: '#/mine' }, 'See all my changes'));
@@ -113,7 +113,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
         h('button.btn.small.ghost', { type: 'button', onclick: () => openLinkForm(p) }, 'Link to someone already in the tree'),
         h('button.btn.small.ghost.danger', { type: 'button', onclick: () => requestDelete(p) }, store.isAdmin ? 'Remove from tree' : 'Ask to remove'),
       ] : !store.preview
-        ? h('p.muted.small', 'Family members can ', h('button.link', { type: 'button', onclick: onSignIn }, 'sign in'), ` to suggest changes. ${config.adminName} approves every change.`)
+        ? h('p.muted.small', 'Family members can ', h('button.link', { type: 'button', onclick: onSignIn }, 'sign in'), ' to suggest changes. The admin approves every change.')
         : null),
     h('p.muted.small.hint', relationHint(fam, id)),
   );

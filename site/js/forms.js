@@ -26,7 +26,7 @@ async function send(kind, payload, opts, close) {
   try {
     const { applied } = await submitChange(kind, payload, opts);
     close();
-    toast(applied ? 'Saved.' : `Sent to ${config.adminName} for approval. You can follow it under "My changes".`, 'ok');
+    toast(applied ? 'Saved.' : 'Sent for admin approval. You can follow it under "My changes".', 'ok');
   } catch (e) {
     console.error(e);
     toast(e.message || 'Something went wrong.', 'error');
@@ -206,7 +206,7 @@ export function openPhotoForm(person) {
 }
 
 export async function removePhoto(person) {
-  if (!(await confirmDialog(`Remove the photo of ${shortName(person)}?${store.isAdmin ? '' : ` ${config.adminName} will check this first.`}`, 'Remove photo'))) return;
+  if (!(await confirmDialog(`Remove the photo of ${shortName(person)}?${store.isAdmin ? '' : ' The admin will check this first.'}`, 'Remove photo'))) return;
   await send('remove_photo', { person_id: person.id }, { target: person.id, summary: `Remove photo of ${shortName(person)}` }, () => {});
 }
 
