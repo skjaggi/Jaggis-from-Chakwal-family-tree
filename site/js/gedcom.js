@@ -78,7 +78,8 @@ export function buildGedcom() {
     }
     if (p.is_living === false || d?.death_date || d?.death_place) {
       L(1, 'DEAT', d?.death_date || d?.death_place ? '' : 'Y');
-      if (d?.death_date) L(2, 'DATE', d.death_date);
+      const dy = birthYear(d?.death_date).replace(/^c\. /, 'ABT ').replace(/s$/, '');
+      if (dy) L(2, 'DATE', dy);
       if (d?.death_place) L(2, 'PLAC', d.death_place);
     }
     if (d?.profession) L(1, 'OCCU', d.profession);

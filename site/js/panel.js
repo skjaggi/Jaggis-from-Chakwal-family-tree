@@ -27,7 +27,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
   const row = (label, value) => value && detailRows.push(h('div.dl-row', h('dt', label), h('dd', value)));
   if (d) {
     row('Born', [birthYear(d.birth_date), d.birth_place].filter(Boolean).join(', '));
-    row('Died', [d.death_date, d.death_place].filter(Boolean).join(', '));
+    row('Died', [birthYear(d.death_date), d.death_place].filter(Boolean).join(', '));
     row('Profession', d.profession);
   }
 

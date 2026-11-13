@@ -114,7 +114,7 @@ export function shortName(p) {
   return [p.given_name, p.surname].filter(Boolean).join(' ');
 }
 
-// The tree shows only the year of birth (never a full date of birth).
+// The tree shows only years for birth and death (never full dates).
 // "1952-03-04" -> "1952", "about 1890" -> "c. 1890", "1930s" stays "1930s".
 export function birthYear(v) {
   if (!v) return '';
@@ -125,7 +125,7 @@ export function birthYear(v) {
 
 export function lifeLine(p, d) {
   const b = birthYear(d?.birth_date);
-  const dd = d?.death_date;
+  const dd = birthYear(d?.death_date);
   if (b || dd) return `${b || '?'} – ${dd || (p.is_living === false ? '?' : '')}`.trim();
   if (p.is_living === false) return 'Deceased';
   return '';

@@ -16,7 +16,7 @@ const DETAIL_FIELDS = ['visibility', 'birth_date', 'birth_place', 'death_date', 
 const LABELS = {
   title: 'Title', given_name: 'First name(s)', surname: 'Surname', other_names: 'Other names', gender: 'Gender',
   is_living: 'Living', visibility: 'Who can see details', birth_date: 'Birth year', birth_place: 'Birth place',
-  death_date: 'Death date', death_place: 'Death place', profession: 'Profession', notes: 'Notes', sources: 'Sources',
+  death_date: 'Death year', death_place: 'Death place', profession: 'Profession', notes: 'Notes', sources: 'Sources',
   uncertainty: "What's uncertain",
 };
 export { LABELS };
@@ -74,7 +74,7 @@ export function openPersonForm({ mode, person = null, relation = null }) {
     h('fieldset', h('legend', 'Life'),
       field('Living?', select('is_living', LIVING, livingVal)),
       h('div.row2', field('Birth year', textInput('birth_date', birthYear(d.birth_date), { placeholder: 'e.g. 1952 or c. 1890', inputmode: 'text', maxlength: 12 })), field('Birth place', textInput('birth_place', d.birth_place))),
-      h('div.row2', field('Death date', textInput('death_date', d.death_date)), field('Death place', textInput('death_place', d.death_place))),
+      h('div.row2', field('Death year', textInput('death_date', birthYear(d.death_date), { placeholder: 'e.g. 1987', maxlength: 12 })), field('Death place', textInput('death_place', d.death_place))),
       field('Profession', textInput('profession', d.profession)),
       field('Notes', textArea('notes', d.notes))),
     h('fieldset', h('legend', 'Sources and certainty'),
@@ -106,15 +106,16 @@ export function openPersonForm({ mode, person = null, relation = null }) {
     for (const k of PERSON_FIELDS) newPerson[k] = k === 'is_living' ? (val(k) === '' ? null : val(k) === 'true') : val(k);
     const newDetails = {};
     for (const k of DETAIL_FIELDS) newDetails[k] = val(k);
-    // Year of birth only: keep "1952", "c. 1890" or "1930s".
-    if (newDetails.birth_date) {
-      const y = birthYear(newDetails.birth_date);
+    // Years only: keep "1952", "c. 1890" or "1930s".
+    for (const [k, what] of [['birth_date', 'birth'], ['death_date', 'death']]) {
+      if (!newDetails[k]) continue;
+      const y = birthYear(newDetails[k]);
       if (!y) {
-        toast('Please enter just the year of birth, for example 1952 or c. 1890.', 'error');
-        form.birth_date.focus();
+        toast(`Please enter just the year of ${what}, for example 1952 or c. 1890.`, 'error');
+        form[k].focus();
         return;
       }
-      newDetails.birth_date = y;
+      newDetails[k] = y;
     }
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true;
