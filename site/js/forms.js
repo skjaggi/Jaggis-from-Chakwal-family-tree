@@ -1,9 +1,34 @@
 // Forms for suggesting changes: add or edit a person, photo, links.
-import { store, submitChange, uploadPendingPhoto } from './data.js';
+import { store, submitChange, uploadPendingPhoto, personHistory } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint, birthYear } from './model.js';
-import { h, modal, toast, field, select, confirmDialog } from './ui.js';
+import { h, clear, modal, toast, field, select, confirmDialog } from './ui.js';
 import { photoEditor } from './photo-editor.js';
+
+// "Added and updated by": who added this person and who changed them since,
+// filled in from approved changes (not editable). Calls onShown when there is
+// something to show.
+export function historyList(id, onShown = () => {}) {
+  const box = h('div.person-history');
+  if (!id || !store.signedIn || store.preview) return box;
+  personHistory(id).then((rows) => {
+    if (!rows) return;
+    const day = (iso) => new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    const what = (r) => {
+      if (r.kind === 'add_person') return 'Added';
+      if (r.kind === 'set_photo') return 'Photo added';
+      if (r.kind === 'remove_photo') return 'Photo removed';
+      const fields = (r.summary || '').split(': ')[1];
+      return fields ? `Updated (${fields})` : 'Updated';
+    };
+    const lines = rows.filter((r) => ['add_person', 'edit_person', 'set_photo', 'remove_photo'].includes(r.kind))
+      .map((r) => h('li', `${what(r)} by ${r.by_name} on ${day(r.at)}`));
+    if (!rows.some((r) => r.kind === 'add_person')) lines.unshift(h('li.muted', 'From the original family tree documents'));
+    clear(box, h('h4', 'Added and updated by'), h('ul', lines), h('p.form-note', 'Filled in automatically when changes are approved.'));
+    onShown();
+  }).catch(() => {});
+  return box;
+}
 
 const GENDERS = [['unknown', 'Not recorded'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
 const LIVING = [['', 'Not sure'], ['true', 'Living'], ['false', 'Deceased']];
@@ -80,6 +105,7 @@ export function openPersonForm({ mode, person = null, relation = null }) {
       field('Notes', textArea('notes', d.notes))),
     h('fieldset', h('legend', 'Sources and certainty'),
       field('Sources', textArea('sources', d.sources, 2), 'Where this information came from: a person, a document, a record'),
+      mode === 'edit' ? historyList(person?.id) : null,
       field("What's uncertain", textArea('uncertainty', d.uncertainty, 2), 'e.g. "Birth year is approximate"')),
     h('fieldset', h('legend', 'Privacy'),
       field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people default to branch only.')),

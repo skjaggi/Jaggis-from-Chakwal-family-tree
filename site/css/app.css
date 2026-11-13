@@ -469,3 +469,4 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .person-history ul { margin: 6px 0 0; padding-left: 18px; }
 .person-history li { margin: 2px 0; }
 .person-history h4 { margin: 10px 0 0; font-size: 0.85rem; color: var(--ink); }
+.person-history .form-note { margin-top: 2px; }

@@ -1,10 +1,10 @@
 // The person card that slides in when someone is tapped.
-import { store, listRequests, personHistory } from './data.js';
+import { store, listRequests } from './data.js';
 import { describe } from './admin.js';
 import { config } from './config.js';
 import { fullName, shortName, KIND_LABEL, relationHint, birthYear } from './model.js';
 import { h, clear, initials } from './ui.js';
-import { openPersonForm, openPhotoForm, removePhoto, openLinkForm, requestRemoveLink, requestDelete } from './forms.js';
+import { historyList, openPersonForm, openPhotoForm, removePhoto, openLinkForm, requestRemoveLink, requestDelete } from './forms.js';
 
 export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn }) {
   const fam = store.fam;
@@ -58,30 +58,11 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
     }).catch(() => {});
   }
 
-  // Who added this person and who updated them, with dates.
   // Sources: what was written about where the information came from, followed by
   // who added this person and who updated them.
-  const historyList = h('div.person-history');
   const sourcesBox = h('details.sources', { hidden: !d?.sources, open: true },
-    h('summary', 'Sources'), d?.sources ? h('p', d.sources) : null, historyList);
-  if (store.signedIn && !store.preview) {
-    personHistory(id).then((rows) => {
-      if (!rows) return;
-      const day = (iso) => new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-      const what = (r) => {
-        if (r.kind === 'add_person') return 'Added';
-        if (r.kind === 'set_photo') return 'Photo added';
-        if (r.kind === 'remove_photo') return 'Photo removed';
-        const fields = (r.summary || '').split(': ')[1];
-        return fields ? `Updated (${fields})` : 'Updated';
-      };
-      const lines = rows.filter((r) => ['add_person', 'edit_person', 'set_photo', 'remove_photo'].includes(r.kind))
-        .map((r) => h('li', `${what(r)} by ${r.by_name} on ${day(r.at)}`));
-      if (!rows.some((r) => r.kind === 'add_person')) lines.unshift(h('li.muted', 'From the original family tree documents'));
-      clear(historyList, h('h4', 'Added and updated by'), h('ul', lines));
-      sourcesBox.hidden = false;
-    }).catch(() => {});
-  }
+    h('summary', 'Sources'), d?.sources ? h('p', d.sources) : null,
+    historyList(id, () => { sourcesBox.hidden = false; }));
 
   const status = p.is_living === false ? 'Deceased' : p.is_living === true ? 'Living' : null;
   const pl = fam.primaryParentLink(id);
