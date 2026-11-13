@@ -4,6 +4,7 @@ import { store, canManage } from './data.js';
 import { shortName, lifeLine } from './model.js';
 import { initials } from './ui.js';
 import { branchesOf } from './branches.js';
+import { HoverCard } from './hovercard.js';
 
 const D3_ESM = 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 let d3;
@@ -59,7 +60,10 @@ export class TreeView {
     const defs = this.svg.append('defs');
     for (const r of [17, 21]) defs.append('clipPath').attr('id', `avatar-clip-${r}`).append('circle').attr('r', r);
     this.g = this.svg.append('g');
-    this.zoom = d3.zoom().scaleExtent([0.15, 2.5]).on('zoom', (e) => this.g.attr('transform', e.transform));
+    this.hover = new HoverCard(this.container);
+    this.zoom = d3.zoom().scaleExtent([0.15, 2.5])
+      .on('start', () => this.hover.conceal())
+      .on('zoom', (e) => this.g.attr('transform', e.transform));
     this.svg.call(this.zoom).on('dblclick.zoom', null);
     // A tap on empty space closes the person's card; a drag to pan does not.
     let down = null;
@@ -67,6 +71,7 @@ export class TreeView {
     this.svg.on('click.background', (e) => {
       const moved = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6;
       if (moved || e.target.closest('g.node, g.toggle, g.edit-btn')) return;
+      this.hover.hide();
       this.onBackground?.();
     });
   }
@@ -282,13 +287,19 @@ export class TreeView {
       .classed('female', p.gender === 'female').classed('male', p.gender === 'male')
       .classed('selected', p.id === this.selectedId)
       .attr('tabindex', 0)
-      .on('click', () => this.onSelect(p.id))
+      .on('click', () => {
+        // A long press shows the balloon; don't also open the card.
+        if (this.hover.longPressed) { this.hover.longPressed = false; return; }
+        this.hover.hide();
+        this.onSelect(p.id);
+      })
       .on('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           this.onSelect(p.id);
         }
       });
+    this.hover.bind(el.node(), p.id);
     el.append('rect').attr('class', 'card').attr('x', -w / 2).attr('y', -h / 2).attr('width', w).attr('height', h).attr('rx', 10);
     el.append('path').attr('class', 'card-top').attr('d', `M${-w / 2 + 1.5},${-h / 2 + 10} a8.5,8.5 0 0 1 8.5,-8.5 h${w - 20} a8.5,8.5 0 0 1 8.5,8.5`);
     const ax = -w / 2 + r + 7;

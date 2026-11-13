@@ -176,3 +176,53 @@ export function relationHint(fam, id) {
   if (sp) return `spouse of ${shortName(sp.person)}`;
   return '';
 }
+
+// How person `other` is related to `me`, in words ("your first cousin",
+// "wife of your nephew"), or '' if no link is found. Follows all parent
+// links (birth, adoptive, step), so it is a guide, not a legal record.
+export function kinship(fam, me, other) {
+  if (!me || !other || !fam.byId.has(me) || !fam.byId.has(other)) return '';
+  if (me === other) return 'This is you';
+  const g = (id, m, f, n) => { const s = fam.byId.get(id)?.gender; return s === 'male' ? m : s === 'female' ? f : n; };
+  const ups = (start) => {
+    const dist = new Map([[start, 0]]);
+    const queue = [start];
+    while (queue.length) {
+      const id = queue.shift();
+      for (const { person: p } of fam.parents(id)) if (!dist.has(p.id)) { dist.set(p.id, dist.get(id) + 1); queue.push(p.id); }
+    }
+    return dist;
+  };
+  const blood = (a, b) => {
+    const da = ups(a);
+    const db = ups(b);
+    let best = null;
+    for (const [id, x] of da) if (db.has(id)) { const y = db.get(id); if (!best || x + y < best[0] + best[1]) best = [x, y]; }
+    if (!best) return '';
+    const [x, y] = best;
+    const greats = (n) => 'great-'.repeat(Math.max(0, n));
+    if (x === 0) return y === 1 ? g(b, 'son', 'daughter', 'child') : `${greats(y - 2)}grand${g(b, 'son', 'daughter', 'child')}`;
+    if (y === 0) return x === 1 ? g(b, 'father', 'mother', 'parent') : `${greats(x - 2)}grand${g(b, 'father', 'mother', 'parent')}`;
+    if (x === 1 && y === 1) return g(b, 'brother', 'sister', 'sibling');
+    if (x === 1) return `${y > 2 ? `${greats(y - 3)}grand-` : ''}${g(b, 'nephew', 'niece', 'nephew or niece')}`;
+    if (y === 1) return `${x > 2 ? `${greats(x - 3)}grand-` : ''}${g(b, 'uncle', 'aunt', 'uncle or aunt')}`;
+    const degree = Math.min(x, y) - 1;
+    const removed = Math.abs(x - y);
+    const ord = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'][degree - 1] || `${degree}th`;
+    return `${ord} cousin${removed ? ` ${removed === 1 ? 'once' : removed === 2 ? 'twice' : `${removed} times`} removed` : ''}`;
+  };
+  const direct = blood(me, other);
+  if (direct) return `Your ${direct}`;
+  for (const { person: s } of fam.spouses(me)) {
+    if (s.id === other) return `Your ${g(other, 'husband', 'wife', 'spouse')}`;
+  }
+  for (const { person: s } of fam.spouses(other)) {
+    const r = blood(me, s.id);
+    if (r) return `${g(other, 'Husband', 'Wife', 'Spouse')} of your ${r}`;
+  }
+  for (const { person: s } of fam.spouses(me)) {
+    const r = blood(s.id, other);
+    if (r) return `Your ${g(s.id, 'husband', 'wife', 'spouse')}'s ${r}`;
+  }
+  return '';
+}
