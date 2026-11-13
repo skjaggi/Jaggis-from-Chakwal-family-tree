@@ -263,10 +263,11 @@ async function publicVisitorsSection() {
   const box = h('section.dash-card.wide', h('h2', 'Public visitors'), h('p.muted', 'Loading…'));
   let days = 30;
   const load = () => visitorStats(days).then((d) => {
-    const stats = (x) => (x?.stats || []).map((s) => ({ label: s.name || '(unknown)', count: s.count || 0, raw: s }));
+    const stats = (x) => (x?.stats || []).filter((s) => s.count > 0).map((s) => ({ label: s.name || s.id || 'Other', count: s.count, raw: s }));
     const totalDays = d.total?.stats || [];
-    // Visits by hour of day, moved from UTC to this computer's time zone.
-    const shift = -new Date().getTimezoneOffset() / 60;
+    // Visits by hour of day. GoatCounter already gives these in the time zone
+    // set in its own settings (picked from the browser when the account was made).
+    const shift = 0;
     const hours = Array(24).fill(0);
     for (const day of totalDays) (day.hourly || []).forEach((n, hr) => { hours[(((hr + shift) % 24) + 24) % 24] += n; });
     const hourRows = hours.map((n, hr) => ({ label: `${String(hr).padStart(2, '0')}:00`, count: n }));
@@ -294,7 +295,7 @@ async function publicVisitorsSection() {
         tile(total ? `${String(busiest).padStart(2, '0')}:00` : '—', 'Busiest hour', 'your time')),
       h('div.dash-grid',
         h('div', h('h3', 'Where visitors are'), places.length ? barChart(places.slice(0, 12), 'Where visitors are', { unit }) : h('p.muted', 'No visitors yet.')),
-        h('div', h('h3', 'How they found the site'), refs.length ? barChart(refs.slice(0, 10), 'How they found the site', { unit }) : h('p.muted', 'No visitors yet.')),
+        h('div', h('h3', 'How they found the site'), refs.length ? barChart(refs.slice(0, 10), 'How they found the site', { unit }) : h('p.muted', 'Nothing yet. Visitors from Google, WhatsApp and other sites will show here.')),
         h('div', h('h3', 'Pages visited'), pages.length ? barChart(pages.slice(0, 12), 'Pages visited', { unit }) : h('p.muted', 'No visitors yet.')),
         h('div', h('h3', timeRows === perDay ? 'Visitors per day' : 'Visitors per week'), timeRows.length ? barChart(timeRows, 'Visitors over time', { unit }) : h('p.muted', 'No visitors yet.')),
         h('div', h('h3', 'Time of day'), total ? barChart(hourRows, 'Time of day', { unit }) : h('p.muted', 'No visitors yet.')),
