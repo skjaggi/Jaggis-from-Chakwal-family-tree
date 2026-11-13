@@ -30,6 +30,44 @@ select pg_temp.expect((select count(*) from public.person_details) = (select cou
 select pg_temp.expect(not exists (select 1 from public.person_details where person_id = pg_temp.pid('Sunil Kumar')), 'anon cannot read living person details');
 rollback;
 
+-- Member invites a relative
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select public.invite_relative('Cousin@Example.com', 'Cousin', pg_temp.pid('Om Parkash'));
+select pg_temp.expect((select role from public.invites where email = 'cousin@example.com') = 'member', 'member can invite a relative, as a member');
+select pg_temp.expect((select invited_by from public.invites where email = 'cousin@example.com') = '00000000-0000-0000-0000-00000000000b', 'invite records who invited');
+select pg_temp.expect((select count(*) from public.invites) = 1, 'member sees only invites they sent');
+do $$ begin
+  begin
+    perform public.invite_relative('cousin@example.com');
+    raise exception 'FAILED: duplicate invite allowed';
+  exception when others then
+    if sqlerrm like 'FAILED%' then raise; end if;
+    raise notice 'ok: duplicate invite refused (%)', sqlerrm;
+  end;
+  begin
+    insert into public.invites (email, role) values ('sneaky@example.com', 'admin');
+    raise exception 'FAILED: member wrote invites directly';
+  exception when others then
+    if sqlerrm like 'FAILED%' then raise; end if;
+    raise notice 'ok: member cannot write invites directly';
+  end;
+end $$;
+rollback;
+begin;
+set local role anon;
+do $$ begin
+  begin
+    perform public.invite_relative('x@example.com');
+    raise exception 'FAILED: anon invited';
+  exception when others then
+    if sqlerrm like 'FAILED%' then raise; end if;
+    raise notice 'ok: visitors cannot invite';
+  end;
+end $$;
+rollback;
+
 -- Member in Tapashi Ram's branch
 begin;
 set local role authenticated;

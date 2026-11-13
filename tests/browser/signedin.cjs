@@ -43,6 +43,21 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.fill('dialog .picker input', 'gokal'); await pg.click('dialog .pick-list button');
     await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(300);
     console.log(role, 'link:', await pg.evaluate(() => window.__db.change_requests.at(-1).summary));
+    // Invite a relative (works at once, no approval)
+    await pg.goto('http://localhost:8765/#/invite'); await pg.waitForSelector('.invite-form');
+    await pg.fill('.invite-form input[name=email]', 'Cousin@Example.com');
+    await pg.fill('.invite-form input[name=display_name]', 'Neha Jaggi');
+    await pg.fill('.invite-form .picker input', 'Om Parkash'); await pg.locator('.invite-form .pick-list button').first().click();
+    await pg.locator('.invite-form button[type=submit]').click(); await pg.waitForSelector('.send-invite');
+    console.log(role, 'invite list:', (await pg.locator('#page section').innerText()).replace(/\n/g, ' | '), '| invites:', await pg.evaluate(() => JSON.stringify(window.__db.invites.map(i => [i.email, i.role, i.invited_by, !!i.person_id]))));
+    console.log(role, 'mailto ok:', /^mailto:cousin@example\.com\?subject=/.test(await pg.locator('.send-invite a').first().getAttribute('href')));
+    const wa = decodeURIComponent(await pg.locator('.send-invite a', { hasText: 'WhatsApp' }).first().getAttribute('href'));
+    console.log(role, 'whatsapp text has site + email:', wa.includes('http://localhost:8765/') && wa.includes('cousin@example.com'), '| greets:', wa.includes('Dear Neha,'));
+    await pg.fill('.invite-form input[name=email]', 'cousin@example.com');
+    await pg.fill('.invite-form .picker input', 'Om Parkash'); await pg.locator('.invite-form .pick-list button').first().click();
+    await pg.locator('.invite-form button[type=submit]').click(); await pg.waitForTimeout(300);
+    console.log(role, 'duplicate toast:', await pg.locator('#toast').innerText());
+    if (role === 'member') await pg.screenshot({ path: `${SHOTS}member-invite.png` });
     if (role === 'member') {
       await pg.goto('http://localhost:8765/#/mine'); await pg.waitForSelector('.history');
       console.log(role, 'mine:', (await pg.locator('#page').innerText()).replace(/\n/g, ' | ').slice(0, 300));

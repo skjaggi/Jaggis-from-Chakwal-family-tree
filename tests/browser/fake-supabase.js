@@ -47,6 +47,11 @@ export function createClient() {
     },
     from: t => new Q(t),
     rpc: async (name, args) => {
+      if (name === 'invite_relative') {
+        if (db.invites.some(i => i.email === args.email)) return { data: null, error: { message: `${args.email} has already been invited` } };
+        db.invites.push({ email: args.email, display_name: args.display_name, person_id: args.person_id, role: 'member', invited_by: uid, created_at: new Date().toISOString() });
+        return { data: null, error: null };
+      }
       const r = db.change_requests.find(x => x.id === args.request_id);
       if (name === 'approve_change_request') {
         if (r.kind === 'add_person') {

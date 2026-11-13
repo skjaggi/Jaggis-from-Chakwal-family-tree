@@ -9,6 +9,7 @@ import { fullName } from './model.js';
 import { h, clear, toast, formatWhen, field, select, confirmDialog } from './ui.js';
 import { LABELS, personPicker } from './forms.js';
 import { downloadGedcom } from './gedcom.js';
+import { sendButtons } from './invite.js';
 
 const KIND_TITLE = {
   add_person: 'Add a person', edit_person: 'Edit details', add_link: 'Add a relationship',
@@ -149,6 +150,7 @@ export async function renderAdmin(container) {
   } catch (e) {
     return clear(container, h('h1', 'Family members and invites'), h('p.notice', e.message));
   }
+  const names = new Map(profiles.map((u) => [u.id, u.display_name || u.email]));
 
   let chosen = null;
   const chosenLabel = h('span.muted.small', 'Not linked yet');
@@ -169,7 +171,7 @@ export async function renderAdmin(container) {
     if (!email.includes('@')) return toast('Please enter an email address.', 'error');
     try {
       await addInvite({ email, display_name: form.display_name.value.trim(), person_id: chosen?.id, role: form.role.value });
-      toast(`Invite added. Tell them to open the site and sign in with ${email}.`, 'ok');
+      toast(`Invite added. Use the Email or WhatsApp button next to ${email} to send them the invitation.`, 'ok');
       renderAdmin(container);
     } catch (err) {
       toast(err.message, 'error');
@@ -203,12 +205,13 @@ export async function renderAdmin(container) {
   clear(container,
     h('h1', 'Family members and invites'),
     h('section', h('h2', 'Invite someone'),
-      h('p.muted', 'Only invited emails can sign in. After adding them here, send them the site link; they sign in with their email and get a sign-in link.'),
+      h('p.muted', 'Only invited emails can sign in. After adding them here, use the Email or WhatsApp button to send the invitation. Family members can also invite relatives from Invite in the menu; you will see who invited whom below, and can remove any invite.'),
       form),
     h('section', h('h2', `Invites (${invites.length})`),
       invites.length ? h('ul.history', invites.map((i) => h('li',
         h('strong', i.email), i.display_name ? ` (${i.display_name})` : '',
-        h('span.muted', ` · ${i.person_id ? personLabel(i.person_id) : 'not linked'} · ${i.role} · ${i.accepted_at ? 'signed in ' + formatWhen(i.accepted_at) : 'not signed in yet'}`),
+        h('span.muted', ` · ${i.person_id ? personLabel(i.person_id) : 'not linked'} · ${i.role} · ${i.accepted_at ? 'signed in ' + formatWhen(i.accepted_at) : 'not signed in yet'}${i.invited_by && i.invited_by !== store.session.user.id && names.get(i.invited_by) ? ` · invited by ${names.get(i.invited_by)}` : ''}`),
+        i.accepted_at ? null : sendButtons(i),
         h('button.btn.small.ghost', { type: 'button', onclick: async () => {
           if (!(await confirmDialog(`Remove the invite for ${i.email}? People who already signed in keep their login.`, 'Remove'))) return;
           await removeInvite(i.email).catch((e) => toast(e.message, 'error'));

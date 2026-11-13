@@ -292,3 +292,9 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
   .wide-only { display: none; }
   .site-title { white-space: normal; line-height: 1.15; }
 }
+
+/* Invite a relative */
+.notice.ok { background: var(--ok-bg); color: var(--ok-ink); }
+.notice p { margin: 0 0 8px; }
+.send-invite { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.send-invite .btn { text-decoration: none; }

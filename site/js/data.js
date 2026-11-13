@@ -262,6 +262,18 @@ export async function addInvite({ email, display_name, person_id, role }) {
   if (error) throw error;
 }
 
+// Any signed-in member can invite a relative (as a member). Works at once.
+export async function inviteRelative({ email, display_name, person_id }) {
+  const { error } = await store.sb.rpc('invite_relative', { email, display_name: display_name || null, person_id: person_id || null });
+  if (error) throw error;
+}
+
+export async function listMyInvites() {
+  const { data, error } = await store.sb.from('invites').select('*').eq('invited_by', store.session.user.id).order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
 export async function removeInvite(email) {
   const { error } = await store.sb.from('invites').delete().eq('email', email);
   if (error) throw error;

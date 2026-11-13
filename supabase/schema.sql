@@ -201,6 +201,33 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Any signed-in family member can invite a relative, always as a member.
+-- The invite works at once; the admin sees who invited whom and can remove it.
+create or replace function public.invite_relative(email text, display_name text default null, person_id uuid default null)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  e text := lower(trim(email));
+begin
+  if not exists (select 1 from profiles where id = auth.uid()) then
+    raise exception 'Please sign in first';
+  end if;
+  if e is null or e !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then
+    raise exception 'Please enter a valid email address';
+  end if;
+  if exists (select 1 from invites i where i.email = e) then
+    raise exception '% has already been invited', e;
+  end if;
+  if person_id is not null and not exists (select 1 from people p where p.id = person_id) then
+    raise exception 'That person is not in the tree';
+  end if;
+  insert into invites (email, display_name, role, person_id, invited_by)
+  values (e, nullif(trim(display_name), ''), 'member', person_id, auth.uid());
+end $$;
+
+revoke execute on function public.invite_relative(text, text, uuid) from public, anon;
+grant execute on function public.invite_relative(text, text, uuid) to authenticated;
+
 -- ---------------------------------------------------------------- applying changes
 
 create or replace function public._text(j jsonb, k text) returns text
@@ -458,6 +485,9 @@ create policy "admin deletes profiles" on public.profiles for delete to authenti
 drop policy if exists "admin manages invites" on public.invites;
 create policy "admin manages invites" on public.invites for all to authenticated
   using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "members read invites they sent" on public.invites;
+create policy "members read invites they sent" on public.invites for select to authenticated
+  using (invited_by = auth.uid());
 
 drop policy if exists "members submit changes" on public.change_requests;
 create policy "members submit changes" on public.change_requests for insert to authenticated

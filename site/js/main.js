@@ -7,19 +7,20 @@ import { TreeView } from './tree.js';
 import { renderOutline } from './outline.js';
 import { renderPanel } from './panel.js';
 import { renderReview, renderMine, renderAdmin } from './admin.js';
+import { renderInvite } from './invite.js';
 import { downloadGedcom } from './gedcom.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { view: 'tree', root: null, selected: null };
 let tree;
 
-// Routes: #/tree/<rootId>, #/outline/<rootId>, #/review, #/mine, #/members; ?p=<personId>
+// Routes: #/tree/<rootId>, #/outline/<rootId>, #/review, #/mine, #/members, #/invite; ?p=<personId>
 function parseHash() {
   let raw = location.hash.replace(/^#\/?/, '');
   if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
-  state.view = ['tree', 'outline', 'review', 'mine', 'members'].includes(view) ? view : 'tree';
+  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite'].includes(view) ? view : 'tree';
   state.root = root && store.fam.byId.has(root) ? root : store.fam.defaultRootId;
   const p = new URLSearchParams(query).get('p');
   state.selected = p && store.fam.byId.has(p) ? p : null;
@@ -66,6 +67,7 @@ async function route() {
     if (state.view === 'review') return store.isAdmin ? renderReview(page) : clear(page, h('p', 'Only the admin can review changes.'));
     if (state.view === 'members') return store.isAdmin ? renderAdmin(page) : clear(page, h('p', 'Only the admin can manage members.'));
     if (state.view === 'mine') return renderMine(page);
+    if (state.view === 'invite') return renderInvite(page);
     return;
   }
 
@@ -247,6 +249,7 @@ async function renderHeader() {
     h('a', { href: `#/tree/${state.root || store.fam.defaultRootId}`, 'data-nav': 'tree' }, 'Tree'),
     h('a', { href: `#/outline/${state.root || store.fam.defaultRootId}`, 'data-nav': 'outline' }, 'List'),
     signed ? h('a', { href: '#/mine', 'data-nav': 'mine' }, 'My changes') : null,
+    signed ? h('a', { href: '#/invite', 'data-nav': 'invite' }, 'Invite') : null,
     store.isAdmin ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
     h('a', { href: 'help.html' }, 'Help'),
