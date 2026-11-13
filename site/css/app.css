@@ -238,6 +238,10 @@ g.edit-btn:focus { outline: none; }
 g.toggle circle { fill: var(--surface); stroke: var(--bark); stroke-width: 1.4; }
 g.toggle text { font-size: 11px !important; font-weight: 700; fill: var(--bark) !important; }
 g.toggle:hover circle { fill: var(--surface-2); }
+g.toggle.pill { cursor: pointer; }
+g.toggle.pill rect { fill: var(--accent); stroke: none; }
+g.toggle.pill text { fill: var(--accent-ink) !important; font-size: 12px !important; }
+g.toggle.pill:hover rect { filter: brightness(1.12); }
 
 /* outline */
 .outline-wrap { position: absolute; inset: 0; overflow: auto; padding: 8px 12px 80px; }

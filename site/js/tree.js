@@ -20,6 +20,7 @@ const JOIN = 30; // gap between a person and their spouse's card
 // in this browser).
 const RING = 22; // gap between a person and a spouse shown below them
 const STACK_GAP = 16; // gap between cards stacked in a column
+const PILL = { w: 46, h: 26, gap: 8 }; // child-count pill beside a stacked card
 // How wide the tree spreads: 'wide' puts all children side by side; 'stack'
 // puts children with nothing showing below them in a column; 'compact' also
 // puts spouses below the person. Try with ?layout=wide|stack|compact.
@@ -169,6 +170,9 @@ export class TreeView {
       n.spouses = S ? fam.spouses(n.data.id) : [];
       const k = n.spouses.length;
       n.w = below ? W : W + k * (S?.w + JOIN || 0);
+      // Stacked cards show their child count as a pill to the right, so make room.
+      n.pill = below && n.data.stackOf != null && n.data.hasKids;
+      if (n.pill) n.w += PILL.gap + PILL.w;
       n.h = below && k ? H + k * (S.h + RING) : H;
     }
     d3.tree().nodeSize([1, 1])
@@ -260,6 +264,18 @@ export class TreeView {
         this.card(u, sp.person, j.cx - d.x, { y: j.cy - d.y, w: S.w, h: S.h, r: S.r, spouse: true,
           line2: sp.union.status && sp.union.status !== 'married' ? sp.union.status : '', branch: br.of.get(sp.person.id)?.slot });
       });
+      if (d.pill) {
+        // In a stacked column there is no room below, so the count sits to the right.
+        const px = off + W / 2 + PILL.gap + PILL.w / 2;
+        const pill = u.append('g').attr('class', 'toggle pill').attr('transform', `translate(${px},0)`)
+          .attr('role', 'button').attr('aria-label', `Show ${d.data.kidCount} children`)
+          .on('click', (e) => { e.stopPropagation(); this.expanded.add(p.id); this.render(); });
+        pill.append('title').text(`Show ${d.data.kidCount} ${d.data.kidCount === 1 ? 'child' : 'children'}`);
+        pill.append('path').attr('class', 'stem').attr('d', `M${-PILL.w / 2 - PILL.gap},0H${-PILL.w / 2}`);
+        pill.append('rect').attr('x', -PILL.w / 2).attr('y', -PILL.h / 2).attr('width', PILL.w).attr('height', PILL.h).attr('rx', PILL.h / 2);
+        pill.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').text(`${d.data.kidCount} ▾`);
+        return;
+      }
       // Show or hide children: under the couple when there is one.
       const side = !below && d.joins.length;
       const tx = side ? d.joins[0].x - d.x : off;
