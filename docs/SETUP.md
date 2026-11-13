@@ -71,7 +71,7 @@ Family members sign in with their email: they type it in, get an email, and tap 
    <p>Or type this code on the sign-in screen: <strong>{{ .Token }}</strong></p>
    ```
 
-   The code works on any phone or computer. The link only works if it opens in the same browser that asked for it, which often isn't the case when a phone's mail app opens links in its own browser.
+   With the code, people sign in right in the browser they are using. A link tapped in a phone's mail app often opens inside the mail app's own browser, so they end up signed in there but not in Safari or Chrome. Links are also single-use and only the newest one works.
 
 4. **Before inviting many people**, set up your own email sender. Supabase's built-in sender only sends a handful of emails per hour, which is fine for testing but not for the whole family at Thanksgiving.
    - Free option: create an account at <https://resend.com> (free tier: 3,000 emails/month), add and verify `sjaggi.com` as a sending domain, and create an API key.
