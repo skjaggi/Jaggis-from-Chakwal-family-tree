@@ -54,11 +54,22 @@ async function setup(ctx) {
     console.log(name, 'selected node box', JSON.stringify(bb), 'panel', JSON.stringify(sheet), 'scrollY', await pg.evaluate(() => scrollY));
     await pg.screenshot({ path: `${SHOTS}${name}-4-uncertain.png` });
     // GEDCOM
-    // Export is hidden on small phones; trigger it directly there.
-    const [dl] = await Promise.all([pg.waitForEvent('download'), pg.evaluate(() => [...document.querySelectorAll('nav button')].find(b => b.textContent === 'Export').click())]);
+    await pg.goto('http://localhost:8765/#/export'); await pg.waitForSelector('.export-choices');
+    const [dl] = await Promise.all([pg.waitForEvent('download'), pg.locator('button', { hasText: 'Download .ged file' }).click()]);
     const ged = fs.readFileSync(await dl.path(), 'utf8');
     console.log(name, 'gedcom INDI', (ged.match(/ INDI/g) || []).length, 'FAM', (ged.match(/ FAM\r/g) || []).length, 'CHIL', (ged.match(/CHIL/g) || []).length);
     if (name === 'desktop') fs.writeFileSync('' + SHOTS + 'test.ged', ged);
+    // PDF family book: what the print dialog would save
+    await pg.evaluate(() => { window.print = () => { window.__printed = true; }; });
+    await pg.locator('button', { hasText: 'Make the PDF' }).click();
+    await pg.waitForFunction(() => window.__printed === true);
+    console.log(name, 'book:', await pg.locator('.bk-tree li').count(), 'tree rows,', await pg.locator('.bk-person').count(), 'people cards');
+    if (name === 'desktop') {
+      await pg.emulateMedia({ media: 'print' });
+      await pg.pdf({ path: SHOTS + 'family-book.pdf', format: 'A4', printBackground: true, preferCSSPageSize: true });
+      await pg.emulateMedia({ media: 'screen' });
+      console.log(name, 'pdf bytes:', fs.statSync(SHOTS + 'family-book.pdf').size);
+    }
     await ctx.close();
   }
   console.log('ERRORS:', errors.length ? errors : 'none');

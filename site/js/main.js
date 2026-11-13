@@ -9,6 +9,7 @@ import { renderPanel } from './panel.js';
 import { renderReview, renderMine, renderAdmin } from './admin.js';
 import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
+import { renderExport } from './export.js';
 import { downloadGedcom } from './gedcom.js';
 
 const $ = (id) => document.getElementById(id);
@@ -21,7 +22,7 @@ function parseHash() {
   if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
-  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard'].includes(view) ? view : 'tree';
+  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export'].includes(view) ? view : 'tree';
   state.root = root && store.fam.byId.has(root) ? root : store.fam.defaultRootId;
   const p = new URLSearchParams(query).get('p');
   state.selected = p && store.fam.byId.has(p) ? p : null;
@@ -62,6 +63,7 @@ async function route() {
     document.body.classList.remove('panel-open');
     const page = $('page');
     if (state.view === 'dashboard') return renderDashboard(page);
+    if (state.view === 'export') return renderExport(page);
     if (!store.signedIn) {
       clear(page, h('h1', 'Please sign in'), h('p', 'This page is for family members.'), h('button.btn.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
       return;
@@ -256,7 +258,7 @@ async function renderHeader() {
     store.isAdmin ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
     h('a', { href: 'help.html' }, 'Help'),
-    h('button.linkish.wide-only', { type: 'button', onclick: downloadGedcom, title: 'Download the tree as a GEDCOM file' }, 'Export'),
+    h('a', { href: '#/export', 'data-nav': 'export', title: 'Download the tree as a PDF or a GEDCOM file' }, 'Export'),
     signed
       ? h('button.linkish', { type: 'button', onclick: async () => {
         await signOut();

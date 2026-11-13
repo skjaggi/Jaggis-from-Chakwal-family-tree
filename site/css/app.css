@@ -402,3 +402,55 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .q-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .q-actions input { flex: 1; min-width: 160px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
 .dash-wide { margin-top: 12px; }
+
+/* Export */
+.export-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 8px 0 12px; }
+.export-choices .dash-card > h2 { background: var(--p-mint); }
+.export-choices .dash-card + .dash-card > h2 { background: var(--p-butter); }
+.book-preview:empty { display: none; }
+.book { background: #fff; color: #1e2a24; padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 16px; font-size: 13px; }
+.book h2 { font-size: 1.3rem; color: #17706b; border-bottom: 2px solid #c49a3a; padding-bottom: 4px; margin: 0 0 12px; }
+.book h3 { color: #6e5236; text-transform: none; letter-spacing: 0; font-size: 1rem; background: #faf1c8; padding: 4px 8px; border-radius: 6px; }
+.bk-cover { text-align: center; padding: 40px 0 30px; }
+.bk-cover h1 { font-size: 2.2rem; color: #17706b; margin: 12px 0 4px; }
+.bk-sub { font-size: 1.1rem; margin: 0 0 18px; }
+.bk-meta { color: #5b6a61; margin: 4px 0; }
+.bk-mark { width: 220px; height: 150px; margin: 0 auto; background: no-repeat center / contain; opacity: 0.55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 420' fill='none' stroke='%2317706b' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 190Q40 150 80 130Q80 90 130 85Q150 50 200 60Q230 30 280 45Q320 25 360 48Q410 35 435 70Q485 70 495 110Q545 120 535 160Q560 195 520 210Q500 235 460 225Q430 245 390 230Q350 250 310 232Q270 250 230 232Q190 248 160 228Q120 240 100 220Q55 225 60 190Z'/%3E%3Cpath d='M288 232C283 290 272 340 252 392M322 232C327 290 338 340 360 392M130 222C127 280 134 340 130 392M200 238C197 300 204 350 200 392M415 232C418 290 410 350 416 392M482 222C485 285 478 345 482 392M40 395Q300 383 560 395' stroke='%23c49a3a'/%3E%3C/svg%3E"); }
+.bk-tree, .bk-tree ul { list-style: none; margin: 0; padding-left: 18px; }
+.bk-tree { padding-left: 0; }
+.bk-tree li { position: relative; padding: 1px 0 1px 12px; border-left: 1px solid #cdd9cb; }
+.bk-tree .bk-name { break-inside: avoid; }
+.bk-tree li::before { content: ""; position: absolute; left: 0; top: 0.75em; width: 8px; border-top: 1px solid #cdd9cb; }
+.bk-tree li[data-branch] > .bk-name { border-bottom: 2px solid var(--branch-0); }
+.bk-tree li[data-branch="1"] > .bk-name { border-bottom-color: #2a78d6; }
+.bk-tree li[data-branch="2"] > .bk-name { border-bottom-color: #eb6834; }
+.bk-tree li[data-branch="3"] > .bk-name { border-bottom-color: #1baf7a; }
+.bk-tree li[data-branch="4"] > .bk-name { border-bottom-color: #eda100; }
+.bk-tree li[data-branch="5"] > .bk-name { border-bottom-color: #e87ba4; }
+.bk-tree li[data-branch="6"] > .bk-name { border-bottom-color: #008300; }
+.bk-tree li[data-branch="7"] > .bk-name { border-bottom-color: #6250d6; }
+.bk-tree li[data-branch="8"] > .bk-name { border-bottom-color: #e34948; }
+.bk-name { font-weight: 650; }
+.bk-years, .bk-spouse { color: #5b6a61; }
+.bk-people { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.bk-person { display: flex; gap: 10px; border: 1px solid #cdd9cb; border-top: 3px solid #c49a3a; border-radius: 8px; padding: 8px 10px; break-inside: avoid; }
+.bk-photo, .bk-initials { width: 52px; height: 52px; border-radius: 50%; flex: none; object-fit: cover; }
+.bk-initials { display: grid; place-items: center; background: #e7eee4; color: #2f6b5a; font-weight: 700; }
+.bk-pname { font-weight: 700; margin-bottom: 2px; }
+.bk-person dl { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; margin: 0; font-size: 12px; }
+.bk-person dt { color: #5b6a61; }
+.bk-person dd { margin: 0; }
+
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  html, body { height: auto !important; overflow: visible !important; display: block !important; background: #fff !important; }
+  body.printing > *:not(main), body.printing main > *:not(#page), body.printing #page > *:not(.book-preview) { display: none !important; }
+  body.printing main, body.printing #page { display: block !important; overflow: visible !important; max-width: none !important; padding: 0 !important; }
+  .book { box-shadow: none; padding: 0; margin: 0; border-radius: 0; }
+  .bk-cover { min-height: 240mm; display: flex; flex-direction: column; justify-content: center; break-after: page; }
+  .bk-dir { break-before: page; }
+  .bk-people { grid-template-columns: 1fr 1fr; }
+  .bk-gen h3 { break-after: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

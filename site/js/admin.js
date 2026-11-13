@@ -228,6 +228,6 @@ export async function renderAdmin(container) {
         } }, 'Remove')))) : h('p.muted', 'No invites yet.')),
     h('section', h('h2', `Members who have signed in (${profiles.length})`), h('ul.members', profiles.map(memberRow))),
     h('section', h('h2', 'Export'),
-      h('p.muted', 'Download the whole tree as a GEDCOM file, the standard format other family tree programs open.'),
-      h('button.btn', { type: 'button', onclick: downloadGedcom }, 'Download GEDCOM')));
+      h('p.muted', 'Download the whole tree as a PDF family book, or as a GEDCOM file for genealogy programs.'),
+      h('a.btn', { href: '#/export' }, 'Open Export')));
 }
