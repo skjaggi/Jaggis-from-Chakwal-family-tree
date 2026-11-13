@@ -17,14 +17,14 @@ const JOIN = 30; // gap between a person and their spouse's card
 // them, or as a smaller card beside them. For trying them out, add
 // ?spouses=side, ?spouses=mini or ?spouses=inside to the address (remembered
 // in this browser).
-const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 140, h: 56, r: 17 } };
+const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 156, h: 56, r: 17 } };
 export function spouseMode() {
   let m = new URLSearchParams(location.search).get('spouses') || new URLSearchParams(location.hash.split('?')[1] || '').get('spouses');
   try {
     if (m && m in SPOUSE) localStorage.setItem('spouses', m);
     else m = localStorage.getItem('spouses');
   } catch { /* storage blocked */ }
-  return m in SPOUSE ? m : 'inside';
+  return m in SPOUSE ? m : 'mini';
 }
 
 export class TreeView {
