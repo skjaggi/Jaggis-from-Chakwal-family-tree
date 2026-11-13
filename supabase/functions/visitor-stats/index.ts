@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
     }
     return reply(200, out);
   } catch (e) {
+    console.error('visitor-stats', String((e as Error).message || e));
     return reply(502, { error: String((e as Error).message || e) });
   }
 });

@@ -306,7 +306,7 @@ async function publicVisitorsSection() {
   }).catch((e) => {
     const msg = /not_configured/.test(e.message)
       ? 'Not switched on yet: the GoatCounter token still needs to be saved as a secret in Supabase.'
-      : /Failed to send|not found|404/i.test(e.message) ? 'Not switched on yet: the visitor-stats server function still needs to be set up in Supabase.'
+      : /Failed to send a request/i.test(e.message) ? 'Could not reach the visitor-stats server function in Supabase.'
         : `Could not load visitor numbers: ${e.message}`;
     clear(box, h('h2', 'Public visitors'), h('p.muted', msg),
       h('p.muted.small', 'You can still see the numbers directly on ', h('a', { href: 'https://jaggis-chakwal.goatcounter.com', target: '_blank', rel: 'noopener' }, 'GoatCounter'), '.'));
