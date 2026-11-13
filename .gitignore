@@ -1,2 +1,6 @@
 node_modules/
 .DS_Store
+# Built during deploy by scripts/build-public-pages.mjs
+site/people/
+site/sitemap.xml
+site/robots.txt

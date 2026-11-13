@@ -6,6 +6,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Rebuild daily so the public ancestor pages follow changes made in the tree.
+  schedule:
+    - cron: '30 11 * * *'
 
 permissions:
   contents: read
@@ -33,6 +36,14 @@ jobs:
           sed -i -E "s#(from '\./[a-z0-9-]+\.js)'#\1?v=$v'#g" site/js/*.js
           sed -i -E "s#(src=\"js/main\.js)\"#\1?v=$v\"#; s#(href=\"css/app\.css)\"#\1?v=$v\"#" site/*.html
           grep -c "?v=$v" site/index.html site/js/main.js
+      # Plain pages for search engines: deceased family members only, public
+      # details only, plus sitemap.xml. If the database can't be reached the
+      # site still deploys, just without these pages.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build public ancestor pages and sitemap
+        run: node scripts/build-public-pages.mjs || echo "::warning::Public ancestor pages were not built"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
