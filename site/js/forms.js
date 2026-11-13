@@ -1,5 +1,5 @@
 // Forms for suggesting changes: add or edit a person, photo, links.
-import { store, submitChange, uploadPendingPhoto, personHistory } from './data.js';
+import { store, submitChange, uploadPendingPhoto, personHistory, canManage } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint, birthYear } from './model.js';
 import { h, clear, modal, toast, field, select, confirmDialog } from './ui.js';
@@ -30,6 +30,13 @@ export function historyList(id, onShown = () => {}) {
   return box;
 }
 
+// Will this add or edit go live straight away for the signed-in person?
+function liveNow(mode, person, relation) {
+  if (store.isAdmin) return true;
+  if (mode === 'edit') return canManage(person?.id, 'person');
+  return relation?.as !== 'parent' && canManage(relation?.of, 'branch');
+}
+
 const GENDERS = [['unknown', 'Not recorded'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
 const LIVING = [['', 'Not sure'], ['true', 'Living'], ['false', 'Deceased']];
 const VIS = [['branch', 'Branch only: family in this branch'], ['public', 'Public: anyone']];
@@ -51,7 +58,7 @@ async function send(kind, payload, opts, close) {
   try {
     const { applied } = await submitChange(kind, payload, opts);
     close();
-    toast(applied ? 'Saved.' : 'Sent for admin approval. You can follow it under "My changes".', 'ok');
+    toast(applied ? 'Saved. It is in the tree now.' : 'Sent for approval. You can follow it under "My changes".', 'ok');
   } catch (e) {
     console.error(e);
     toast(e.message || 'Something went wrong.', 'error');
@@ -111,7 +118,7 @@ export function openPersonForm({ mode, person = null, relation = null }) {
       field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people default to branch only.')),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
-      h('button.btn.primary', { type: 'submit' }, store.isAdmin ? 'Save' : 'Send for approval')));
+      h('button.btn.primary', { type: 'submit' }, liveNow(mode, person, relation) ? 'Save' : 'Send for approval')));
 
   // Deceased defaults to public, living to branch only, until the person picks one.
   let visTouched = !!person;
@@ -210,7 +217,7 @@ export function openPhotoForm(person) {
     field('Who can see this photo', vis),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
-      h('button.btn.primary', { type: 'submit' }, store.isAdmin ? 'Save photo' : 'Send for approval')));
+      h('button.btn.primary', { type: 'submit' }, canManage(person.id) ? 'Save photo' : 'Send for approval')));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!editor.loaded) return toast('Please choose a photo first.', 'error');
@@ -226,13 +233,13 @@ export function openPhotoForm(person) {
       toast(err.message || 'Upload failed.', 'error');
     }
     btn.disabled = false;
-    btn.textContent = store.isAdmin ? 'Save photo' : 'Send for approval';
+    btn.textContent = canManage(person.id) ? 'Save photo' : 'Send for approval';
   });
   const m = modal('Profile photo', form);
 }
 
 export async function removePhoto(person) {
-  if (!(await confirmDialog(`Remove the photo of ${shortName(person)}?${store.isAdmin ? '' : ' The admin will check this first.'}`, 'Remove photo'))) return;
+  if (!(await confirmDialog(`Remove the photo of ${shortName(person)}?${canManage(person.id) ? '' : ' This will be checked before it happens.'}`, 'Remove photo'))) return;
   await send('remove_photo', { person_id: person.id }, { target: person.id, summary: `Remove photo of ${shortName(person)}` }, () => {});
 }
 

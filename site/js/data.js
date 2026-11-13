@@ -24,7 +24,33 @@ export const store = {
   get isAdmin() {
     return this.profile?.role === 'admin';
   },
+  // The box this account has claimed as "This is me" (approved), if any.
+  get claimedId() {
+    return this.profile?.claimed_person_id || null;
+  },
+  // People this account looks after: id -> true when only their details and
+  // photo can be changed (deceased ancestors).
+  managed: new Map(),
 };
+
+// Can the signed-in person change this person straight away? scope 'person'
+// for details and photo, 'branch' for adding children and spouses. The
+// database has the final say (for example when two owners overlap).
+export function canManage(id, scope = 'person') {
+  if (store.isAdmin) return true;
+  if (!store.managed.has(id)) return false;
+  return scope === 'person' || !store.managed.get(id);
+}
+
+function predictManage(kind, payload) {
+  // Claiming the box your invitation was linked to takes effect at once.
+  if (kind === 'claim_person') return payload.person_id === store.profile?.person_id;
+  if (['edit_person', 'set_photo', 'remove_photo'].includes(kind)) return canManage(payload.person_id, 'person');
+  const l = payload.link;
+  if (kind === 'add_person' && l?.as === 'child') return canManage(l.of, 'branch') && (!l.other_parent || canManage(l.other_parent, 'branch'));
+  if (kind === 'add_person' && l?.as === 'spouse') return canManage(l.of, 'branch') && store.fam?.parentLinks(l.of).length > 0;
+  return false;
+}
 
 export async function init() {
   if (store.preview) {
@@ -53,12 +79,26 @@ export async function init() {
   await loadData();
 }
 
+export async function refreshProfile() {
+  await loadProfile();
+  store.emit();
+}
+
 async function loadProfile() {
   store.profile = null;
   if (!store.session) return;
   const { data, error } = await store.sb.from('profiles').select('*').eq('id', store.session.user.id).maybeSingle();
   if (error) console.warn('profile', error);
   store.profile = data;
+  await loadManaged();
+}
+
+async function loadManaged() {
+  store.managed = new Map();
+  if (!store.claimedId || store.isAdmin) return;
+  const { data, error } = await store.sb.rpc('my_managed_people');
+  if (error) return console.warn('managed', error);
+  for (const r of data || []) store.managed.set(r.person_id, !!r.edit_only);
 }
 
 async function selectAll(table, columns = '*') {
@@ -165,6 +205,15 @@ export async function submitChange(kind, payload, { target = null, summary = '' 
     const result = await approveChange(data, 'Made by admin');
     return { applied: true, result };
   }
+  // Owners' changes to their own part of the tree go live straight away.
+  if (predictManage(kind, payload)) {
+    try {
+      const result = await approveChange(data, 'Made by branch owner');
+      return { applied: true, result };
+    } catch (e) {
+      console.warn('stays waiting for approval:', e.message);
+    }
+  }
   store.emit(); // redraw so the member sees their change waiting on the card
   return { applied: false, request: data };
 }
@@ -177,7 +226,13 @@ export async function approveChange(req, note = null) {
   const oldBucket = old?.photo_visibility === 'public' ? 'photos-public' : 'photos-branch';
   if (req.kind === 'set_photo') extra = { final_path: await movePendingPhoto(req) };
   const { data, error } = await store.sb.rpc('approve_change_request', { request_id: req.id, note, extra });
-  if (error) throw error;
+  if (error) {
+    if (extra.final_path) {
+      const bucket = req.payload.visibility === 'public' ? 'photos-public' : 'photos-branch';
+      await store.sb.storage.from(bucket).remove([extra.final_path]).catch(() => {});
+    }
+    throw error;
+  }
   if (req.kind === 'set_photo') {
     await store.sb.storage.from('photos-pending').remove([req.payload.path]);
   }
@@ -235,9 +290,40 @@ export async function withdrawRequest(req) {
 }
 
 export async function pendingCount() {
-  if (!store.isAdmin) return 0;
-  const { count } = await store.sb.from('change_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+  if (!store.signedIn || store.preview) return 0;
+  let q = store.sb.from('change_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+  // Owners review other people's suggestions, not their own.
+  if (!store.isAdmin) q = q.neq('submitted_by', store.session.user.id);
+  const { count } = await q;
   return count || 0;
+}
+
+// "This is me": ask the admin to confirm that this box is the signed-in person.
+export async function claimPerson(person, summary) {
+  return submitChange('claim_person', { person_id: person.id }, { target: person.id, summary });
+}
+
+export async function personClaimedBy(id) {
+  const { data, error } = await store.sb.rpc('person_claimed_by', { p: id });
+  if (error) return null;
+  return data;
+}
+
+export async function revokeClaim(userId) {
+  const { error } = await store.sb.rpc('revoke_claim', { u: userId });
+  if (error) throw error;
+}
+
+export async function memberName(id) {
+  const { data } = await store.sb.rpc('member_name', { u: id });
+  return data || 'A family member';
+}
+
+export async function undoChange(req) {
+  const { error } = await store.sb.rpc('undo_change_request', { request_id: req.id });
+  if (error) throw error;
+  await loadData();
+  store.emit();
 }
 
 // ------------------------------------------------------------------ admin

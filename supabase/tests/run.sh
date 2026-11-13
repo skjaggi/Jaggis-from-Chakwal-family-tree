@@ -10,4 +10,5 @@ PGOPTIONS="-c client_min_messages=warning" $P -f ../schema.sql
 PGOPTIONS="-c client_min_messages=warning" $P -f ../schema.sql   # re-running must work
 $P -f ../seed.sql
 $P -o /dev/null -f policy-tests.sql 2>&1 | sed -n "s/.*NOTICE:  //p"
+$P -o /dev/null -f owner-tests.sql 2>&1 | sed -n "s/.*NOTICE:  //p"
 echo "ALL DATABASE TESTS PASSED"

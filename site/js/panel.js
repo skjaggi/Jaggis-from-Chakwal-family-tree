@@ -1,9 +1,9 @@
 // The person card that slides in when someone is tapped.
-import { store, listRequests } from './data.js';
+import { store, listRequests, canManage, claimPerson, personClaimedBy, refreshProfile } from './data.js';
 import { describe } from './admin.js';
 import { config } from './config.js';
 import { fullName, shortName, KIND_LABEL, relationHint, birthYear } from './model.js';
-import { h, clear, initials } from './ui.js';
+import { h, clear, initials, toast, confirmDialog } from './ui.js';
 import { historyList, openPersonForm, openPhotoForm, removePhoto, openLinkForm, requestRemoveLink, requestDelete } from './forms.js';
 
 export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn }) {
@@ -64,6 +64,40 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
     h('summary', 'Sources'), d?.sources ? h('p', d.sources) : null,
     historyList(id, () => { sourcesBox.hidden = false; }));
 
+  // "This is me": whose own box this is, or a button to claim it.
+  const claimBox = h('div.claim-box', { hidden: true });
+  if (store.signedIn && !store.preview) {
+    Promise.all([personClaimedBy(id), listRequests({ status: 'pending', mine: true }).catch(() => [])]).then(([owner, mine]) => {
+      const waiting = mine.find((r) => r.kind === 'claim_person');
+      if (store.claimedId === id) {
+        clear(claimBox, h('p', h('strong', 'This is you. You are the branch admin here.'), ' Your changes to your own family below this box appear right away, and you approve what others suggest for it.'));
+      } else if (owner) {
+        clear(claimBox, h('p.muted', `Branch admin: ${owner} (this is their own box).`));
+      } else if (waiting?.target_person_id === id) {
+        clear(claimBox, h('p.muted', 'Waiting for confirmation that this is you.'));
+      } else if (!store.claimedId && !waiting) {
+        const btn = h('button.btn.small', { type: 'button', onclick: async () => {
+          const linked = store.profile?.person_id === id;
+          const msg = linked
+            ? `Confirm that you are ${fullName(p)}? This is the person your invitation was linked to, so it takes effect right away. You can claim only one box.`
+            : `Ask to confirm that you are ${fullName(p)}? The person who invited you, or the admin, will confirm it. You can claim only one box.`;
+          if (!(await confirmDialog(msg, 'This is me'))) return;
+          btn.disabled = true;
+          try {
+            const res = await claimPerson(p, `${store.profile?.display_name || 'A member'} says this is them: ${fullName(p)}`);
+            toast(res.applied ? 'Done. This is now your box, and you are its branch admin.' : 'Sent. You become the branch admin once it is confirmed.', 'ok');
+            await refreshProfile();
+          } catch (e) {
+            toast(e.message.includes('duplicate') ? 'You already have a claim waiting.' : e.message, 'error');
+            btn.disabled = false;
+          }
+        } }, 'This is me');
+        clear(claimBox, btn, h('span.muted.small', ' Is this you? Claim your own box to become the branch admin for your family below it.'));
+      } else return;
+      claimBox.hidden = false;
+    }).catch(() => {});
+  }
+
   const status = p.is_living === false ? 'Deceased' : p.is_living === true ? 'Living' : null;
   const pl = fam.primaryParentLink(id);
 
@@ -77,6 +111,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
       !photo && p.photo_path && p.photo_visibility === 'branch' ? h('p.muted.small', 'Photo visible to this branch only.') : null),
     h('h2.panel-name', fullName(p)),
     p.other_names ? h('p.muted', p.other_names) : null,
+    claimBox,
     h('p.tags',
       p.generation ? h('span.tag', `Generation ${p.generation}`) : null,
       status ? h('span.tag', status) : null,
@@ -110,7 +145,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
     h('div.panel-actions',
       h('button.btn', { type: 'button', onclick: () => onRoot(id) }, 'Show tree from here'),
       canEdit ? [
-        h('button.btn', { type: 'button', onclick: () => openPersonForm({ mode: 'edit', person: p }) }, store.isAdmin ? 'Edit' : 'Suggest an edit'),
+        h('button.btn', { type: 'button', onclick: () => openPersonForm({ mode: 'edit', person: p }) }, canManage(id, 'person') ? 'Edit' : 'Suggest an edit'),
         h('div.add-row',
           h('span.muted', 'Add: '),
           h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'child', of: id } }) }, 'Child'),

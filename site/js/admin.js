@@ -3,6 +3,7 @@
 import {
   store, listRequests, approveChange, rejectChange, withdrawRequest, pendingPhotoUrl,
   listInvites, addInvite, removeInvite, sendInviteEmail, listProfiles, updateProfile, personLabel,
+  memberName, undoChange, revokeClaim,
 } from './data.js';
 import { config } from './config.js';
 import { fullName } from './model.js';
@@ -14,6 +15,7 @@ import { sendButtons } from './invite.js';
 const KIND_TITLE = {
   add_person: 'Add a person', edit_person: 'Edit details', add_link: 'Add a relationship',
   remove_link: 'Remove a relationship', set_photo: 'New photo', remove_photo: 'Remove a photo', delete_person: 'Remove a person',
+  claim_person: 'This is me',
 };
 
 function valueText(k, v) {
@@ -57,6 +59,9 @@ export function describe(req, emailOf) {
     add('Person', p.name || personLabel(p.person_id));
   } else if (req.kind === 'remove_link') {
     add('Link', req.summary || '');
+  } else if (req.kind === 'claim_person') {
+    add('Says they are', personLabel(req.target_person_id));
+    add('If approved', 'They can add and edit their own family below this box, and their changes appear right away. They also approve suggestions for it.');
   }
   return h('div',
     h('p.muted.small', `${emailOf(req.submitted_by)} · ${formatWhen(req.submitted_at)}`),
@@ -64,15 +69,25 @@ export function describe(req, emailOf) {
 }
 
 export async function renderReview(container) {
-  clear(container, h('h1', 'Changes waiting for approval'), h('p.muted', 'Loading…'));
+  const admin = store.isAdmin;
+  const title = admin ? 'Changes waiting for approval' : store.claimedId ? 'Suggestions for your part of the tree' : 'Waiting for you to confirm';
+  clear(container, h('h1', title), h('p.muted', 'Loading…'));
   let pending;
-  let recent;
+  let recent = [];
   let emails = new Map();
   try {
-    [pending, recent] = await Promise.all([listRequests({ status: 'pending' }), listRequests({ status: null })]);
-    emails = new Map((await listProfiles()).map((u) => [u.id, u.display_name || u.email]));
+    pending = await listRequests({ status: 'pending' });
+    // Owners review other people's suggestions; their own wait for the admin.
+    if (!admin) pending = pending.filter((r) => r.submitted_by !== store.session.user.id);
+    if (admin) {
+      recent = await listRequests({ status: null });
+      emails = new Map((await listProfiles()).map((u) => [u.id, u.display_name || u.email]));
+    } else {
+      const ids = [...new Set(pending.map((r) => r.submitted_by))];
+      emails = new Map(await Promise.all(ids.map(async (id) => [id, await memberName(id)])));
+    }
   } catch (e) {
-    return clear(container, h('h1', 'Changes waiting for approval'), h('p.notice', e.message));
+    return clear(container, h('h1', title), h('p.notice', e.message));
   }
   const emailOf = (id) => emails.get(id) || 'Unknown member';
 
@@ -106,14 +121,30 @@ export async function renderReview(container) {
       describe(req, emailOf), note, buttons);
   };
 
+  // The admin can undo an approved edit, addition or claim.
+  const undoBtn = (r) => (r.status === 'approved' && ['edit_person', 'add_person', 'claim_person'].includes(r.kind)
+    ? h('button.btn.small', { type: 'button', onclick: async () => {
+      const what = r.kind === 'add_person' ? 'This removes the person who was added.' : r.kind === 'claim_person' ? 'They will no longer look after this part of the tree.' : 'The details go back to how they were before.';
+      if (!(await confirmDialog(`Undo "${r.summary || KIND_TITLE[r.kind]}"? ${what}`, 'Undo'))) return;
+      try {
+        await undoChange(r);
+        toast('Undone.', 'ok');
+        renderReview(container);
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    } }, 'Undo') : null);
+
   clear(container,
-    h('h1', 'Changes waiting for approval'),
+    h('h1', title),
+    admin ? null : h('p.muted', 'You look after this part of the tree, so you can approve or decline what other family members suggest for it. Anything you decline can still be suggested again.'),
     pending.length ? pending.map(card) : h('p.empty', 'Nothing waiting. 🎉'),
-    h('h2', 'Recent decisions'),
-    recent.length ? h('ul.history', recent.slice(0, 30).map((r) =>
-      h('li', h('span.tag' + (r.status === 'approved' ? '.ok' : '.warn'), r.status), ' ', r.summary || KIND_TITLE[r.kind],
-        h('span.muted', ` · ${emailOf(r.submitted_by)} · ${formatWhen(r.reviewed_at)}`), r.review_note ? h('div.muted.small', `Note: ${r.review_note}`) : null)))
-      : h('p.muted', 'None yet.'));
+    admin ? [h('h2', 'Recent decisions'),
+      recent.length ? h('ul.history', recent.slice(0, 40).map((r) =>
+        h('li', h('span.tag' + (r.status === 'approved' ? '.ok' : '.warn'), r.status), ' ', r.summary || KIND_TITLE[r.kind],
+          h('span.muted', ` · ${emailOf(r.submitted_by)} · ${formatWhen(r.reviewed_at)}`), ' ', undoBtn(r),
+          r.review_note ? h('div.muted.small', `Note: ${r.review_note}`) : null)))
+        : h('p.muted', 'None yet.')] : null);
 }
 
 export async function renderMine(container) {
@@ -208,11 +239,47 @@ export async function renderAdmin(container) {
         toast(err.message, 'error');
       }
     });
-    return h('li.member', h('div', h('strong', u.display_name || u.email), h('div.muted.small', u.email)), h('div', 'In tree: ', label), picker, roleSel);
+    return h('li.member', h('div', h('strong', u.display_name || u.email), h('div.muted.small', u.email), u.claimed_person_id ? h('div.small', h('span.tag.ok', 'Branch admin'), ` of ${personLabel(u.claimed_person_id)}`) : null), h('div', 'In tree: ', label), picker, roleSel);
   };
+
+  // Branch admins: who has claimed which box, how many people that covers,
+  // who invited them, and a way to take it away.
+  const fam = store.fam;
+  const branchSize = (id) => {
+    const seen = new Set([id]);
+    const stack = [id];
+    while (stack.length) {
+      for (const { person: c } of fam.children(stack.pop())) if (!seen.has(c.id)) { seen.add(c.id); stack.push(c.id); }
+    }
+    for (const x of [...seen]) for (const { person: sp } of fam.spouses(x)) seen.add(sp.id);
+    return seen.size;
+  };
+  const inviterOf = new Map(invites.map((i) => [i.email, i.invited_by]));
+  const keepers = profiles.filter((u) => u.claimed_person_id)
+    .sort((a, b) => (fam.byId.get(a.claimed_person_id)?.generation ?? 99) - (fam.byId.get(b.claimed_person_id)?.generation ?? 99));
+  const branchAdmins = h('section', h('h2', `Branch admins (${keepers.length})`),
+    h('p.muted', 'Family members who claimed their own box with "This is me". Each one can change their own family below that box straight away and approve suggestions for it. Removing someone here takes that away; their account and past changes stay.'),
+    keepers.length ? h('table.dash-table.branch-admins',
+      h('thead', h('tr', h('th', 'Branch admin'), h('th', 'Their box'), h('th', 'People in their branch'), h('th', 'Invited by'), h('th', ''))),
+      h('tbody', keepers.map((u) => h('tr',
+        h('td', h('strong', u.display_name || u.email), h('div.muted.small', u.email)),
+        h('td', h('a', { href: `#/tree/${u.claimed_person_id}?p=${u.claimed_person_id}` }, personLabel(u.claimed_person_id))),
+        h('td', fam.byId.has(u.claimed_person_id) ? String(branchSize(u.claimed_person_id)) : '—'),
+        h('td', names.get(inviterOf.get(u.email)) || h('span.muted', 'the admin')),
+        h('td', h('button.btn.small.ghost.danger', { type: 'button', onclick: async () => {
+          if (!(await confirmDialog(`Remove ${u.display_name || u.email} as branch admin of ${personLabel(u.claimed_person_id)}? Their changes will need approval again.`, 'Remove'))) return;
+          try {
+            await revokeClaim(u.id);
+            toast('Removed as branch admin.', 'ok');
+            renderAdmin(container);
+          } catch (err) {
+            toast(err.message, 'error');
+          }
+        } }, 'Remove as branch admin')))))) : h('p.muted', 'Nobody has claimed a box yet.'));
 
   clear(container,
     h('h1', 'Family members and invites'),
+    branchAdmins,
     h('section', h('h2', 'Invite someone'),
       h('p.muted', 'Only invited emails can sign in. After you add them here, the site emails them an invitation; the WhatsApp and Copy buttons are there if you would rather send it yourself. Family members can also invite relatives from Invite in the menu; you will see who invited whom below, and can remove any invite.'),
       form),

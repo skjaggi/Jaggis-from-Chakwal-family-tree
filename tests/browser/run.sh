@@ -19,3 +19,4 @@ sleep 1
 if [ "${1:-}" = shots ]; then node help-shots.cjs; exit; fi  # retake the help page pictures
 node smoke.cjs
 node signedin.cjs
+node owner.cjs

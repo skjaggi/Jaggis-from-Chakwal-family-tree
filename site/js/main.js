@@ -69,7 +69,7 @@ async function route() {
       clear(page, h('h1', 'Please sign in'), h('p', 'This page is for family members.'), h('button.btn.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
       return;
     }
-    if (state.view === 'review') return store.isAdmin ? renderReview(page) : clear(page, h('p', 'Only the admin can review changes.'));
+    if (state.view === 'review') return store.signedIn ? renderReview(page) : clear(page, h('p', 'Only the admin, and family members who look after a part of the tree, can review changes.'));
     if (state.view === 'members') return store.isAdmin ? renderAdmin(page) : clear(page, h('p', 'Only the admin can manage members.'));
     if (state.view === 'mine') return renderMine(page);
     if (state.view === 'invite') return renderInvite(page);
@@ -249,14 +249,14 @@ async function renderHeader() {
   const nav = $('nav');
   const signed = store.signedIn;
   let count = 0;
-  if (store.isAdmin) count = await pendingCount().catch(() => 0);
+  if (signed) count = await pendingCount().catch(() => 0);
   clear(nav,
     h('a', { href: `#/tree/${state.root || store.fam.defaultRootId}`, 'data-nav': 'tree' }, 'Tree'),
     h('a', { href: `#/outline/${state.root || store.fam.defaultRootId}`, 'data-nav': 'outline' }, 'List'),
     h('a', { href: '#/dashboard', 'data-nav': 'dashboard' }, 'Dashboard'),
     signed ? h('a', { href: '#/mine', 'data-nav': 'mine' }, 'My changes') : null,
     signed ? h('a', { href: '#/invite', 'data-nav': 'invite' }, 'Invite') : null,
-    store.isAdmin ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
+    store.isAdmin || store.claimedId || count ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
     h('a', { href: 'help.html' }, 'Help'),
     h('a', { href: '#/export', 'data-nav': 'export', title: 'Download the tree as a PDF or a GEDCOM file' }, 'Export'),
@@ -267,7 +267,7 @@ async function renderHeader() {
       } }, 'Sign out')
       : h('button.btn.small.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
   for (const a of nav.querySelectorAll('[data-nav]')) a.classList.toggle('active', a.dataset.nav === state.view);
-  $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : ''}` : '';
+  $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   $('preview-banner').hidden = !store.preview;
 }
 

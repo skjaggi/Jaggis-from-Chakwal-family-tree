@@ -1,10 +1,11 @@
 // In-browser fake of the parts of supabase-js the app uses (test only).
 const seed = await (await fetch('/data/seed.json')).json();
-const ADMIN = window.__FAKE_ROLE__ !== 'member';
+const ADMIN = !['member', 'owner'].includes(window.__FAKE_ROLE__);
+const SUNIL = seed.people.find(p => p.given_name === 'Sunil Kumar').id;
 const uid = 'u-1';
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
-  profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: seed.people.find(p => p.given_name === 'Sunil Kumar').id, created_at: new Date().toISOString() }],
+  profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' ? SUNIL : null, created_at: new Date().toISOString() }],
   invites: [], change_requests: [], research_questions: [],
 };
 window.__db = db;
@@ -48,6 +49,17 @@ export function createClient() {
     from: t => new Q(t),
     functions: { invoke: async (name, { body }) => { (window.__invoked ||= []).push([name, body.email]); return { data: { sent: true }, error: null }; } },
     rpc: async (name, args) => {
+      if (name === 'my_managed_people') {
+        const c = db.profiles[0].claimed_person_id; if (!c) return { data: [], error: null };
+        const ids = new Set([c]); let grew = true;
+        while (grew) { grew = false; for (const l of db.parent_child) if (ids.has(l.parent_id) && !ids.has(l.child_id)) { ids.add(l.child_id); grew = true; } }
+        for (const u of db.unions) { if (ids.has(u.partner_a)) ids.add(u.partner_b); if (ids.has(u.partner_b)) ids.add(u.partner_a); }
+        return { data: [...ids].map(id => ({ person_id: id, edit_only: false })), error: null };
+      }
+      if (name === 'person_claimed_by') return { data: db.profiles.find(x => x.claimed_person_id === args.p)?.display_name ?? null, error: null };
+      if (name === 'revoke_claim') { db.profiles.find(x => x.id === args.u).claimed_person_id = null; return { data: null, error: null }; }
+      if (name === 'member_name') return { data: 'Cousin Neha', error: null };
+      if (name === 'undo_change_request') { const r = db.change_requests.find(x => x.id === args.request_id); r.status = 'undone'; return { data: null, error: null }; }
       if (name === 'person_history') {
         return { data: db.change_requests.filter(r => r.status === 'approved' && (r.payload.person_id === args.p || r.result_person_id === args.p))
           .map(r => ({ kind: r.kind, summary: r.summary, by_name: 'Tester', at: new Date().toISOString() })), error: null };
@@ -65,6 +77,7 @@ export function createClient() {
           db.person_details.push({ person_id: id, ...r.payload.details });
           if (r.payload.link.as === 'child') db.parent_child.push({ id: crypto.randomUUID(), parent_id: r.payload.link.of, child_id: id, kind: 'biological', confidence: 'confirmed' });
         }
+        if (r.kind === 'claim_person') db.profiles.find(x => x.id === r.submitted_by).claimed_person_id = r.target_person_id;
         if (r.kind === 'set_photo') { const p = db.people.find(p => p.id === r.payload.person_id); p.photo_path = args.extra.final_path; p.photo_visibility = r.payload.visibility; }
         if (r.kind === 'remove_photo') { const p = db.people.find(p => p.id === r.payload.person_id); p.photo_path = null; }
         if (r.kind === 'edit_person') { const d = db.person_details.find(d => d.person_id === r.payload.person_id); Object.assign(d, r.payload.details); }

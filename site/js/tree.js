@@ -1,6 +1,6 @@
 // Top-down tree drawn with d3: pan and pinch-zoom, tap a card to open the
 // person, tap the round button under a card to show or hide their children.
-import { store } from './data.js';
+import { store, canManage } from './data.js';
 import { shortName, lifeLine } from './model.js';
 import { initials } from './ui.js';
 import { branchesOf } from './branches.js';
@@ -307,7 +307,7 @@ export class TreeView {
       .text(pl?.confidence === 'uncertain' ? '?' : pl && pl.kind !== 'biological' ? pl.kind[0].toUpperCase() : '');
     if (canEdit) {
       // A pencil on the top corner of the box opens the edit form.
-      const label = `${store.isAdmin ? 'Edit' : 'Suggest an edit to'} ${shortName(p)}`;
+      const label = `${canManage(p.id, 'person') ? 'Edit' : 'Suggest an edit to'} ${shortName(p)}`;
       const pen = el.append('g').attr('class', 'edit-btn').attr('transform', `translate(${w / 2 - 6},${-h / 2 + 4})`)
         .attr('role', 'button').attr('tabindex', 0).attr('aria-label', label)
         .on('click', (e) => {
