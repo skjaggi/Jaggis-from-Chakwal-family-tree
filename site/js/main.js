@@ -258,6 +258,7 @@ async function renderHeader() {
     signed ? h('a', { href: '#/invite', 'data-nav': 'invite' }, 'Invite') : null,
     store.isAdmin || store.claimedId || count ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
+    h('a', { href: 'people/', title: 'Family members who have passed away, one page each' }, 'Ancestors'),
     h('a', { href: 'help.html' }, 'Help'),
     h('a', { href: '#/export', 'data-nav': 'export', title: 'Download the tree as a PDF or a GEDCOM file' }, 'Export'),
     signed
