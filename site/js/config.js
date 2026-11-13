@@ -11,5 +11,5 @@ export const config = {
   siteTitle: 'Jaggis of Chakwal',
   adminName: 'Sunil',
   // GoatCounter site code for the anonymous visitor counter ('' = off).
-  goatcounter: '',
+  goatcounter: 'jaggis-chakwal',
 };
