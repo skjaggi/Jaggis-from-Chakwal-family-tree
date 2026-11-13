@@ -288,7 +288,7 @@ async function publicVisitorsSection() {
       [7, 30, 90, 365].map((n) => h('option', { value: n, selected: n === days }, n === 365 ? 'Last year' : `Last ${n} days`)));
     clear(box,
       h('div.dash-head', h('h2', 'Public visitors'), picker),
-      h('p.muted.small', 'Everyone who opens the site, signed in or not, counted anonymously by GoatCounter: no names, no cookies. Only you can see this. Times are in your time zone. Search words people typed into Google are in Google Search Console.'),
+      h('p.muted.small', 'Visitors who are not signed in, counted anonymously by GoatCounter: no names, no cookies. Signed-in family members are in the section above instead (counting starts from now). Only you can see this. Times are in your time zone. Search words people typed into Google are in Google Search Console.'),
       h('div.stats',
         tile(total, 'Visitors', days === 365 ? 'last year' : `last ${days} days`),
         tile(places.length, 'Countries and regions', places[0] ? `most from ${places[0].label}` : ''),
