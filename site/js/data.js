@@ -288,6 +288,14 @@ export async function sendInviteEmail(email) {
   return data?.sent ? `Invitation email sent to ${email}.` : (data?.message || 'No email was sent.');
 }
 
+// Who added this person and who updated them since (approved changes only).
+// Returns null if the database doesn't have this yet.
+export async function personHistory(id) {
+  const { data, error } = await store.sb.rpc('person_history', { p: id });
+  if (error) return null;
+  return data;
+}
+
 export async function listMyInvites() {
   const { data, error } = await store.sb.from('invites').select('*').eq('invited_by', store.session.user.id).order('created_at', { ascending: false });
   if (error) throw error;

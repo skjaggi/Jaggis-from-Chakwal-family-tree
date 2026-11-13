@@ -48,6 +48,10 @@ export function createClient() {
     from: t => new Q(t),
     functions: { invoke: async (name, { body }) => { (window.__invoked ||= []).push([name, body.email]); return { data: { sent: true }, error: null }; } },
     rpc: async (name, args) => {
+      if (name === 'person_history') {
+        return { data: db.change_requests.filter(r => r.status === 'approved' && (r.payload.person_id === args.p || r.result_person_id === args.p))
+          .map(r => ({ kind: r.kind, summary: r.summary, by_name: 'Tester', at: new Date().toISOString() })), error: null };
+      }
       if (name === 'invite_relative') {
         if (db.invites.some(i => i.email === args.email)) return { data: null, error: { message: `${args.email} has already been invited` } };
         db.invites.push({ email: args.email, display_name: args.display_name, person_id: args.person_id, role: 'member', invited_by: uid, created_at: new Date().toISOString() });

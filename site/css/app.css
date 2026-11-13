@@ -466,3 +466,5 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
   .bk-gen h3 { break-after: avoid; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+.person-history ul { margin: 6px 0 0; padding-left: 18px; }
+.person-history li { margin: 2px 0; }
