@@ -170,11 +170,18 @@ export async function submitChange(kind, payload, { target = null, summary = '' 
 
 export async function approveChange(req, note = null) {
   let extra = {};
+  // The photo file this change replaces or removes, to tidy up afterwards.
+  const old = ['set_photo', 'remove_photo'].includes(req.kind) ? store.fam?.byId.get(req.payload.person_id) : null;
+  const oldPath = old?.photo_path;
+  const oldBucket = old?.photo_visibility === 'public' ? 'photos-public' : 'photos-branch';
   if (req.kind === 'set_photo') extra = { final_path: await movePendingPhoto(req) };
   const { data, error } = await store.sb.rpc('approve_change_request', { request_id: req.id, note, extra });
   if (error) throw error;
   if (req.kind === 'set_photo') {
     await store.sb.storage.from('photos-pending').remove([req.payload.path]);
+  }
+  if (oldPath && !oldPath.startsWith('img/') && oldPath !== extra.final_path) {
+    await store.sb.storage.from(oldBucket).remove([oldPath]).catch(() => {});
   }
   await loadData();
   store.emit();

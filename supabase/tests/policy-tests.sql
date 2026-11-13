@@ -152,6 +152,9 @@ do $$ begin
 end $$;
 select public.approve_change_request((select id from public.change_requests where kind='set_photo'), null, '{"final_path":"abc/1.jpg"}');
 select pg_temp.expect((select photo_path from public.people where id = pg_temp.pid('Sunil Kumar')) = 'abc/1.jpg', 'photo set');
+insert into public.change_requests (kind, payload, summary) values ('remove_photo', jsonb_build_object('person_id', pg_temp.pid('Sunil Kumar')), 'rmphoto');
+select public.approve_change_request((select id from public.change_requests where summary='rmphoto'));
+select pg_temp.expect((select photo_path from public.people where id = pg_temp.pid('Sunil Kumar')) is null, 'photo removed');
 -- reject
 insert into public.change_requests (kind, payload, summary) values ('delete_person', jsonb_build_object('person_id', pg_temp.pid('Veena')), 'del');
 select public.reject_change_request((select id from public.change_requests where summary='del'), 'no');

@@ -298,3 +298,11 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .notice p { margin: 0 0 8px; }
 .send-invite { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .send-invite .btn { text-decoration: none; }
+
+/* Photo framing */
+.photo-editor { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.photo-frame { border-radius: 8px; touch-action: none; cursor: grab; background: var(--surface-2); max-width: 100%; }
+.photo-frame:active { cursor: grabbing; }
+.zoom-row { display: flex; align-items: center; gap: 8px; width: 260px; max-width: 100%; }
+.zoom-row input { flex: 1; }
+.photo-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }

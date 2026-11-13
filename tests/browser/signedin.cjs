@@ -35,9 +35,26 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.click('.panel-photo button');
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR42mP8z8DwnwEJMDKgCxAMAAB0sAX9i8b6ZwAAAABJRU5ErkJggg==', 'base64');
     await pg.setInputFiles('dialog input[type=file]', '' + SHOTS + 'desktop-1-tree.png');
-    await pg.waitForTimeout(500); console.log(role, 'preview:', await pg.locator('dialog .photo-preview').innerHTML(), await pg.locator('#toast').innerText());
-    await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(500);
-    console.log(role, 'photo request:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.at(-1).payload)));
+    await pg.waitForSelector('dialog .photo-editor:not([hidden])');
+    const box = await pg.locator('dialog canvas.photo-frame').boundingBox();
+    await pg.mouse.move(box.x + 130, box.y + 130); await pg.mouse.down(); await pg.mouse.move(box.x + 200, box.y + 140, { steps: 5 }); await pg.mouse.up();
+    await pg.locator('dialog .zoom-row input').fill('1.5');
+    if (role === 'admin') await pg.screenshot({ path: `${SHOTS}admin-photo-editor.png` });
+    await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(700);
+    console.log(role, 'photo request:', await pg.evaluate(() => JSON.stringify([window.__db.change_requests.at(-1).summary, window.__db.change_requests.at(-1).status])));
+    if (role === 'admin') {
+      await pg.waitForTimeout(300);
+      const photoBtns = (await pg.locator('.panel-photo .photo-actions').innerText()).replace(/\n/g, ' | ');
+      console.log(role, 'photo buttons after save:', photoBtns);
+      await pg.locator('.panel-photo button', { hasText: 'Change or center photo' }).click();
+      await pg.waitForSelector('dialog .photo-editor:not([hidden])');
+      console.log(role, 'existing photo loads for centering:', await pg.locator('dialog .photo-editor').isVisible(), '|', (await pg.locator('dialog .form-note').first().innerText()));
+      await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(700);
+      console.log(role, 'recenter request:', await pg.evaluate(() => window.__db.change_requests.at(-1).summary));
+      await pg.locator('.panel-photo button', { hasText: 'Remove photo' }).click();
+      await pg.locator('dialog button', { hasText: 'Remove photo' }).click(); await pg.waitForTimeout(700);
+      console.log(role, 'after remove:', await pg.evaluate(() => JSON.stringify([window.__db.change_requests.at(-1).summary, window.__db.change_requests.at(-1).status])), '| button now:', await pg.locator('.panel-photo button').first().innerText());
+    }
     // link form
     await pg.click('.panel-actions button:has-text("Link to someone")');
     await pg.fill('dialog .picker input', 'gokal'); await pg.click('dialog .pick-list button');

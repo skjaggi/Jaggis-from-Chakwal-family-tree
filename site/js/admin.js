@@ -13,7 +13,7 @@ import { sendButtons } from './invite.js';
 
 const KIND_TITLE = {
   add_person: 'Add a person', edit_person: 'Edit details', add_link: 'Add a relationship',
-  remove_link: 'Remove a relationship', set_photo: 'New photo', delete_person: 'Remove a person',
+  remove_link: 'Remove a relationship', set_photo: 'New photo', remove_photo: 'Remove a photo', delete_person: 'Remove a person',
 };
 
 function valueText(k, v) {
@@ -49,6 +49,10 @@ function describe(req, emailOf) {
     const img = h('img.review-photo', { alt: 'Submitted photo' });
     pendingPhotoUrl(p.path).then((u) => u && (img.src = u));
     rows.push(img);
+  } else if (req.kind === 'remove_photo') {
+    add('Person', personLabel(p.person_id));
+    const url = store.photoUrls.get(p.person_id);
+    if (url) rows.push(h('img.review-photo', { src: url, alt: 'Photo to be removed' }));
   } else if (req.kind === 'delete_person') {
     add('Person', p.name || personLabel(p.person_id));
   } else if (req.kind === 'remove_link') {

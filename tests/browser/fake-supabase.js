@@ -61,6 +61,7 @@ export function createClient() {
           if (r.payload.link.as === 'child') db.parent_child.push({ id: crypto.randomUUID(), parent_id: r.payload.link.of, child_id: id, kind: 'biological', confidence: 'confirmed' });
         }
         if (r.kind === 'set_photo') { const p = db.people.find(p => p.id === r.payload.person_id); p.photo_path = args.extra.final_path; p.photo_visibility = r.payload.visibility; }
+        if (r.kind === 'remove_photo') { const p = db.people.find(p => p.id === r.payload.person_id); p.photo_path = null; }
         if (r.kind === 'edit_person') { const d = db.person_details.find(d => d.person_id === r.payload.person_id); Object.assign(d, r.payload.details); }
         r.status = 'approved'; window.__approved = (window.__approved || []).concat(r);
       } else { r.status = 'rejected'; }

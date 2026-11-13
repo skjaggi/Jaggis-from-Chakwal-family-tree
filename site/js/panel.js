@@ -3,7 +3,7 @@ import { store } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, KIND_LABEL, relationHint, birthYear } from './model.js';
 import { h, clear, initials } from './ui.js';
-import { openPersonForm, openPhotoForm, openLinkForm, requestRemoveLink, requestDelete } from './forms.js';
+import { openPersonForm, openPhotoForm, removePhoto, openLinkForm, requestRemoveLink, requestDelete } from './forms.js';
 
 export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn }) {
   const fam = store.fam;
@@ -47,7 +47,9 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
     h('div.panel-head',
       h('button.icon-btn', { type: 'button', 'aria-label': 'Close', onclick: onClose }, '✕')),
     h('div.panel-photo', photo ? h('a', { href: photo, target: '_blank', rel: 'noopener', title: 'Open full size' }, h('img', { src: photo, alt: `Photo of ${shortName(p)}` })) : h('div.avatar-lg', initials(p.given_name)),
-      canEdit ? h('button.btn.small', { type: 'button', onclick: () => openPhotoForm(p) }, photo ? 'Change photo' : 'Add photo') : null,
+      canEdit ? h('div.photo-actions',
+        h('button.btn.small', { type: 'button', onclick: () => openPhotoForm(p) }, photo ? 'Change or center photo' : 'Add photo'),
+        p.photo_path ? h('button.btn.small.ghost', { type: 'button', onclick: () => removePhoto(p) }, 'Remove photo') : null) : null,
       !photo && p.photo_path && p.photo_visibility === 'branch' ? h('p.muted.small', 'Photo visible to this branch only.') : null),
     h('h2.panel-name', fullName(p)),
     p.other_names ? h('p.muted', p.other_names) : null,

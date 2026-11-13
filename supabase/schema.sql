@@ -102,7 +102,7 @@ create table if not exists public.invites (
 
 create table if not exists public.change_requests (
   id uuid primary key default gen_random_uuid(),
-  kind text not null check (kind in ('add_person', 'edit_person', 'add_link', 'remove_link', 'set_photo', 'delete_person')),
+  kind text not null check (kind in ('add_person', 'edit_person', 'add_link', 'remove_link', 'set_photo', 'remove_photo', 'delete_person')),
   target_person_id uuid references public.people (id) on delete set null,
   payload jsonb not null,
   summary text,
@@ -385,6 +385,12 @@ begin
       photo_path = public._text(extra, 'final_path'),
       photo_visibility = coalesce(public._check_choice(public._text(r.payload, 'visibility'), array['public','branch'], 'visibility'), 'branch')
     where id = pid;
+    if not found then raise exception 'That person no longer exists'; end if;
+    return pid;
+
+  elsif r.kind = 'remove_photo' then
+    pid := (r.payload ->> 'person_id')::uuid;
+    update people set photo_path = null where id = pid;
     if not found then raise exception 'That person no longer exists'; end if;
     return pid;
 

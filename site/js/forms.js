@@ -3,6 +3,7 @@ import { store, submitChange, uploadPendingPhoto } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint, birthYear } from './model.js';
 import { h, modal, toast, field, select, confirmDialog } from './ui.js';
+import { photoEditor } from './photo-editor.js';
 
 const GENDERS = [['unknown', 'Not recorded'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
 const LIVING = [['', 'Not sure'], ['true', 'Living'], ['false', 'Deceased']];
@@ -152,49 +153,49 @@ export function openPersonForm({ mode, person = null, relation = null }) {
   setTimeout(() => form.given_name.focus(), 50);
 }
 
-// Resize to at most 900px on the long side and re-encode as JPEG.
-async function shrinkImage(file) {
-  const bmp = await createImageBitmap(file);
-  const scale = Math.min(1, 900 / Math.max(bmp.width, bmp.height));
-  const c = document.createElement('canvas');
-  c.width = Math.round(bmp.width * scale);
-  c.height = Math.round(bmp.height * scale);
-  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-  return new Promise((res) => c.toBlob(res, 'image/jpeg', 0.85));
-}
-
+// Add, change or re-center a person's profile photo.
 export function openPhotoForm(person) {
+  const current = store.photoUrls.get(person.id);
   const input = h('input', { type: 'file', accept: 'image/*', name: 'photo' });
-  const preview = h('div.photo-preview', h('span.muted', 'No photo chosen'));
-  const vis = select('visibility', VIS, person.is_living === false ? 'public' : 'branch');
-  let blob = null;
+  const editor = photoEditor();
+  const vis = select('visibility', VIS, person.photo_path ? (person.photo_visibility || 'branch') : person.is_living === false ? 'public' : 'branch');
+  let picked = false;
   input.addEventListener('change', async () => {
     const f = input.files[0];
     if (!f) return;
     try {
-      blob = await shrinkImage(f);
-      preview.replaceChildren(h('img', { src: URL.createObjectURL(blob), alt: 'Preview' }));
+      await editor.load(f);
+      picked = true;
     } catch {
-      blob = null;
       toast('That file could not be read as a picture.', 'error');
     }
   });
+  if (current) {
+    editor.load(current).catch(() => {
+      toast('Could not open the current photo for moving. You can still choose a new one.', 'error');
+    });
+  }
   const form = h('form.form',
-    h('p.form-note', `One profile photo for ${fullName(person)}. A new photo replaces the current one.`),
-    field('Photo', input), preview,
+    h('p.form-note', current
+      ? `Drag the photo to center it, or choose a different one. ${fullName(person)} has one profile photo.`
+      : `One profile photo for ${fullName(person)}.`),
+    field(current ? 'Choose a different photo' : 'Photo', input),
+    editor.el,
     field('Who can see this photo', vis),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       h('button.btn.primary', { type: 'submit' }, store.isAdmin ? 'Save photo' : 'Send for approval')));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!blob) return toast('Please choose a photo first.', 'error');
+    if (!editor.loaded) return toast('Please choose a photo first.', 'error');
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true;
     btn.textContent = 'Uploading…';
     try {
+      const blob = await editor.toBlob();
       const path = await uploadPendingPhoto(blob);
-      await send('set_photo', { person_id: person.id, path, visibility: vis.value }, { target: person.id, summary: `New photo for ${shortName(person)}` }, m.close);
+      const what = picked || !current ? 'New photo' : 'Re-centered photo';
+      await send('set_photo', { person_id: person.id, path, visibility: vis.value }, { target: person.id, summary: `${what} for ${shortName(person)}` }, m.close);
     } catch (err) {
       toast(err.message || 'Upload failed.', 'error');
     }
@@ -202,6 +203,11 @@ export function openPhotoForm(person) {
     btn.textContent = store.isAdmin ? 'Save photo' : 'Send for approval';
   });
   const m = modal('Profile photo', form);
+}
+
+export async function removePhoto(person) {
+  if (!(await confirmDialog(`Remove the photo of ${shortName(person)}?${store.isAdmin ? '' : ` ${config.adminName} will check this first.`}`, 'Remove photo'))) return;
+  await send('remove_photo', { person_id: person.id }, { target: person.id, summary: `Remove photo of ${shortName(person)}` }, () => {});
 }
 
 // A search box that lets you pick one person.
