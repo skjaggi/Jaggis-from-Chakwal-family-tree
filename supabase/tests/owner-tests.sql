@@ -58,8 +58,21 @@ select pg_temp.req(:'SUNIL', 'edit_person', jsonb_build_object('person_id', pg_t
 select pg_temp.expect(pg_temp.try_approve(:'bro') like 'Only the admin%', 'owner cannot edit a brother');
 select pg_temp.req(:'SUNIL', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'P'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Sunil Kumar')))) as par \gset
 select pg_temp.expect(pg_temp.try_approve(:'par') like 'Only the admin%', 'owner cannot add parents');
-select pg_temp.req(:'SUNIL', 'delete_person', jsonb_build_object('person_id', pg_temp.pid('Owner Kid')), pg_temp.pid('Owner Kid')) as del \gset
-select pg_temp.expect(pg_temp.try_approve(:'del') like 'Only the admin%', 'removing people stays with the admin');
+-- Removing people or links: admin only, not even as a suggestion
+do $$ begin
+  perform pg_temp.req('00000000-0000-0000-0000-00000000000b', 'delete_person', jsonb_build_object('person_id', pg_temp.pid('Owner Kid')), pg_temp.pid('Owner Kid'));
+  raise exception 'FAILED: branch admin could ask to remove a person';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: branch admin cannot even ask to remove a person';
+end $$;
+do $$ begin
+  perform pg_temp.req('00000000-0000-0000-0000-00000000000b', 'remove_link', jsonb_build_object('type', 'parent_child', 'id', (select id from public.parent_child limit 1)));
+  raise exception 'FAILED: branch admin could ask to remove a link';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: branch admin cannot even ask to remove a link';
+end $$;
 
 -- Suggestions from others for the owner's branch
 select pg_temp.req(:'OM', 'edit_person', jsonb_build_object('person_id', pg_temp.pid('Owner Kid'), 'details', jsonb_build_object('profession', 'Pilot'))) as sugg \gset

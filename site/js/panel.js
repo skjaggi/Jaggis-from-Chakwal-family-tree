@@ -17,7 +17,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
   const personLink = (q, extra) =>
     h('li', h('button.link', { type: 'button', onclick: () => onSelect(q.id) }, fullName(q)), extra ? h('span.muted', ` ${extra}`) : null);
   const removeBtn = (kind, link, other) =>
-    canEdit ? h('button.icon-btn.small', { type: 'button', title: 'Remove this link', 'aria-label': `Remove link to ${shortName(other)}`, onclick: () => requestRemoveLink(p, kind, link, shortName(other)) }, '✕') : null;
+    store.isAdmin ? h('button.icon-btn.small', { type: 'button', title: 'Remove this link', 'aria-label': `Remove link to ${shortName(other)}`, onclick: () => requestRemoveLink(p, kind, link, shortName(other)) }, '✕') : null;
 
   const parents = fam.parents(id);
   const spouses = fam.spouses(id);
@@ -153,7 +153,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
           // The birth family of someone who married in is not added (admin excepted).
           store.isAdmin || !fam.isMarriedIn(id) ? h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'parent', of: id } }) }, 'Parent') : null),
         h('button.btn.small.ghost', { type: 'button', onclick: () => openLinkForm(p) }, 'Link to someone already in the tree'),
-        h('button.btn.small.ghost.danger', { type: 'button', onclick: () => requestDelete(p) }, store.isAdmin ? 'Remove from tree' : 'Ask to remove'),
+        store.isAdmin ? h('button.btn.small.ghost.danger', { type: 'button', onclick: () => requestDelete(p) }, 'Remove from tree') : null,
       ] : !store.preview
         ? h('p.muted.small', 'Family members can ', h('button.link', { type: 'button', onclick: onSignIn }, 'sign in'), ' to suggest changes. The admin approves every change.')
         : null),
