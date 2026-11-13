@@ -103,6 +103,17 @@ If someone isn't in the tree yet (for example a spouse who married in), add them
 - Free tier limits that matter here: 500 MB database (enough for many thousands of people), 1 GB file storage (thousands of photos: the site shrinks each photo to under ~200 KB before upload), 50,000 monthly active users.
 - To back up: on the site, **Export** downloads the tree as a GEDCOM file. Supabase also keeps daily backups on paid plans only, so an occasional GEDCOM export is a good habit.
 
+## Changing the admin
+
+You can hand over (or share) the admin role at any time. Nothing on the site needs a code change.
+
+1. The new admin must have signed in once. Then, on **Members**, find them under *Members who have signed in* and change their role from **Member** to **Admin**. They now see **Review** and **Members** too. (You can have more than one admin.)
+2. To step down, the new admin changes *your* role to **Member** on their Members page. Nobody can change their own role, so there is always at least one admin.
+3. Two places still show the current admin's name; update them if you like:
+   - **Sender name of the sign-in emails:** Supabase → **Authentication → Emails → SMTP Settings → Sender name** (now "Sunil Jaggi"). If the sending Gmail account changes too, also update the email and app password there.
+   - **Contact line at the end of the help page:** in `site/help.html`, the line "For anything else, contact the admin (Sunil Jaggi)."
+   - The sign-off "Sunil" in the *Confirm signup* and *Magic Link* templates (see `docs/email-templates.md`).
+
 ## Using sjaggi.com later
 
 1. In the repo, **Settings → Pages → Custom domain**: enter e.g. `family.sjaggi.com`.
