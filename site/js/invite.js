@@ -33,7 +33,7 @@ export function inviteMessage({ email, display_name }, fromName) {
     '',
     `You only sign in once on each phone or computer. A short guide: ${site}help.html`,
     '',
-    `Every change is checked by ${config.adminName} before it shows up, so don't worry about mistakes.`,
+    `Please note: changes you make are not visible right away. ${config.adminName}, the administrator, checks each one first, and it appears in the tree once approved. So don't worry about mistakes.`,
     '',
     fromName ? `With love,\n${fromName}` : '',
   ].join('\n').trim();
