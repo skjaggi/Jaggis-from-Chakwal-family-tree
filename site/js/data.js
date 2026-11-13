@@ -460,3 +460,15 @@ export async function visitorStats(days = 30) {
   }
   return data;
 }
+
+// Admin only: email this week's summary to the admin now (the same email
+// that goes out every Monday).
+export async function sendWeeklySummary() {
+  const { data, error } = await store.sb.functions.invoke('weekly-summary', { body: {} });
+  if (error) {
+    let msg = error.message;
+    try { msg = (await error.context.json()).error || msg; } catch { /* keep the generic message */ }
+    throw new Error(msg === 'not_configured' ? 'The email sender is not set up yet: save GMAIL_APP_PASSWORD in Supabase → Edge Functions → Secrets.' : msg);
+  }
+  return `Summary sent to ${(data?.to || []).join(', ')}.`;
+}

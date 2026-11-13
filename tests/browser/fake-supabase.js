@@ -67,6 +67,7 @@ export function createClient() {
           systems: { stats: [{ name: 'Android', count: 70 }, { name: 'iOS', count: 40 }, { name: 'Windows', count: 32 }] },
           sizes: { stats: [{ name: 'Phones', count: 100 }, { name: 'Computer monitors', count: 42 }] } }, error: null };
       }
+      if (name === 'weekly-summary') return { data: { sent: true, to: ['me@example.com'] }, error: null };
       return { data: { sent: true }, error: null };
     } },
     rpc: async (name, args) => {

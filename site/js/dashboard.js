@@ -2,7 +2,7 @@
 // Everything is worked out from the data this visitor can already see, so it
 // follows the same privacy rules as the rest of the site.
 import {
-  store, pendingCount, listProfiles, listInvites, listViews, visitorStats, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
+  store, pendingCount, listProfiles, listInvites, listViews, visitorStats, sendWeeklySummary, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
 } from './data.js';
 import { fullName, birthYear, skeleton, lifeLine } from './model.js';
 import { branchesOf, BRANCH_GEN } from './branches.js';
@@ -220,9 +220,14 @@ async function visitsSection() {
     while (weeks.length > 4 && weeks[0].count === 0) weeks.shift(); // skip quiet weeks before tracking began
     const notYet = invites.filter((i) => !i.accepted_at);
     const unit = ['view', 'views'];
+    const mailBtn = h('button.btn.small', { type: 'button', onclick: async () => {
+      mailBtn.disabled = true;
+      try { toast(await sendWeeklySummary(), 'ok'); } catch (err) { toast(err.message, 'error'); }
+      mailBtn.disabled = false;
+    } }, 'Email me this week\'s summary now');
     clear(box,
-      h('h2', 'Visits by family members'),
-      h('p.muted.small', 'Only you can see this. It covers signed-in family members over the last 90 days, not counting your own visits. A visit is one sitting; opening a person counts as a view. Public visitors who don\'t sign in are counted separately and anonymously.'),
+      h('div.dash-head', h('h2', 'Visits by family members'), mailBtn),
+      h('p.muted.small', 'Only you can see this. It covers signed-in family members over the last 90 days, not counting your own visits. A visit is one sitting; opening a person counts as a view. Public visitors who don\'t sign in are counted separately and anonymously. A summary of the week is emailed to you every Monday morning.'),
       h('div.stats',
         tile(active30, 'Members active', 'last 30 days'),
         tile(visits7, 'Visits', 'last 7 days'),
