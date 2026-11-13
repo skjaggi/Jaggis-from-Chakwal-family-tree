@@ -19,7 +19,7 @@ You only sign in once on each phone or computer; after that the site remembers y
 
 A short guide is here: https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/help.html
 
-Please note: changes you make are not visible right away. As the administrator, I check each one first, and it appears in the tree once I approve it. So don't worry about making a mistake. Please tell me anything that's wrong or missing. I'd love to have it ready for Thanksgiving.
+Please note: changes you make are not visible right away. As the administrator, I check each one first, and it appears in the tree once I approve it. So don't worry about making a mistake. Please tell me anything that's wrong or missing.
 
 With love,
 Sunil
