@@ -448,3 +448,15 @@ export async function listViews(days = 90) {
     if (data.length < 1000 || rows.length >= 20000) return rows;
   }
 }
+
+// Admin only: anonymous public-visitor statistics from GoatCounter, fetched
+// through the visitor-stats server function (which holds the API token).
+export async function visitorStats(days = 30) {
+  const { data, error } = await store.sb.functions.invoke('visitor-stats', { body: { days } });
+  if (error) {
+    let msg = error.message;
+    try { msg = (await error.context.json()).error || msg; } catch { /* keep the generic message */ }
+    throw new Error(msg);
+  }
+  return data;
+}

@@ -2,7 +2,7 @@
 // Everything is worked out from the data this visitor can already see, so it
 // follows the same privacy rules as the rest of the site.
 import {
-  store, pendingCount, listProfiles, listInvites, listViews, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
+  store, pendingCount, listProfiles, listInvites, listViews, visitorStats, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
 } from './data.js';
 import { fullName, birthYear, skeleton, lifeLine } from './model.js';
 import { branchesOf, BRANCH_GEN } from './branches.js';
@@ -249,6 +249,72 @@ async function visitsSection() {
   return box;
 }
 
+// ---------------------------------------------------------------- public visitors
+// Admin only: anonymous visitors counted by GoatCounter (no names, no cookies).
+const COUNTRY = (() => { try { return new Intl.DisplayNames(undefined, { type: 'region' }); } catch { return null; } })();
+function placeName(s) {
+  // GoatCounter gives "US" or "US-AZ" style codes, with a name.
+  if (s.name && !/^[A-Z]{2}(-|$)/.test(s.name)) return s.name;
+  const code = String(s.id || s.name || '').split('-')[0];
+  try { return COUNTRY?.of(code) || s.name || code; } catch { return s.name || code; }
+}
+
+async function publicVisitorsSection() {
+  const box = h('section.dash-card.wide', h('h2', 'Public visitors'), h('p.muted', 'Loading…'));
+  let days = 30;
+  const load = () => visitorStats(days).then((d) => {
+    const stats = (x) => (x?.stats || []).map((s) => ({ label: s.name || '(unknown)', count: s.count || 0, raw: s }));
+    const totalDays = d.total?.stats || [];
+    // Visits by hour of day, moved from UTC to this computer's time zone.
+    const shift = -new Date().getTimezoneOffset() / 60;
+    const hours = Array(24).fill(0);
+    for (const day of totalDays) (day.hourly || []).forEach((n, hr) => { hours[(((hr + shift) % 24) + 24) % 24] += n; });
+    const hourRows = hours.map((n, hr) => ({ label: `${String(hr).padStart(2, '0')}:00`, count: n }));
+    const busiest = hours.indexOf(Math.max(...hours));
+    // Visits per day (or per week for long ranges).
+    const perDay = totalDays.map((x) => ({ label: new Date(`${x.day}T12:00:00Z`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }), count: x.daily || 0 }));
+    let timeRows = perDay;
+    if (perDay.length > 14) {
+      timeRows = [];
+      for (let i = 0; i < perDay.length; i += 7) timeRows.push({ label: `Week of ${perDay[i].label}`, count: perDay.slice(i, i + 7).reduce((n, r) => n + r.count, 0) });
+    }
+    const pages = (d.pages?.hits || []).map((x) => ({ label: x.title && !/^Jaggis of Chakwal$/.test(x.title) ? `${x.title}` : x.path, count: x.count || 0 }));
+    const places = stats(d.locations).map((r) => ({ ...r, label: placeName(r.raw) }));
+    const refs = stats(d.referrers).map((r) => ({ ...r, label: r.label === '' || r.label === '(unknown)' ? 'Typed in or bookmark' : r.label })).sort((a, b) => b.count - a.count);
+    const unit = ['visitor', 'visitors'];
+    const total = d.total?.total ?? 0;
+    const picker = h('select', { 'aria-label': 'Period', onchange: (e) => { days = Number(e.target.value); clear(box, h('h2', 'Public visitors'), h('p.muted', 'Loading…')); load(); } },
+      [7, 30, 90, 365].map((n) => h('option', { value: n, selected: n === days }, n === 365 ? 'Last year' : `Last ${n} days`)));
+    clear(box,
+      h('div.dash-head', h('h2', 'Public visitors'), picker),
+      h('p.muted.small', 'Everyone who opens the site, signed in or not, counted anonymously by GoatCounter: no names, no cookies. Only you can see this. Times are in your time zone. Search words people typed into Google are in Google Search Console.'),
+      h('div.stats',
+        tile(total, 'Visitors', days === 365 ? 'last year' : `last ${days} days`),
+        tile(places.length, 'Countries and regions', places[0] ? `most from ${places[0].label}` : ''),
+        tile(total ? `${String(busiest).padStart(2, '0')}:00` : '—', 'Busiest hour', 'your time')),
+      h('div.dash-grid',
+        h('div', h('h3', 'Where visitors are'), places.length ? barChart(places.slice(0, 12), 'Where visitors are', { unit }) : h('p.muted', 'No visitors yet.')),
+        h('div', h('h3', 'How they found the site'), refs.length ? barChart(refs.slice(0, 10), 'How they found the site', { unit }) : h('p.muted', 'No visitors yet.')),
+        h('div', h('h3', 'Pages visited'), pages.length ? barChart(pages.slice(0, 12), 'Pages visited', { unit }) : h('p.muted', 'No visitors yet.')),
+        h('div', h('h3', timeRows === perDay ? 'Visitors per day' : 'Visitors per week'), timeRows.length ? barChart(timeRows, 'Visitors over time', { unit }) : h('p.muted', 'No visitors yet.')),
+        h('div', h('h3', 'Time of day'), total ? barChart(hourRows, 'Time of day', { unit }) : h('p.muted', 'No visitors yet.')),
+        h('div', h('h3', 'Devices'),
+          barChart(stats(d.sizes), 'Screen sizes', { unit }) || h('p.muted', 'No visitors yet.'),
+          h('h3', 'Browsers'), barChart(stats(d.browsers), 'Browsers', { unit }) || h('p.muted', '—'),
+          h('h3', 'Systems'), barChart(stats(d.systems), 'Systems', { unit }) || h('p.muted', '—'))),
+      h('p.muted.small', 'More detail: ', h('a', { href: 'https://jaggis-chakwal.goatcounter.com', target: '_blank', rel: 'noopener' }, 'open GoatCounter'), '.'));
+  }).catch((e) => {
+    const msg = /not_configured/.test(e.message)
+      ? 'Not switched on yet: the GoatCounter token still needs to be saved as a secret in Supabase.'
+      : /Failed to send|not found|404/i.test(e.message) ? 'Not switched on yet: the visitor-stats server function still needs to be set up in Supabase.'
+        : `Could not load visitor numbers: ${e.message}`;
+    clear(box, h('h2', 'Public visitors'), h('p.muted', msg),
+      h('p.muted.small', 'You can still see the numbers directly on ', h('a', { href: 'https://jaggis-chakwal.goatcounter.com', target: '_blank', rel: 'noopener' }, 'GoatCounter'), '.'));
+  });
+  load();
+  return box;
+}
+
 async function questionsSection() {
   const box = h('section.dash-card.dash-wide', h('h2', 'Open questions'), h('p.muted', 'Loading…'));
   if (!store.signedIn) {
@@ -362,6 +428,7 @@ export async function renderDashboard(container) {
     h('p.muted', 'The tree at a glance. Tap a row to see who it is about, then tap a name to open their card.'),
     tiles,
     store.isAdmin ? await visitsSection() : null,
+    store.isAdmin ? await publicVisitorsSection() : null,
     h('div.dash-grid',
       h('section.dash-card', h('h2', 'Needs attention'),
         attention,

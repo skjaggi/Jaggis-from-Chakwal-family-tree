@@ -55,7 +55,20 @@ export function createClient() {
       onAuthStateChange: () => {}, signInWithOtp: async () => ({ error: null }), verifyOtp: async () => ({ error: null }), signOut: async () => ({}),
     },
     from: t => new Q(t),
-    functions: { invoke: async (name, { body }) => { (window.__invoked ||= []).push([name, body.email]); return { data: { sent: true }, error: null }; } },
+    functions: { invoke: async (name, { body }) => {
+      (window.__invoked ||= []).push([name, body.email]);
+      if (name === 'visitor-stats') {
+        const days = Array.from({ length: body.days }, (_, i) => ({ day: new Date(Date.now() - (body.days - 1 - i) * 864e5).toISOString().slice(0, 10), daily: (i * 7) % 11, hourly: Array.from({ length: 24 }, (_, h) => (h > 14 && h < 22 ? 2 : 0)) }));
+        return { data: { days: body.days, total: { total: 142, stats: days },
+          pages: { hits: [{ path: '/Jaggis-from-Chakwal-family-tree/#/tree', title: 'Jaggis of Chakwal: tree', count: 90 }, { path: '/Jaggis-from-Chakwal-family-tree/people/', title: 'Ancestors | Jaggi family of Chakwal', count: 30 }] },
+          locations: { stats: [{ id: 'IN', name: 'India', count: 70 }, { id: 'US', name: 'United States', count: 50 }, { id: 'CA', name: 'Canada', count: 12 }] },
+          referrers: { stats: [{ name: 'Google', count: 40 }, { name: '', count: 80 }, { name: 'WhatsApp', count: 22 }] },
+          browsers: { stats: [{ name: 'Chrome', count: 90 }, { name: 'Safari', count: 52 }] },
+          systems: { stats: [{ name: 'Android', count: 70 }, { name: 'iOS', count: 40 }, { name: 'Windows', count: 32 }] },
+          sizes: { stats: [{ name: 'Phones', count: 100 }, { name: 'Computer monitors', count: 42 }] } }, error: null };
+      }
+      return { data: { sent: true }, error: null };
+    } },
     rpc: async (name, args) => {
       if (name === 'my_managed_people') {
         const c = db.profiles[0].claimed_person_id; if (!c) return { data: [], error: null };

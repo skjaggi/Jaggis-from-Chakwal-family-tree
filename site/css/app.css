@@ -510,3 +510,7 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .dash-card.wide { margin: 16px 0; }
 .dash-card.wide h3 { font-size: 1rem; margin: 16px 0 6px; }
 .dash-card.wide .dash-table td { vertical-align: top; }
+.dash-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.dash-head select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.dash-card > .dash-head { margin: 0 -16px 10px; padding: 6px 16px; background: var(--p-sky); border-bottom: 1px solid var(--line); }
+.dash-head h2 { margin: 0; font-size: 1rem; }
