@@ -89,8 +89,13 @@ select pg_temp.req('00000000-0000-0000-0000-0000000000d2', 'edit_person', jsonb_
 select pg_temp.expect(pg_temp.try_approve(:'se') = 'ok', 'married-in owner edits their own details');
 select pg_temp.req('00000000-0000-0000-0000-0000000000d2', 'add_person', pg_temp.child_of('Gurjeet Kumar', 'Gurjeet Kid')) as sk \gset
 select pg_temp.expect(pg_temp.try_approve(:'sk') = 'ok', 'married-in owner adds under their own children');
-select pg_temp.req('00000000-0000-0000-0000-0000000000d2', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Her Father'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Shakuntala Rani')))) as sp \gset
-select pg_temp.expect(pg_temp.try_approve(:'sp') like 'Only the admin%', 'married-in owner cannot add their own parents');
+do $$ begin
+  perform pg_temp.req('00000000-0000-0000-0000-0000000000d2', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Her Father'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Shakuntala Rani'))));
+  raise exception 'FAILED: married-in owner added a parent';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: married-in owner cannot add their own parents';
+end $$;
 select pg_temp.req('00000000-0000-0000-0000-0000000000d2', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Other Husband'), 'link', jsonb_build_object('as', 'spouse', 'of', pg_temp.pid('Shakuntala Rani')))) as ss \gset
 select pg_temp.expect(pg_temp.try_approve(:'ss') like 'Only the admin%', 'married-in owner cannot add a spouse to themselves');
 select pg_temp.req('00000000-0000-0000-0000-0000000000d2', 'edit_person', jsonb_build_object('person_id', pg_temp.pid('Harbans Lal'), 'details', jsonb_build_object('notes', 'x'))) as sh \gset
@@ -131,3 +136,28 @@ select pg_temp.expect((select claimed_person_id from public.profiles where id = 
 select pg_temp.as_user(:'SUNIL');
 select pg_temp.req(:'SUNIL', 'add_person', pg_temp.child_of('Owner Kid', 'After Revoke')) as ar \gset
 select pg_temp.expect(pg_temp.try_approve(:'ar') like 'Only the admin%', 'after removal their changes need approval again');
+
+-- Married-in spouses' parents (and so brothers and sisters) are not added
+select pg_temp.as_user('00000000-0000-0000-0000-0000000000d2');
+do $$ begin
+  insert into public.change_requests (kind, payload, summary, submitted_by)
+  values ('add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Her Mother'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Shakuntala Rani'))), 'x', '00000000-0000-0000-0000-0000000000d2');
+  raise exception 'FAILED: suggestion of a married-in parent accepted';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: nobody can even suggest parents for someone who married in';
+end $$;
+select pg_temp.as_user(:'OM');
+do $$ begin
+  insert into public.change_requests (kind, payload, summary, submitted_by)
+  values ('add_link', jsonb_build_object('type', 'parent_child', 'parent_id', pg_temp.pid('Om Parkash'), 'child_id', pg_temp.pid('Shakuntala Rani')), 'x', '00000000-0000-0000-0000-00000000000c');
+  raise exception 'FAILED: linking a parent to a married-in person accepted';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: nobody can link a parent to someone who married in';
+end $$;
+select pg_temp.req(:'OM', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Blood Parent'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Om Parkash')))) is not null as ok \gset
+select pg_temp.expect(:'ok', 'parents of blood relatives can still be suggested');
+select pg_temp.as_user(:'ADMIN');
+select pg_temp.req(:'ADMIN', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Admin Added'), 'link', jsonb_build_object('as', 'parent', 'of', pg_temp.pid('Shakuntala Rani')))) is not null as ok2 \gset
+select pg_temp.expect(:'ok2', 'the admin can still add them if needed');

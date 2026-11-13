@@ -150,7 +150,8 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
           h('span.muted', 'Add: '),
           h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'child', of: id } }) }, 'Child'),
           h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'spouse', of: id } }) }, 'Spouse'),
-          h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'parent', of: id } }) }, 'Parent')),
+          // The birth family of someone who married in is not added (admin excepted).
+          store.isAdmin || !fam.isMarriedIn(id) ? h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'parent', of: id } }) }, 'Parent') : null),
         h('button.btn.small.ghost', { type: 'button', onclick: () => openLinkForm(p) }, 'Link to someone already in the tree'),
         h('button.btn.small.ghost.danger', { type: 'button', onclick: () => requestDelete(p) }, store.isAdmin ? 'Remove from tree' : 'Ask to remove'),
       ] : !store.preview
