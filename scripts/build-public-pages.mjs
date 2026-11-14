@@ -47,7 +47,8 @@ const slugify = (s) => s.normalize('NFKD').replace(/[^\w\s-]/g, '').trim().toLow
 
 const STYLE = `
   :root { --bg:#f6f8f5; --ink:#1d2a22; --muted:#5b6b61; --accent:#17706b; --line:#d9e2db; --card:#fff; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#121815; --ink:#e8efe9; --muted:#a3b2a8; --accent:#5cc0b5; --line:#33423a; --card:#1b231f; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#121815; --ink:#e8efe9; --muted:#a3b2a8; --accent:#5cc0b5; --line:#33423a; --card:#1b231f; } }
+  :root[data-theme="dark"] { --bg:#121815; --ink:#e8efe9; --muted:#a3b2a8; --accent:#5cc0b5; --line:#33423a; --card:#1b231f; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
   main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
   a { color:var(--accent); }
@@ -73,6 +74,7 @@ function page({ title, description, canonical, body, jsonld, depth = 1 }) {
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">

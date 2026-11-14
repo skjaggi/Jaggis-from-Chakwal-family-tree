@@ -1,4 +1,5 @@
 // App start-up, routing and the header.
+import { currentTheme, toggleTheme } from './theme.js';
 import { store, init, sendLoginLink, verifyCode, signOut, pendingCount, listRequests, logView } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint } from './model.js';
@@ -264,6 +265,7 @@ async function renderHeader() {
     h('a', { href: 'people/', title: 'Family members who have passed away, one page each' }, 'Ancestors'),
     h('a', { href: 'help.html' }, 'Help'),
     h('a', { href: '#/export', 'data-nav': 'export', title: 'Download the tree as a PDF or a GEDCOM file' }, 'Export'),
+    themeButton(),
     signed
       ? h('button.linkish', { type: 'button', onclick: async () => {
         await signOut();
@@ -371,3 +373,13 @@ async function start() {
 }
 
 start();
+
+// Light/dark switch in the menu. The label names the look you switch to.
+function themeButton() {
+  const label = () => (currentTheme() === 'dark' ? '☀ Light' : '☾ Dark');
+  const b = h('button.linkish.theme-toggle', { type: 'button', title: 'Switch between light and dark colours (remembered on this device)', onclick: () => {
+    toggleTheme();
+    b.textContent = label();
+  } }, label());
+  return b;
+}

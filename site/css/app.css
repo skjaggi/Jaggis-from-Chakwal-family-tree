@@ -29,8 +29,10 @@
   --p-mint: #dcf2e6; --p-blush: #fae1e7; --p-sky: #dde9fa; --p-lavender: #e9e3f8; --p-butter: #faf1c8; --p-peach: #fde5d4;
   color-scheme: light;
 }
+/* Dark colours: follow the device unless the person picked Light or Dark
+   with the switch in the menu (stored per device, see js/theme.js). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #121815;
     --surface: #1b231f;
     --surface-2: #24302a;
@@ -55,6 +57,31 @@
     --p-mint: #1e3329; --p-blush: #3a252b; --p-sky: #1f2c3d; --p-lavender: #2b2639; --p-butter: #36311b; --p-peach: #3a2a1e;
     color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #121815;
+  --surface: #1b231f;
+  --surface-2: #24302a;
+  --ink: #e8efe9;
+  --muted: #a3b2a8;
+  --line: #33423a;
+  --bark: #c79a6a;
+  --leaf: #7fbfa8;
+  --accent: #5cc0b5;
+  --accent-ink: #0f1513;
+  --gold: #d6b25a;
+  --male: #1c272b;
+  --female: #2a2226;
+  --warn-bg: #3d3216;
+  --warn-ink: #f2d27a;
+  --ok-bg: #1f3524;
+  --ok-ink: #9fd8a9;
+  --danger: #ff8a80;
+  --watermark-opacity: 0.13;
+  --branch-1: #3987e5; --branch-2: #d95926; --branch-3: #199e70; --branch-4: #c98500;
+  --branch-5: #d55181; --branch-6: #008300; --branch-7: #9085e9; --branch-8: #e66767; --branch-0: #6b776f;
+  --p-mint: #1e3329; --p-blush: #3a252b; --p-sky: #1f2c3d; --p-lavender: #2b2639; --p-butter: #36311b; --p-peach: #3a2a1e;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -503,7 +530,8 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .claim-banner[hidden] { display: none; }
 .claim-banner.waiting { background: #eef6f4; color: #1d4d49; border-bottom-color: #9cc9c2; }
 .claim-banner .claim-actions { display: inline-flex; gap: 8px; align-items: center; margin-left: auto; }
-@media (prefers-color-scheme: dark) { .claim-banner { background: #3a3018; color: #f3e3b8; } .claim-banner.waiting { background: #1e3633; color: #cfe8e3; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .claim-banner { background: #3a3018; color: #f3e3b8; } :root:not([data-theme="light"]) .claim-banner.waiting { background: #1e3633; color: #cfe8e3; } }
+:root[data-theme="dark"] .claim-banner { background: #3a3018; color: #f3e3b8; } :root[data-theme="dark"] .claim-banner.waiting { background: #1e3633; color: #cfe8e3; }
 .hovercard .hc-hint { font-size: 0.75rem; color: var(--muted); font-style: italic; margin-bottom: 4px; }
 
 /* Admin: visits report */
@@ -514,3 +542,5 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .dash-head select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .dash-card > .dash-head { margin: 0 -16px 10px; padding: 6px 16px; background: var(--p-sky); border-bottom: 1px solid var(--line); }
 .dash-head h2 { margin: 0; font-size: 1rem; }
+
+.theme-toggle { font-size: 0.95rem; }
