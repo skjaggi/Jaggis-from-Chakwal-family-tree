@@ -193,9 +193,9 @@ begin
   insert into public.profiles (id, email, display_name, role, person_id)
   values (new.id, lower(new.email), coalesce(inv.display_name, split_part(new.email, '@', 1)), inv.role, inv.person_id)
   on conflict (id) do nothing;
-  -- A login made by an invitation email exists before they sign in, so it
-  -- only counts as "signed in" once they actually do (see below).
-  if new.invited_at is null or new.last_sign_in_at is not null then
+  -- A login counts as "signed in" only once they actually sign in (see
+  -- below). Invited logins are created before invited_at is stamped.
+  if new.last_sign_in_at is not null then
     update public.invites set accepted_at = now() where email = inv.email;
   end if;
   return new;
@@ -208,7 +208,9 @@ create trigger on_auth_user_created after insert on auth.users
 create or replace function public.handle_user_signed_in() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  update public.invites set accepted_at = now() where email = lower(new.email) and accepted_at is null;
+  if new.last_sign_in_at is not null and new.last_sign_in_at is distinct from old.last_sign_in_at then
+    update public.invites set accepted_at = now() where email = lower(new.email) and accepted_at is null;
+  end if;
   return new;
 end $$;
 

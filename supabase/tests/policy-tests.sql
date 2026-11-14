@@ -27,6 +27,13 @@ insert into auth.users (id, email, invited_at) values ('00000000-0000-0000-0000-
 select pg_temp.expect((select accepted_at from public.invites where email = 'emailed@example.com') is null, 'invite email alone does not count as signed in');
 update auth.users set last_sign_in_at = now() where email = 'emailed@example.com';
 select pg_temp.expect((select accepted_at from public.invites where email = 'emailed@example.com') is not null, 'first sign-in marks the invite as used');
+-- What Supabase really does: create the login first, then stamp invited_at.
+insert into public.invites (email, role) values ('emailed2@example.com', 'member');
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000e2', 'emailed2@example.com');
+update auth.users set invited_at = now(), last_sign_in_at = null where email = 'emailed2@example.com';
+select pg_temp.expect((select accepted_at from public.invites where email = 'emailed2@example.com') is null, 'login created then stamped invited does not count as signed in');
+update auth.users set last_sign_in_at = now() where email = 'emailed2@example.com';
+select pg_temp.expect((select accepted_at from public.invites where email = 'emailed2@example.com') is not null, 'real sign-in after invite marks it used');
 
 -- Anonymous visitor
 begin;
