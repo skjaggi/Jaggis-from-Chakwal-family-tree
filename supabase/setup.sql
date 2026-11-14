@@ -1062,6 +1062,20 @@ drop trigger if exists trim_page_views on public.page_views;
 create trigger trim_page_views after insert on public.page_views
   for each statement execute function public._trim_page_views();
 
+-- Members the admin removed (login blocked, restorable). See functions/remove-member.
+create table if not exists public.removed_members (
+  email text primary key,
+  user_id uuid,
+  snapshot jsonb not null,          -- the invite and profile rows as they were
+  removed_by uuid references auth.users (id) on delete set null,
+  removed_at timestamptz not null default now()
+);
+alter table public.removed_members enable row level security;
+drop policy if exists "admin reads removed members" on public.removed_members;
+create policy "admin reads removed members" on public.removed_members for select to authenticated
+  using (public.is_admin());
+-- Writes happen only in the edge function (service role).
+
 -- ---------------------------------------------------------------- family data from the PDFs
 insert into public.people (id, title, given_name, surname, other_names, gender, generation, birth_order, is_living, photo_path, photo_visibility) values
   ('8bac953e-f5f1-5016-8d99-cb43ce99cb80', 'Bakhshi', 'Bhanna Mal', 'Jaggi', null, 'male', 1, 1, false, null, 'public'),
@@ -1352,19 +1366,4 @@ insert into public.invites (email, role, person_id)
 select email, 'admin', '143f144c-493b-5c9f-9996-9f7de3feafcc'::uuid from setup_admin
 on conflict (email) do update set role = 'admin';
 
--- Members the admin removed (login blocked, restorable). See functions/remove-member.
-create table if not exists public.removed_members (
-  email text primary key,
-  user_id uuid,
-  snapshot jsonb not null,          -- the invite and profile rows as they were
-  removed_by uuid references auth.users (id) on delete set null,
-  removed_at timestamptz not null default now()
-);
-alter table public.removed_members enable row level security;
-drop policy if exists "admin reads removed members" on public.removed_members;
-create policy "admin reads removed members" on public.removed_members for select to authenticated
-  using (public.is_admin());
--- Writes happen only in the edge function (service role).
-
 select 'Setup finished: ' || (select count(*) from public.people) || ' people loaded, admin invite for ' || (select email from setup_admin) as result;
-
