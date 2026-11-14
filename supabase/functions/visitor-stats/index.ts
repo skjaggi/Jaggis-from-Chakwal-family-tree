@@ -8,7 +8,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 
 const SITE_CODE = 'jaggis-chakwal';
 const API = `https://${SITE_CODE}.goatcounter.com/api/v0`;
-const ALLOWED_ORIGINS = ['https://skjaggi.github.io', 'http://localhost:8765'];
+const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
 
 function cors(req: Request) {
   const origin = req.headers.get('Origin') || '';

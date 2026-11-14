@@ -12,7 +12,7 @@
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { buildFamily, fullName, birthYear } from '../site/js/model.js';
 
-const SITE = 'https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/';
+const SITE = 'https://familytree.sjaggi.com/';
 const OUT = new URL('../site/', import.meta.url);
 const TITLE = 'Jaggi family of Chakwal';
 

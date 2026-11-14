@@ -21,7 +21,7 @@ Until step 4 is done the site still works in **preview mode**: anyone can browse
 2. Under **Build and deployment → Source**, choose **GitHub Actions**.
 3. Go to the **Actions** tab, open **Deploy site to GitHub Pages**, and click **Run workflow** (it also runs on every change to `main`).
 
-The site will be at **https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/**.
+The site will be at **https://familytree.sjaggi.com/**.
 
 ## 2. Create the Supabase project
 
@@ -62,7 +62,7 @@ The anon key is meant to be public. What it can do is limited by the database's 
 Family members sign in with their email: they type it in, get an email, and tap the link. No passwords.
 
 1. In Supabase, open **Authentication → URL Configuration**.
-   - **Site URL**: `https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/`
+   - **Site URL**: `https://familytree.sjaggi.com/`
    - **Redirect URLs**: add the same address.
 2. Open **Authentication → Sign In / Providers** (or **Providers → Email**). Make sure **Email** is enabled and **Allow new users to sign up** is **on**. Don't worry: the database only lets invited emails create a login. Everyone else sees "This email hasn't been invited yet".
 3. **Add the sign-in code to the emails** (strongly recommended). Open **Authentication → Emails → Templates**. In **both** the **Confirm signup** template (used the first time someone signs in) and the **Magic Link** template (used after that), add this line under the link and save:
@@ -117,7 +117,7 @@ You can hand over (or share) the admin role at any time. Nothing on the site nee
 ## Using sjaggi.com later
 
 1. In the repo, **Settings → Pages → Custom domain**: enter e.g. `family.sjaggi.com`.
-2. At your domain registrar, add a `CNAME` record from `family` to `skjaggi.github.io`.
+2. At your domain registrar, add a `CNAME` record from `familytree` to `skjaggi.github.io`.
 3. In Supabase, update **Site URL** and **Redirect URLs** to the new address.
 
 ## Changing the starting data

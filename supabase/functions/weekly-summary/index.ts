@@ -14,9 +14,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 import nodemailer from 'npm:nodemailer@6.9.16';
 
 const SENDER = 'helloquantumnexus@gmail.com';
-const SITE = 'https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/';
+const SITE = 'https://familytree.sjaggi.com/';
 const GOAT = 'https://jaggis-chakwal.goatcounter.com/api/v0';
-const ALLOWED_ORIGINS = ['https://skjaggi.github.io', 'http://localhost:8765'];
+const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
 const GAP = 30 * 60 * 1000; // a visit = views with no gap over 30 minutes
 
 function cors(req: Request) {

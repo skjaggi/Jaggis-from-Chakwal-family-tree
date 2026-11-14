@@ -6,8 +6,8 @@
 // Deployed with verify_jwt off because it checks the caller itself.
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 
-const SITE = 'https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/';
-const ALLOWED_ORIGINS = ['https://skjaggi.github.io', 'http://localhost:8765'];
+const SITE = 'https://familytree.sjaggi.com/';
+const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
 
 function cors(req: Request) {
   const origin = req.headers.get('Origin') || '';

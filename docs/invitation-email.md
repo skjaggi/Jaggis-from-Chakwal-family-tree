@@ -8,7 +8,7 @@ Dear NAME,
 
 I've put together an online family tree for the Jaggis of Chakwal, starting from Bakhshi Bhanna Mal Jaggi, and I'd love for you to see it. You're already in it.
 
-Open the tree: https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/
+Open the tree: https://familytree.sjaggi.com/
 
 Anyone can look around without signing in. To add or correct something, sign in once:
 1. Click "Sign in" at the top and enter EMAIL.
@@ -17,7 +17,7 @@ Anyone can look around without signing in. To add or correct something, sign in 
 
 You only sign in once on each phone or computer; after that the site remembers you. On a phone, open the site in Safari or Chrome (not inside the Gmail app) and add it to your home screen.
 
-A short guide is here: https://skjaggi.github.io/Jaggis-from-Chakwal-family-tree/help.html
+A short guide is here: https://familytree.sjaggi.com/help.html
 
 Please note: changes you make are not visible right away. As the administrator, I check each one first, and it appears in the tree once I approve it. So don't worry about making a mistake. Please tell me anything that's wrong or missing.
 
