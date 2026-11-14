@@ -54,7 +54,12 @@ const STYLE = `
   a { color:var(--accent); }
   header.top { border-bottom:3px solid #c49a3a; padding:12px 16px; background:var(--card); }
   header.top a { text-decoration:none; font-weight:700; color:var(--ink); display:inline-flex; align-items:center; gap:10px; }
-  header.top img { height:64px; width:auto; display:block; }
+  header.top { display:flex; align-items:center; gap:10px; }
+  header.top .logo { position:relative; line-height:0; cursor:zoom-in; }
+  header.top .logo > img { height:88px; width:auto; display:block; }
+  header.top .pop { display:none; pointer-events:none; position:absolute; top:calc(100% + 8px); left:0; z-index:5; padding:10px; background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:0 8px 24px rgb(0 0 0 / .25); }
+  header.top .pop img { display:block; width:min(500px, calc(100vw - 52px)); height:auto; }
+  header.top .logo:hover .pop, header.top .logo:focus .pop { display:block; }
   footer.foot { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
   footer.foot img { height:36px; width:auto; border-radius:6px; display:block; }
   h1 { margin:8px 0 4px; font-size:1.7rem; }
@@ -91,7 +96,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <style>${STYLE}</style>
 </head>
 <body>
-<header class="top"><a href="${up}"><img src="${up}img/brand/jaggis-logo-168.webp" srcset="${up}img/brand/jaggis-logo-168.webp 2x, ${up}img/brand/jaggis-logo-320.webp 4x" width="80" height="64" alt="">Jaggis of Chakwal</a></header>
+<header class="top"><span class="logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="${up}img/brand/jaggis-logo-168.webp" srcset="${up}img/brand/jaggis-logo-320.webp 2x" width="110" height="88" alt=""><span class="pop" role="img" aria-label="Jaggis of Chakwal logo: Our roots, our strength, our family. Legacy, family, heritage."><img src="${up}img/brand/jaggis-logo-800.webp" loading="lazy" width="500" height="400" alt=""></span></span><a href="${up}">Jaggis of Chakwal</a></header>
 <main>
 ${body}
 <footer>Part of the <a href="${up}">Jaggi family tree of Chakwal</a>, descending from Bakhshi Bhanna Mal Jaggi. Details of living family members are private and are not shown here.</footer>
