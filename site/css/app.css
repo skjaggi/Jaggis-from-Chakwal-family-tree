@@ -368,7 +368,7 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 }
 
 @media (max-width: 760px) {
-  .brand-logo img { height: 36px; }
+  .brand-logo img { height: 26px; }
   .site-title { font-size: 0.98rem; }
   .brand { flex: 1; min-width: 0; }
   nav { margin-left: 0; flex: none; }
