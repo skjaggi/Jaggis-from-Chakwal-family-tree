@@ -182,7 +182,7 @@ export function openPersonForm({ mode, person = null, relation = null }) {
   });
 
   const title = mode === 'add' ? `Add ${relation.as}` : `Edit ${shortName(person)}`;
-  const m = modal(title, form);
+  const m = modal(title, form, { guard: true });
   setTimeout(() => form.given_name.focus(), 50);
 }
 
@@ -235,7 +235,7 @@ export function openPhotoForm(person) {
     btn.disabled = false;
     btn.textContent = canManage(person.id) ? 'Save photo' : 'Send for approval';
   });
-  const m = modal('Profile photo', form);
+  const m = modal('Profile photo', form, { guard: true });
 }
 
 export async function removePhoto(person) {
@@ -298,7 +298,7 @@ export function openLinkForm(person) {
     }
     await send('add_link', payload, { target: person.id, summary }, m.close);
   });
-  const m = modal('Link to someone in the tree', form);
+  const m = modal('Link to someone in the tree', form, { guard: true });
 }
 
 export async function requestRemoveLink(person, kind, link, otherName) {

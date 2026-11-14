@@ -45,7 +45,7 @@ const quiet = (pg) => pg.evaluate(() => { const t = document.getElementById('toa
   pg.on('pageerror', (e) => errors.push(e.message));
   await pg.goto(`${SITE}#/tree/${root}?p=${kesar}`); await pg.waitForSelector('#panel .panel-name'); await pg.waitForTimeout(800);
   await shot(pg, 'person-card');
-  await pg.locator('#panel').evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  await pg.locator('#panel').evaluate((el) => { el.scrollTop = el.querySelector('.panel-top').offsetTop - 120; });
   await pg.waitForTimeout(200);
   await shot(pg, 'card-actions');
 

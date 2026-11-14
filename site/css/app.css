@@ -196,6 +196,8 @@ nav a.active { background: var(--surface-2); font-weight: 600; }
 .modal-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
 .modal-head h2 { margin: 0; font-size: 1.1rem; }
 .modal-body { padding: 16px; }
+/* Keep a form's Save button in view while the dialog scrolls. */
+.modal .form > .form-actions:last-child { position: sticky; bottom: 0; z-index: 1; margin: 4px -16px -16px; padding: 12px 16px; background: var(--surface); border-top: 1px solid var(--line); border-radius: 0 0 14px 14px; }
 
 /* ---------- main layout */
 body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
@@ -324,6 +326,8 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .sources { margin: 12px 0; font-size: 0.88rem; color: var(--muted); }
 .sources p { white-space: pre-wrap; }
 .panel-actions { display: grid; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.panel-actions.panel-top { margin: 4px 0 14px; padding: 0 0 14px; border-top: 0; border-bottom: 1px solid var(--line); }
+.panel-top .main-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .add-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .btn.danger.ghost { justify-self: start; }
 .hint { text-align: center; margin-top: 14px; }

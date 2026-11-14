@@ -117,6 +117,21 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
       status ? h('span.tag', status) : null,
       d?.visibility === 'branch' ? h('span.tag.lock', 'Details: branch only') : null,
       pl?.confidence === 'uncertain' ? h('span.tag.warn', 'Parent not confirmed') : null),
+    // The everyday buttons sit near the top so people find them without scrolling.
+    h('div.panel-actions.panel-top',
+      canEdit ? h('div.main-row',
+        h('button.btn.primary', { type: 'button', onclick: () => openPersonForm({ mode: 'edit', person: p }) }, canManage(id, 'person') ? 'Edit' : 'Suggest an edit'),
+        h('button.btn', { type: 'button', onclick: () => onRoot(id) }, 'Show tree from here'))
+        : h('button.btn', { type: 'button', onclick: () => onRoot(id) }, 'Show tree from here'),
+      canEdit ? h('div.add-row',
+        h('span.muted', 'Add: '),
+        h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'child', of: id } }) }, 'Child'),
+        h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'spouse', of: id } }) }, 'Spouse'),
+        // The birth family of someone who married in is not added (admin excepted).
+        store.isAdmin || !fam.isMarriedIn(id) ? h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'parent', of: id } }) }, 'Parent') : null)
+        : !store.preview
+          ? h('p.muted.small', 'Family members can ', h('button.link', { type: 'button', onclick: onSignIn }, 'sign in'), ' to suggest changes. The admin approves every change.')
+          : null),
     pendingBox,
     detailRows.length ? h('dl.details', detailRows) : null,
     hiddenNote,
@@ -142,21 +157,9 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
 
     sourcesBox,
 
-    h('div.panel-actions',
-      h('button.btn', { type: 'button', onclick: () => onRoot(id) }, 'Show tree from here'),
-      canEdit ? [
-        h('button.btn', { type: 'button', onclick: () => openPersonForm({ mode: 'edit', person: p }) }, canManage(id, 'person') ? 'Edit' : 'Suggest an edit'),
-        h('div.add-row',
-          h('span.muted', 'Add: '),
-          h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'child', of: id } }) }, 'Child'),
-          h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'spouse', of: id } }) }, 'Spouse'),
-          // The birth family of someone who married in is not added (admin excepted).
-          store.isAdmin || !fam.isMarriedIn(id) ? h('button.btn.small', { type: 'button', onclick: () => openPersonForm({ mode: 'add', relation: { as: 'parent', of: id } }) }, 'Parent') : null),
-        h('button.btn.small.ghost', { type: 'button', onclick: () => openLinkForm(p) }, 'Link to someone already in the tree'),
-        store.isAdmin ? h('button.btn.small.ghost.danger', { type: 'button', onclick: () => requestDelete(p) }, 'Remove from tree') : null,
-      ] : !store.preview
-        ? h('p.muted.small', 'Family members can ', h('button.link', { type: 'button', onclick: onSignIn }, 'sign in'), ' to suggest changes. The admin approves every change.')
-        : null),
+    canEdit ? h('div.panel-actions.panel-more',
+      h('button.btn.small.ghost', { type: 'button', onclick: () => openLinkForm(p) }, 'Link to someone already in the tree'),
+      store.isAdmin ? h('button.btn.small.ghost.danger', { type: 'button', onclick: () => requestDelete(p) }, 'Remove from tree') : null) : null,
     h('p.muted.small.hint', relationHint(fam, id)),
   );
 }

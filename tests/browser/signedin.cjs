@@ -14,8 +14,8 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.goto('http://localhost:8765/'); await pg.waitForSelector('g.node');
     console.log(role, 'nav:', (await pg.locator('#nav').innerText()).replace(/\n/g, ' | '), '| who:', await pg.locator('#who').innerText());
     await pg.fill('#search', 'sunil'); await pg.keyboard.press('Enter');
-    await pg.waitForSelector('.panel-actions');
-    console.log(role, 'panel shows details?', await pg.locator('#panel .details, #panel .sources').count() > 0, '| actions:', (await pg.locator('.panel-actions').innerText()).replace(/\n/g, ' | '));
+    await pg.waitForSelector('.panel-top');
+    console.log(role, 'panel shows details?', await pg.locator('#panel .details, #panel .sources').count() > 0, '| actions:', (await pg.locator('.panel-top').innerText()).replace(/\n/g, ' | '));
     // add child
     await pg.click('.add-row button:has-text("Child")');
     await pg.waitForSelector('dialog form');

@@ -13,26 +13,26 @@ const SUNIL = idOf('Sunil Kumar'); const HARBANS = idOf('Harbans Lal');
     await ctx.addInitScript(r => { window.__FAKE_ROLE__ = r; }, role);
     const pg = await ctx.newPage();
     pg.on('pageerror', e => errors.push(role + ': ' + e.message));
-    const open = async (id) => { await pg.goto(`http://localhost:8765/#/tree/${HARBANS}?p=${id}`); await pg.waitForSelector('#panel .panel-actions'); await pg.waitForTimeout(400); };
+    const open = async (id) => { await pg.goto(`http://localhost:8765/#/tree/${HARBANS}?p=${id}`); await pg.waitForSelector('#panel .panel-top'); await pg.waitForTimeout(400); };
     await open(SUNIL);
     const claim = async () => (await pg.locator('#panel .claim-box:not([hidden])').count()) ? (await pg.locator('#panel .claim-box').innerText()).replace(/\n/g, ' ') : '(none)';
-    console.log(role, '| claim box:', await claim(), '| edit button:', await pg.locator('#panel .panel-actions > button').nth(1).innerText());
+    console.log(role, '| claim box:', await claim(), '| edit button:', await pg.locator('#panel .panel-top .main-row > button').first().innerText());
     if (role === 'member') {
       await pg.click('#panel .claim-box button'); await pg.locator('dialog button', { hasText: 'This is me' }).click(); await pg.waitForTimeout(600);
       console.log(role, '| after claim toast:', await pg.locator('#toast').innerText(), '| box:', await claim(), '| nav has Review:', (await pg.locator('#nav').innerText()).includes('Review'));
     }
     if (role === 'owner') {
-      await pg.locator('#panel .panel-actions button', { hasText: 'Edit' }).click(); await pg.waitForSelector('dialog form');
+      await pg.locator('#panel .panel-top button', { hasText: 'Edit' }).click(); await pg.waitForSelector('dialog form');
       console.log(role, '| form button:', await pg.locator('dialog button[type=submit]').innerText());
       await pg.fill('dialog [name=profession]', 'Engineer'); await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);
       console.log(role, '| edit toast:', await pg.locator('#toast').innerText(), '| status:', await pg.evaluate(() => window.__db.change_requests.at(-1).status));
       await open(HARBANS);
-      console.log(role, '| parent edit button:', await pg.locator('#panel .panel-actions > button').nth(1).innerText());
+      console.log(role, '| parent edit button:', await pg.locator('#panel .panel-top .main-row > button').first().innerText());
       await pg.goto('http://localhost:8765/#/review'); await pg.waitForSelector('#page h1');
       console.log(role, '| review title:', await pg.locator('#page h1').innerText());
     }
     if (role === 'admin') {
-      await pg.locator('#panel .panel-actions button', { hasText: 'Edit' }).click(); await pg.waitForSelector('dialog form');
+      await pg.locator('#panel .panel-top button', { hasText: 'Edit' }).click(); await pg.waitForSelector('dialog form');
       await pg.fill('dialog [name=profession]', 'Doctor'); await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);
       await pg.goto('http://localhost:8765/#/review'); await pg.waitForSelector('#page .history');
       console.log(role, '| undo buttons:', await pg.locator('#page .history button', { hasText: 'Undo' }).count());
