@@ -33,6 +33,19 @@ export function layoutMode() {
   } catch { /* storage blocked */ }
   return ok.includes(m) ? m : 'compact';
 }
+// How you move around the tree: 'pan' (drag it anywhere, the wheel zooms) or
+// 'scroll' (the tree stays put with its top centered; two fingers or the wheel
+// scroll up and down, pinch zooms, and a bar shows where you are). Try with
+// ?view=pan|scroll (remembered in this browser).
+export function moveMode() {
+  let m = new URLSearchParams(location.search).get('view') || new URLSearchParams(location.hash.split('?')[1] || '').get('view');
+  const ok = ['pan', 'scroll'];
+  try {
+    if (ok.includes(m)) localStorage.setItem('treeview', m);
+    else m = localStorage.getItem('treeview');
+  } catch { /* storage blocked */ }
+  return ok.includes(m) ? m : 'pan';
+}
 const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 156, h: 56, r: 17 } };
 export function spouseMode() {
   let m = new URLSearchParams(location.search).get('spouses') || new URLSearchParams(location.hash.split('?')[1] || '').get('spouses');
@@ -66,6 +79,8 @@ export class TreeView {
       .on('start', () => this.hover.conceal())
       .on('zoom', (e) => this.g.attr('transform', e.transform));
     this.svg.call(this.zoom).on('dblclick.zoom', null);
+    this.scrollMode = moveMode() === 'scroll';
+    if (this.scrollMode) this.setupScrollMode();
     // A tap on empty space closes the person's card; a drag to pan does not.
     let down = null;
     this.svg.node().addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; }, true);
@@ -75,6 +90,77 @@ export class TreeView {
       this.hover.hide();
       this.onBackground?.();
     });
+  }
+
+  // Scroll mode: the wheel and two-finger swipes move the tree up and down (and
+  // sideways); pinching (ctrl+wheel in most browsers, gesture events in
+  // Safari, two fingers on a phone) zooms. The tree can't drift off-screen.
+  setupScrollMode() {
+    const svg = this.svg.node();
+    this.zoom.filter((e) => (e.type === 'wheel' ? e.ctrlKey : !e.button));
+    svg.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) return; // pinch: d3 zooms
+      e.preventDefault();
+      this.hover.conceal();
+      const k = d3.zoomTransform(svg).k;
+      const unit = e.deltaMode === 1 ? 20 : e.deltaMode === 2 ? this.container.clientHeight : 1;
+      this.svg.call(this.zoom.translateBy, (-e.deltaX * unit) / k, (-e.deltaY * unit) / k);
+    }, { passive: false });
+    let g0 = 1;
+    svg.addEventListener('gesturestart', (e) => { e.preventDefault(); g0 = d3.zoomTransform(svg).k; });
+    svg.addEventListener('gesturechange', (e) => {
+      e.preventDefault();
+      const r = svg.getBoundingClientRect();
+      this.svg.call(this.zoom.scaleTo, g0 * e.scale, [e.clientX - r.left, e.clientY - r.top]);
+    });
+    // The "you are here" bar.
+    this.trail = document.createElement('div');
+    this.trail.className = 'tree-trail';
+    this.container.parentElement.append(this.trail);
+    this.zoom.on('zoom.trail', () => this.updateTrail());
+  }
+
+  updateTrail() {
+    if (!this.trail || !this.nodes?.length) return;
+    const t = d3.zoomTransform(this.svg.node());
+    const { width, height } = this.container.getBoundingClientRect();
+    const [cx, cy] = t.invert([width / 2, height * 0.4]);
+    let best = null, bd = Infinity;
+    for (const n of this.nodes) {
+      const d = Math.abs(n.y - cy) * 3 + Math.abs(n.cx - cx);
+      if (d < bd) { bd = d; best = n; }
+    }
+    if (!best || best.data.id === this.trailId) return;
+    this.trailId = best.data.id;
+    const chain = store.fam.lineage(best.data.id);
+    const from = Math.max(0, chain.indexOf(this.rootId));
+    const person = store.fam.byId.get(best.data.id);
+    this.trail.replaceChildren();
+    const gen = document.createElement('span');
+    gen.className = 'gen';
+    gen.textContent = `Generation ${person?.generation ?? chain.length}`;
+    this.trail.append(gen);
+    chain.slice(from).forEach((id, i) => {
+      if (i) this.trail.append(Object.assign(document.createElement('span'), { className: 'sep', textContent: '›' }));
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'linkish';
+      b.textContent = shortName(store.fam.byId.get(id));
+      b.title = 'Go to ' + b.textContent;
+      b.onclick = () => this.centerOn(id);
+      this.trail.append(b);
+    });
+  }
+
+  // Keep the tree from floating away: allow scrolling a little past its edges only.
+  limitPan() {
+    if (!this.scrollMode || !this.nodes?.length) return;
+    const { width, height } = this.container.getBoundingClientRect();
+    const minX = Math.min(...this.nodes.map((n) => n.x - n.w / 2)) - 40;
+    const maxX = Math.max(...this.nodes.map((n) => n.x + n.w / 2)) + 40;
+    const minY = Math.min(...this.nodes.map((n) => n.y)) - H / 2 - 60;
+    const maxY = Math.max(...this.nodes.map((n) => n.bottom)) + height * 0.5;
+    this.zoom.translateExtent([[Math.min(minX, (minX + maxX) / 2 - width), minY], [Math.max(maxX, (minX + maxX) / 2 + width), maxY]]);
   }
 
   // Show the tree from rootId, expanding `depth` generations by default.
@@ -293,6 +379,9 @@ export class TreeView {
       tog.append('circle').attr('r', 11);
       tog.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').text(this.expanded.has(p.id) ? '−' : String(d.data.kidCount));
     });
+    this.limitPan();
+    this.trailId = null;
+    this.updateTrail();
   }
 
   // One person's card, centred at x within its unit.
@@ -372,12 +461,15 @@ export class TreeView {
     const minY = Math.min(...this.nodes.map((n) => n.y)) - H / 2 - 20;
     const maxY = Math.max(...this.nodes.map((n) => n.bottom)) + 40;
     let k = Math.min(width / (maxX - minX), height / (maxY - minY), 1);
+    if (this.scrollMode) k = Math.max(k, width < 600 ? 0.75 : 0.9);
     // On a phone a whole wide tree is unreadable; keep cards legible and let people pan.
     k = Math.max(k, Math.min(1, width < 600 ? 0.55 : 0.35));
     const tx = width / 2 - ((minX + maxX) / 2) * k;
     const contentFits = (maxX - minX) * k <= width;
     const x = contentFits ? tx : width / 2 - this.nodes[0].cx * k;
-    const t = d3.zoomIdentity.translate(x, 24 - minY * k).scale(k);
+    const t = d3.zoomIdentity.translate(x, (this.scrollMode ? 60 : 24) - minY * k).scale(k);
+    this.limitPan();
+    this.trailId = null;
     this.svg.transition().duration(300).call(this.zoom.transform, t);
   }
 
