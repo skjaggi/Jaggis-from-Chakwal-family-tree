@@ -206,9 +206,13 @@ export async function submitChange(kind, payload, { target = null, summary = '' 
     return { applied: true, result };
   }
   // Owners' changes to their own part of the tree go live straight away.
+  // The list of people they look after can be out of date (a spouse added a
+  // minute ago), so refresh it once before deciding.
+  if (!predictManage(kind, payload) && store.claimedId) await loadManaged();
   if (predictManage(kind, payload)) {
     try {
       const result = await approveChange(data, 'Made by branch owner');
+      if (kind === 'add_person' || kind === 'claim_person') await loadManaged();
       return { applied: true, result };
     } catch (e) {
       console.warn('stays waiting for approval:', e.message);
