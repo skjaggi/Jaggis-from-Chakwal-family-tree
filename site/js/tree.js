@@ -1,4 +1,4 @@
-// Top-down tree drawn with d3: pan and pinch-zoom, tap a card to open the
+// Top-down tree drawn with d3: scroll to move, pinch to zoom, tap a card to open the
 // person, tap the round button under a card to show or hide their children.
 import { store, canManage } from './data.js';
 import { shortName, lifeLine } from './model.js';
@@ -33,20 +33,6 @@ export function layoutMode() {
   } catch { /* storage blocked */ }
   return ok.includes(m) ? m : 'compact';
 }
-// How you move around the tree: 'scroll' (the default: the tree stays put
-// with its top centered; two fingers or the wheel
-// scroll up and down, pinch zooms, and a bar shows where you are) or 'pan'
-// (the first version: drag it anywhere, the wheel zooms). Switch with
-// ?view=pan|scroll (remembered in this browser).
-export function moveMode() {
-  let m = new URLSearchParams(location.search).get('view') || new URLSearchParams(location.hash.split('?')[1] || '').get('view');
-  const ok = ['pan', 'scroll'];
-  try {
-    if (ok.includes(m)) localStorage.setItem('treeview', m);
-    else m = localStorage.getItem('treeview');
-  } catch { /* storage blocked */ }
-  return ok.includes(m) ? m : 'scroll';
-}
 const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 156, h: 56, r: 17 } };
 export function spouseMode() {
   let m = new URLSearchParams(location.search).get('spouses') || new URLSearchParams(location.hash.split('?')[1] || '').get('spouses');
@@ -80,8 +66,10 @@ export class TreeView {
       .on('start', () => this.hover.conceal())
       .on('zoom', (e) => this.g.attr('transform', e.transform));
     this.svg.call(this.zoom).on('dblclick.zoom', null);
-    this.scrollMode = moveMode() === 'scroll';
-    if (this.scrollMode) this.setupScrollMode();
+    // The tree stays put: scroll to move, pinch to zoom.
+    this.scrollMode = true;
+    try { localStorage.removeItem('treeview'); } catch { /* storage blocked */ }
+    this.setupScrollMode();
     // A tap on empty space closes the person's card; a drag to pan does not.
     let down = null;
     this.svg.node().addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; }, true);
