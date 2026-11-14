@@ -110,6 +110,13 @@ a { color: var(--accent); }
   background: var(--surface); border-bottom: 2px solid var(--gold);
 }
 .brand { display: flex; align-items: center; gap: 8px; flex: none; }
+.brand-logo { display: block; flex: none; line-height: 0; }
+.brand-logo img { display: block; height: 44px; width: auto; }
+/* Footer: maker's mark and copyright, on every page. */
+.site-foot { flex: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 4px 16px calc(4px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); color: var(--muted); font-size: 0.75rem; }
+.site-foot img { display: block; height: 22px; width: auto; border-radius: 4px; }
+.page-foot { margin-top: 32px; padding: 16px; font-size: 0.85rem; border-top: 1px solid var(--line); background: none; }
+.page-foot img { height: 36px; border-radius: 6px; }
 .site-title { font-weight: 700; font-size: 1.05rem; color: var(--ink); text-decoration: none; white-space: nowrap; }
 .search-wrap { position: relative; flex: 1; max-width: 420px; }
 #search {
@@ -361,7 +368,7 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 }
 
 @media (max-width: 760px) {
-  .brand svg { display: none; }
+  .brand-logo img { height: 36px; }
   .site-title { font-size: 0.98rem; }
   .brand { flex: 1; min-width: 0; }
   nav { margin-left: 0; flex: none; }

@@ -53,7 +53,10 @@ const STYLE = `
   main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
   a { color:var(--accent); }
   header.top { border-bottom:3px solid #c49a3a; padding:12px 16px; background:var(--card); }
-  header.top a { text-decoration:none; font-weight:700; color:var(--ink); }
+  header.top a { text-decoration:none; font-weight:700; color:var(--ink); display:inline-flex; align-items:center; gap:10px; }
+  header.top img { height:44px; width:auto; display:block; }
+  footer.foot { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
+  footer.foot img { height:36px; width:auto; border-radius:6px; display:block; }
   h1 { margin:8px 0 4px; font-size:1.7rem; }
   .years { color:var(--muted); margin:0 0 16px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0; }
@@ -88,10 +91,11 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <style>${STYLE}</style>
 </head>
 <body>
-<header class="top"><a href="${up}">🌳 Jaggis of Chakwal</a></header>
+<header class="top"><a href="${up}"><img src="${up}img/brand/jaggis-logo-112.webp" srcset="${up}img/brand/jaggis-logo-112.webp 2x, ${up}img/brand/jaggis-logo-168.webp 3x" width="55" height="44" alt="">Jaggis of Chakwal</a></header>
 <main>
 ${body}
 <footer>Part of the <a href="${up}">Jaggi family tree of Chakwal</a>, descending from Bakhshi Bhanna Mal Jaggi. Details of living family members are private and are not shown here.</footer>
+<footer class="foot"><img src="${up}img/brand/qn-mark-64.webp" srcset="${up}img/brand/qn-mark-64.webp 2x, ${up}img/brand/qn-mark-96.webp 3x" width="52" height="36" alt="Quantum Nexus LLC logo"><span>© 2026 Quantum Nexus LLC. All rights reserved.</span></footer>
 </main>
 <script type="module">import { countView } from '${up}js/count.js'; countView(location.pathname);</script>
 </body>
