@@ -33,9 +33,10 @@ export function layoutMode() {
   } catch { /* storage blocked */ }
   return ok.includes(m) ? m : 'compact';
 }
-// How you move around the tree: 'pan' (drag it anywhere, the wheel zooms) or
-// 'scroll' (the tree stays put with its top centered; two fingers or the wheel
-// scroll up and down, pinch zooms, and a bar shows where you are). Try with
+// How you move around the tree: 'scroll' (the default: the tree stays put
+// with its top centered; two fingers or the wheel
+// scroll up and down, pinch zooms, and a bar shows where you are) or 'pan'
+// (the first version: drag it anywhere, the wheel zooms). Switch with
 // ?view=pan|scroll (remembered in this browser).
 export function moveMode() {
   let m = new URLSearchParams(location.search).get('view') || new URLSearchParams(location.hash.split('?')[1] || '').get('view');
@@ -44,7 +45,7 @@ export function moveMode() {
     if (ok.includes(m)) localStorage.setItem('treeview', m);
     else m = localStorage.getItem('treeview');
   } catch { /* storage blocked */ }
-  return ok.includes(m) ? m : 'pan';
+  return ok.includes(m) ? m : 'scroll';
 }
 const SPOUSE = { inside: null, side: { w: W, h: H, r: 21 }, mini: { w: 156, h: 56, r: 17 } };
 export function spouseMode() {
