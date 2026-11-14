@@ -265,10 +265,11 @@ g.edit-btn:focus { outline: none; }
 g.toggle circle { fill: var(--surface); stroke: var(--bark); stroke-width: 1.4; }
 g.toggle text { font-size: 11px !important; font-weight: 700; fill: var(--bark) !important; }
 g.toggle:hover circle { fill: var(--surface-2); }
-/* Closed families show their child count in a teal circle, like the pills. */
-g.toggle.closed circle { fill: var(--accent); stroke: none; }
-g.toggle.closed text { fill: var(--accent-ink) !important; }
-g.toggle.closed:hover circle { fill: var(--accent); filter: brightness(1.12); }
+/* The open/close circles under a card are teal, like the child-count pills:
+   a number when the family is closed, − when it is open. */
+g.toggle circle { fill: var(--accent); stroke: none; }
+g.toggle text { fill: var(--accent-ink) !important; }
+g.toggle:hover circle { fill: var(--accent); filter: brightness(1.12); }
 g.toggle.pill { cursor: pointer; }
 g.toggle.pill rect { fill: var(--accent); stroke: none; }
 g.toggle.pill text { fill: var(--accent-ink) !important; font-size: 12px !important; }
