@@ -96,7 +96,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <style>${STYLE}</style>
 </head>
 <body>
-<header class="top"><span class="logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="${up}img/brand/jaggis-logo-168.webp" srcset="${up}img/brand/jaggis-logo-320.webp 2x" width="110" height="88" alt=""><span class="pop" role="img" aria-label="Jaggis of Chakwal logo: Our roots, our strength, our family. Legacy, family, heritage."><img src="${up}img/brand/jaggis-logo-800.webp" loading="lazy" width="500" height="400" alt=""></span></span><a href="${up}">Jaggis of Chakwal</a></header>
+<header class="top"><span class="logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="${up}img/brand/jaggis-logo2-168.webp" srcset="${up}img/brand/jaggis-logo2-320.webp 2x" width="123" height="88" alt=""><span class="pop" role="img" aria-label="Jaggis of Chakwal logo: Generations today, a brighter tomorrow. Legacy, family, heritage."><img src="${up}img/brand/jaggis-logo2-800.webp" loading="lazy" width="558" height="400" alt=""></span></span><a href="${up}">Jaggis of Chakwal</a></header>
 <main>
 ${body}
 <footer>Part of the <a href="${up}">Jaggi family tree of Chakwal</a>, descending from Bakhshi Bhanna Mal Jaggi. Details of living family members are private and are not shown here.</footer>
