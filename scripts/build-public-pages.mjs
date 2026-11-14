@@ -95,7 +95,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 <main>
 ${body}
 <footer>Part of the <a href="${up}">Jaggi family tree of Chakwal</a>, descending from Bakhshi Bhanna Mal Jaggi. Details of living family members are private and are not shown here.</footer>
-<footer class="foot"><img src="${up}img/brand/qn-mark-64.webp" srcset="${up}img/brand/qn-mark-64.webp 2x, ${up}img/brand/qn-mark-96.webp 3x" width="52" height="36" alt="Quantum Nexus LLC logo"><span>© 2026 Quantum Nexus LLC. All rights reserved.</span></footer>
+<footer class="foot"><img src="${up}img/brand/qn-mark-64.webp" srcset="${up}img/brand/qn-mark-64.webp 2x, ${up}img/brand/qn-mark-96.webp 3x" width="52" height="36" alt="Quantum Nexus LLC logo"><span>© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved.</span></footer>
 </main>
 <script type="module">import { countView } from '${up}js/count.js'; countView(location.pathname);</script>
 </body>
