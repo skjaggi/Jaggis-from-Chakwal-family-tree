@@ -200,7 +200,7 @@ function openSignIn() {
   let remembered = '';
   try { remembered = localStorage.getItem('signin-email') || ''; } catch {}
   const email = h('input', { type: 'email', name: 'email', required: true, autocomplete: 'email', placeholder: 'you@example.com', value: remembered });
-  const code = h('input', { type: 'text', name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: '6-digit code', maxlength: 10 });
+  const code = h('input', { type: 'text', name: 'code', inputmode: 'numeric', autocomplete: 'one-time-code', placeholder: 'Code from the email', maxlength: 10 });
   const codeBtn = h('button.btn.primary', { type: 'button', onclick: async () => {
     if (!email.value.includes('@')) return toast('Please enter your email address first.', 'error');
     if (!/^\d{6,10}$/.test(code.value.trim())) return toast('Please type the code from the newest email.', 'error');

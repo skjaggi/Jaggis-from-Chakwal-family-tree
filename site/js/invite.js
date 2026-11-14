@@ -28,7 +28,7 @@ export function inviteMessage({ email, display_name }, fromName) {
     '',
     `Anyone can look around. To add or correct something, sign in once:`,
     `1. Tap "Sign in" at the top and enter ${email}.`,
-    `2. You'll get an email with a 6-digit code (check Spam if it doesn't arrive in a minute).`,
+    `2. You'll get an email with a sign-in code (check Spam if it doesn't arrive in a minute).`,
     `3. Type the code on the site. There is no password.`,
     '',
     `IMPORTANT, please do this first: claim your box.`,
