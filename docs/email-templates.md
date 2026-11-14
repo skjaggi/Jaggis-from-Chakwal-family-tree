@@ -1,7 +1,7 @@
 # Sign-in email templates
 
 Paste these into Supabase → **Authentication → Emails → Templates**.
-Supabase fills in `{{ .Token }}` (the sign-in code; its length is set under Authentication → Sign In / Providers → Email) and `{{ .ConfirmationURL }}` (the link).
+Supabase fills in `{{ .Token }}` (the 7-digit sign-in code; its length is set under Authentication → Sign In / Providers → Email) and `{{ .ConfirmationURL }}` (the link).
 
 ## Confirm signup (the first time someone signs in)
 
@@ -34,7 +34,7 @@ The site sends this when the admin adds an invite on the Members page, or a fami
 <p>{{ if .Data.name }}Dear {{ .Data.name }},{{ else }}Hello,{{ end }}</p>
 <p>{{ .Data.invited_by }} has invited you to the online family tree of the Jaggis of Chakwal, starting from Bakhshi Bhanna Mal Jaggi.</p>
 <p style="margin:24px 0"><a href="{{ .ConfirmationURL }}" style="background:#7a3b12;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Open the family tree and sign in</a></p>
-<p>This button signs you in straight away. It works once, within 24 hours. After that, there's no need for a new invitation: open <a href="https://familytree.sjaggi.com/">the family tree</a> any time, tap <strong>Sign in</strong>, enter this email address, and type the code we email you. There is no password.</p>
+<p>This button signs you in straight away. It works once, within 24 hours. After that, there's no need for a new invitation: open <a href="https://familytree.sjaggi.com/">the family tree</a> any time, tap <strong>Sign in</strong>, enter this email address, and type the 7-digit code we email you. There is no password.</p>
 <p>You only sign in once on each phone or computer. On a phone, open the site in Safari or Chrome (not inside the Gmail app) and add it to your home screen.</p>
 <div style="margin:20px 0;padding:14px 16px;background:#faf1c8;border-left:4px solid #c49a3a;border-radius:6px">
 <p style="margin:0 0 8px"><strong>Important, please do this first: claim your box.</strong></p>

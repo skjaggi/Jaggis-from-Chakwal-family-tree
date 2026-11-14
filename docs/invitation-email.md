@@ -12,7 +12,7 @@ Open the tree: https://familytree.sjaggi.com/
 
 Anyone can look around without signing in. To add or correct something, sign in once:
 1. Click "Sign in" at the top and enter EMAIL.
-2. You'll get an email from "Sunil Jaggi" with a sign-in code (check Spam if it doesn't arrive within a minute).
+2. You'll get an email from "Sunil Jaggi" with a 7-digit code (check Spam if it doesn't arrive within a minute).
 3. Type the code on the site. That's it, there is no password.
 
 You only sign in once on each phone or computer; after that the site remembers you. On a phone, open the site in Safari or Chrome (not inside the Gmail app) and add it to your home screen.
