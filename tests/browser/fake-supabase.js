@@ -6,7 +6,7 @@ const uid = 'u-1';
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' ? SUNIL : null, created_at: new Date().toISOString() }],
-  invites: [], change_requests: [], research_questions: [], page_views: [],
+  invites: [], change_requests: [], research_questions: [], page_views: [], removed_members: [],
 };
 // A second member with some visits, for the admin's Visits report.
 if (ADMIN) {
@@ -66,6 +66,10 @@ export function createClient() {
           browsers: { stats: [{ name: 'Chrome', count: 90 }, { name: 'Safari', count: 52 }] },
           systems: { stats: [{ name: 'Android', count: 70 }, { name: 'iOS', count: 40 }, { name: 'Windows', count: 32 }] },
           sizes: { stats: [{ name: 'Phones', count: 100 }, { name: 'Computer monitors', count: 42 }] } }, error: null };
+      }
+      if (name === 'remove-member') {
+        if (body.action === 'remove') { const i = db.invites.findIndex((x) => x.email === body.email); const inv = db.invites.splice(i, 1)[0]; (db.removed_members ||= []).push({ email: body.email, snapshot: { invite: inv, profile: null }, removed_at: new Date().toISOString() }); return { data: { removed: true }, error: null }; }
+        const j = db.removed_members.findIndex((x) => x.email === body.email); const r = db.removed_members.splice(j, 1)[0]; db.invites.push(r.snapshot.invite); return { data: { restored: true }, error: null };
       }
       if (name === 'weekly-summary') return { data: { sent: true, to: ['me@example.com'] }, error: null };
       return { data: { sent: true }, error: null };

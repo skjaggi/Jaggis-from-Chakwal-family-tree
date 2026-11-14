@@ -2,7 +2,7 @@
 // (their own submitted changes).
 import {
   store, listRequests, approveChange, rejectChange, withdrawRequest, pendingPhotoUrl,
-  listInvites, addInvite, removeInvite, sendInviteEmail, listProfiles, updateProfile, personLabel,
+  listInvites, addInvite, removeMember, restoreMember, listRemoved, sendInviteEmail, listProfiles, updateProfile, personLabel,
   memberName, undoChange, revokeClaim,
 } from './data.js';
 import { config } from './config.js';
@@ -181,8 +181,11 @@ export async function renderAdmin(container) {
   clear(container, h('h1', 'Family members and invites'), h('p.muted', 'Loading…'));
   let invites;
   let profiles;
+  let removed;
   try {
-    [invites, profiles] = await Promise.all([listInvites(), listProfiles()]);
+    [invites, profiles, removed] = await Promise.all([listInvites(), listProfiles(), listRemoved().catch(() => [])]);
+    const gone = new Set(removed.map((r) => r.email));
+    profiles = profiles.filter((u) => !gone.has(u.email));
   } catch (e) {
     return clear(container, h('h1', 'Family members and invites'), h('p.notice', e.message));
   }
@@ -281,7 +284,7 @@ export async function renderAdmin(container) {
     h('h1', 'Family members and invites'),
     branchAdmins,
     h('section', h('h2', 'Invite someone'),
-      h('p.muted', 'Only invited emails can sign in. After you add them here, the site emails them an invitation; the WhatsApp and Copy buttons are there if you would rather send it yourself. Family members can also invite relatives from Invite in the menu; you will see who invited whom below, and can remove any invite.'),
+      h('p.muted', 'Only invited emails can sign in. After you add them here, the site emails them an invitation; the WhatsApp and Copy buttons are there if you would rather send it yourself. Family members can also invite relatives from Invite in the menu; you will see who invited whom below. Removing someone also stops them from signing in, and can be undone.'),
       form),
     h('section', h('h2', `Invites (${invites.length})`),
       invites.length ? h('ul.history', invites.map((i) => h('li',
@@ -289,10 +292,25 @@ export async function renderAdmin(container) {
         h('span.muted', ` · ${i.person_id ? personLabel(i.person_id) : 'not linked'} · ${i.role} · ${i.accepted_at ? 'signed in ' + formatWhen(i.accepted_at) : 'not signed in yet'}${i.invited_by && i.invited_by !== store.session.user.id && names.get(i.invited_by) ? ` · invited by ${names.get(i.invited_by)}` : ''}`),
         i.accepted_at ? null : sendButtons(i),
         h('button.btn.small.ghost', { type: 'button', onclick: async () => {
-          if (!(await confirmDialog(`Remove the invite for ${i.email}? People who already signed in keep their login.`, 'Remove'))) return;
-          await removeInvite(i.email).catch((e) => toast(e.message, 'error'));
+          if (!(await confirmDialog(`Remove ${i.display_name || i.email}? They won't be able to sign in any more, and if they are signed in now they are signed out within the hour. Changes they already made stay in the tree. You can undo this under Removed below.`, 'Remove'))) return;
+          try {
+            await removeMember(i.email);
+            toast(`Removed ${i.display_name || i.email}. They can no longer sign in.`, 'ok');
+          } catch (e) { toast(e.message, 'error'); }
           renderAdmin(container);
         } }, 'Remove')))) : h('p.muted', 'No invites yet.')),
+    removed.length ? h('section', h('h2', `Removed (${removed.length})`),
+      h('p.muted', "These people can't sign in. Restore gives them their invite and login back, and their box if nobody else has claimed it."),
+      h('ul.history', removed.map((r) => h('li',
+        h('strong', r.email), r.snapshot?.invite?.display_name ? ` (${r.snapshot.invite.display_name})` : '',
+        h('span.muted', ` · removed ${formatWhen(r.removed_at)}`),
+        h('button.btn.small.ghost', { type: 'button', onclick: async () => {
+          try {
+            const res = await restoreMember(r.email);
+            toast(`Restored ${r.email}.${r.snapshot?.profile?.claimed_person_id && !res?.boxBack ? ' Their box was claimed by someone else meanwhile, so they need to claim again.' : ''}`, 'ok');
+          } catch (e) { toast(e.message, 'error'); }
+          renderAdmin(container);
+        } }, 'Restore'))))) : null,
     h('section', h('h2', `Members who have signed in (${profiles.length})`), h('ul.members', profiles.map(memberRow))),
     h('section', h('h2', 'Export'),
       h('p.muted', 'Download the whole tree as a PDF family book, or as a GEDCOM file for genealogy programs.'),

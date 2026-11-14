@@ -1048,3 +1048,17 @@ end $$;
 drop trigger if exists trim_page_views on public.page_views;
 create trigger trim_page_views after insert on public.page_views
   for each statement execute function public._trim_page_views();
+
+-- Members the admin removed (login blocked, restorable). See functions/remove-member.
+create table if not exists public.removed_members (
+  email text primary key,
+  user_id uuid,
+  snapshot jsonb not null,          -- the invite and profile rows as they were
+  removed_by uuid references auth.users (id) on delete set null,
+  removed_at timestamptz not null default now()
+);
+alter table public.removed_members enable row level security;
+drop policy if exists "admin reads removed members" on public.removed_members;
+create policy "admin reads removed members" on public.removed_members for select to authenticated
+  using (public.is_admin());
+-- Writes happen only in the edge function (service role).

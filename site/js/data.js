@@ -392,9 +392,28 @@ export async function listMyInvites() {
   return data;
 }
 
-export async function removeInvite(email) {
-  const { error } = await store.sb.from('invites').delete().eq('email', email);
+// Admin only: removing someone also blocks their login (it isn't deleted, so
+// it can be restored). Both go through the remove-member edge function.
+export async function removeMember(email) {
+  const { data, error } = await store.sb.functions.invoke('remove-member', { body: { email, action: 'remove' } });
+  if (error) throw new Error(await functionError(error));
+  return data;
+}
+
+export async function restoreMember(email) {
+  const { data, error } = await store.sb.functions.invoke('remove-member', { body: { email, action: 'restore' } });
+  if (error) throw new Error(await functionError(error));
+  return data;
+}
+
+export async function listRemoved() {
+  const { data, error } = await store.sb.from('removed_members').select('*').order('removed_at', { ascending: false });
   if (error) throw error;
+  return data || [];
+}
+
+async function functionError(error) {
+  try { return (await error.context?.json())?.error || error.message; } catch { return error.message; }
 }
 
 export function personLabel(id) {
