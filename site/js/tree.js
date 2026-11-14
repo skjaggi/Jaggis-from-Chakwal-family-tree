@@ -354,7 +354,7 @@ export class TreeView {
       // Show or hide children: under the couple when there is one.
       const side = !below && d.joins.length;
       const tx = side ? d.joins[0].x - d.x : off;
-      const tog = u.append('g').attr('class', 'toggle').attr('transform', `translate(${tx},${d.bottom - d.y + 12})`)
+      const tog = u.append('g').attr('class', this.expanded.has(p.id) ? 'toggle' : 'toggle closed').attr('transform', `translate(${tx},${d.bottom - d.y + 12})`)
         .style('display', d.data.hasKids ? null : 'none')
         .attr('role', 'button')
         .attr('aria-label', this.expanded.has(p.id) ? 'Hide children' : `Show ${d.data.kidCount} children`)
