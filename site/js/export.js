@@ -50,7 +50,7 @@ function directory(fam) {
       const children = fam.children(p.id).map(({ person: c }) => fullName(c, { title: false }));
       const rows = [
         ['Parents', parents.join(' and ')], ['Spouse', spouses.join(', ')], ['Children', children.join(', ')],
-        ['Places', placeLine(d)], ['Profession', d?.profession], ['Notes', d?.notes], ['Uncertain', d?.uncertainty],
+        ['Places', placeLine(d)], ['Profession', d?.profession], ['Notes / Story', d?.notes], ['Uncertain', d?.uncertainty],
       ].filter(([, v]) => v);
       return h('article.bk-person',
         photo ? h('img.bk-photo', { src: photo, alt: '' }) : h('div.bk-initials', initials(p.given_name)),

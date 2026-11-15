@@ -333,6 +333,8 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .notice { padding: 10px 12px; border-radius: var(--radius); background: var(--surface-2); color: var(--muted); font-size: 0.9rem; }
 .uncertain { padding: 10px 12px; border-radius: var(--radius); background: var(--warn-bg); color: var(--warn-ink); font-size: 0.92rem; margin: 10px 0; }
 .notes { white-space: pre-wrap; margin: 10px 0; }
+.notes-box { margin: 10px 0; }
+.notes-box .notes { margin: 4px 0 0; }
 .family ul { list-style: none; margin: 0; padding: 0; }
 .family li { padding: 3px 0; }
 .sources { margin: 12px 0; font-size: 0.88rem; color: var(--muted); }
@@ -624,6 +626,27 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 table.rules { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .rules td { padding: 6px 4px; border-bottom: 1px solid var(--line); }
 .rules td.n { text-align: right; white-space: nowrap; font-weight: 700; }
+.rules th { padding: 6px 4px; border-bottom: 2px solid var(--line); text-align: left; font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.rules th.n { text-align: right; }
+table.rules.mult { margin-top: 12px; }
+.bless-card table.rules.mult { margin-top: 16px; }
+
+/* Blessings: "How it works" (shown once after sign-in, and on request). */
+.bless-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.bless-intro { display: grid; gap: 14px; max-width: 560px; }
+.bless-intro p { margin: 0; }
+.intro-lead { font-size: 1rem; line-height: 1.5; }
+.intro-step { display: grid; gap: 6px; }
+.intro-step h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.02rem; text-transform: none; letter-spacing: normal; color: var(--ink); }
+.intro-n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 0.8rem; font-weight: 700; flex: none; }
+.intro-step table.rules.mult { margin-top: 0; }
+.intro-badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.intro-badges li { display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; }
+.intro-badges .medal { width: 34px; height: 34px; flex: none; }
+.intro-badges span { display: grid; line-height: 1.3; }
+.intro-badges small { color: var(--muted); font-size: 0.8rem; }
+.me-help { margin-left: 6px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; vertical-align: middle; }
+.me-help:hover { border-color: var(--gold); color: var(--ink); }
 .row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 560px) { .row-fields { grid-template-columns: 1fr; } }
 

@@ -5,7 +5,7 @@
 import { store } from './data.js';
 import { fullName } from './model.js';
 import { branchesOf } from './branches.js';
-import { h, clear, toast, formatWhen, initials, field, select } from './ui.js';
+import { h, clear, toast, formatWhen, initials, field, select, modal } from './ui.js';
 
 const ICON = {
   root: 'M12 4c-3 0-5 2.2-5 5 0 2 1.2 3.4 2.6 4.2L9 20h6l-.6-6.8C15.8 12.4 17 11 17 9c0-2.8-2-5-5-5z',
@@ -105,6 +105,32 @@ export function thankYou(kind, payload, summary, applied) {
   return applied ? ` +${points} blessings${extra}. Thank you!` : ` You'll get +${points} blessings${extra} once it's approved.`;
 }
 
+// ---------------------------------------------------------------- how it works
+// A short explanation, shown once to each member the first time they sign in
+// after Blessings arrived, and again from "How it works" whenever they like.
+const seenKey = () => `blessings-intro-seen:${store.session?.user?.id || ''}`;
+export function maybeShowBlessingsIntro() {
+  if (!store.signedIn || store.preview || document.querySelector('dialog[open]')) return;
+  try { if (localStorage.getItem(seenKey())) return; localStorage.setItem(seenKey(), '1'); } catch { return; }
+  showBlessingsIntro();
+}
+export function showBlessingsIntro() {
+  const step = (n, title, text, extra) => h('section.intro-step', h('h3', h('span.intro-n', String(n)), title), h('p', text), extra);
+  const m = modal('Welcome to Family Blessings', h('div.bless-intro',
+    h('p.intro-lead', coin(), ' Every time you add to the family tree, you earn ', h('b', 'blessings'), '. They show how much each of us has given to keeping our family story alive.'),
+    step(1, 'Add what you know', 'Each update earns blessings:', rulesTable()),
+    step(2, 'Our elders count most', 'Details about the earliest generations are the rarest, so their blessings are multiplied:', multTable()),
+    step(3, 'Collect badges', 'Reach a goal and you keep the badge for good.'),
+    h('ul.intro-badges', BADGES.map((b) => h('li', medal(b), h('span', h('b', b.name), h('small', b.how))))),
+    h('p.muted.small', store.claimedId
+      ? 'Your blessings and badges show at the top right, next to your photo. Tap them to see the family leaderboard. Blessings count once a change is approved.'
+      : 'Claim your own box with "This is me" to earn your first 5 blessings, and your blessings and badges will show at the top right. Blessings count once a change is approved.'),
+    h('div.form-actions',
+      h('button.btn', { type: 'button', onclick: () => { m.close(); location.hash = '#/blessings'; } }, 'See the leaderboard'),
+      h('button.btn.primary', { type: 'button', onclick: () => m.close() }, 'Got it'))));
+  return m;
+}
+
 // ---------------------------------------------------------------- corner chip
 // At the top right once someone has signed in and claimed their box: their
 // photo, their blessings and the badges they have.
@@ -118,7 +144,8 @@ export async function renderCorner(el) {
     photo ? h('img.me-photo', { src: photo, alt: '' }) : h('span.me-photo.me-initials', initials(p?.given_name || store.profile?.display_name || '')),
     h('span.me-name', store.profile?.display_name || (p ? fullName(p, { title: false }) : '')),
     h('span.me-points', coin(), ` ${me?.total ?? 0}`),
-    me?.badges?.length ? h('span.me-badges', me.badges.map((b) => medal(b, 'mini-medal'))) : null));
+    me?.badges?.length ? h('span.me-badges', me.badges.map((b) => medal(b, 'mini-medal'))) : null),
+  h('button.me-help', { type: 'button', title: 'How blessings and badges work', 'aria-label': 'How blessings and badges work', onclick: showBlessingsIntro }, '?'));
   return true;
 }
 
@@ -167,7 +194,7 @@ export async function renderBlessings(page) {
 
   const myCounts = me?.counts || { person: 0, story: 0, photo: 0, invite: 0, historian: 0 };
   clear(page,
-    h('h1.bless-title', 'Family Blessings'),
+    h('div.bless-head', h('h1.bless-title', 'Family Blessings'), h('button.btn.small', { type: 'button', onclick: showBlessingsIntro }, 'How it works')),
     h('p.muted', 'Every approved addition to the tree earns blessings. Details about the earliest generations count more: 5× for Generation 1, 4× for 2, 3× for 3 and 2× for 4.'),
     h('div.bless-grid',
       h('section.bless-card', seg, board),
@@ -193,15 +220,22 @@ export async function renderBlessings(page) {
     store.isAdmin ? adjustForm(people) : null,
     h('section.bless-card',
       h('h2', 'How blessings are earned'),
-      h('table.rules', h('tbody',
-        rule('Add a person', 5), rule('A story about someone (Notes)', 5), rule('Add a photo', 5),
-        rule('Birth or death year, birth or death place, profession, source', '2 each'),
-        rule('Other details, like names or gender', '1 each'), rule('Connect two people already in the tree', 3),
-        rule('Claim your own box ("This is me")', 5), rule('Invite a relative who then signs in', 10),
-        rule('Generation 1, 2, 3 or 4 ancestors', '×5, ×4, ×3, ×2'))),
+      rulesTable(), multTable(),
       h('p.muted.small', 'Blessings count once a change is approved. The admin can add or take back blessings.')));
 }
 const rule = (what, n) => h('tr', h('td', what), h('td.n', String(n)));
+function rulesTable() {
+  return h('table.rules', h('tbody',
+    rule('Add a person', 5), rule('A story about someone (in "Notes / Story")', 5), rule('Add a photo', 5),
+    rule('Birth or death year, birth or death place, profession, source', '2 each'),
+    rule('Other details, like names or gender', '1 each'), rule('Connect two people already in the tree', 3),
+    rule('Claim your own box ("This is me")', 5), rule('Invite a relative who then signs in', 10)));
+}
+function multTable() {
+  return h('table.rules.mult', h('thead', h('tr', h('th', 'Details about'), h('th.n', 'Earn'))), h('tbody',
+    rule('Generation 1 (Bakhshi Bhanna Mal Jaggi)', '5×'), rule('Generation 2', '4×'), rule('Generation 3', '3×'), rule('Generation 4', '2×'),
+    rule('Everyone else', '1×')));
+}
 
 function adjustForm(people) {
   const who = select('user', people.map((m) => [m.id, m.name]).sort((a, b) => a[1].localeCompare(b[1])), '');

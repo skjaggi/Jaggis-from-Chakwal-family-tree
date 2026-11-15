@@ -3,6 +3,8 @@ const seed = await (await fetch('/data/seed.json')).json();
 const ADMIN = !['member', 'owner'].includes(window.__FAKE_ROLE__);
 const SUNIL = seed.people.find(p => p.given_name === 'Sunil Kumar').id;
 const uid = 'u-1';
+// The one-time Blessings welcome would cover the page in every test; skip it unless a test asks for it.
+if (!window.__FAKE_INTRO__) try { localStorage.setItem('blessings-intro-seen:' + uid, '1'); } catch {}
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' ? SUNIL : null, created_at: new Date().toISOString() }],

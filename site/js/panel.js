@@ -136,7 +136,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
     detailRows.length ? h('dl.details', detailRows) : null,
     hiddenNote,
     d?.uncertainty ? h('div.uncertain', h('strong', 'Uncertain: '), d.uncertainty) : null,
-    d?.notes ? h('div.notes', d.notes) : null,
+    d?.notes ? h('section.notes-box', h('h3', 'Notes / Story'), h('div.notes', d.notes)) : null,
 
     h('div.family',
       parents.length ? h('section', h('h3', 'Parents'), h('ul', parents.map(({ person: q, link }) =>
