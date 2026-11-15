@@ -123,7 +123,7 @@ a { color: var(--accent); }
 .page-foot { margin-top: 32px; padding: 16px; font-size: 0.85rem; border-top: 1px solid var(--line); background: none; }
 .page-foot img { height: 36px; border-radius: 6px; }
 .site-title { font-weight: 700; font-size: 1.05rem; color: var(--ink); text-decoration: none; white-space: nowrap; }
-.search-wrap { position: relative; flex: 1 1 220px; min-width: 200px; max-width: 420px; }
+.search-wrap { position: relative; flex: 1 1 160px; min-width: 160px; max-width: 420px; }
 #search {
   width: 100%; padding: 9px 12px; border-radius: 999px;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); font-size: 16px;
@@ -149,12 +149,29 @@ nav a:hover, .linkish:hover { background: var(--surface-2); }
 nav a.active { background: var(--surface-2); font-weight: 600; }
 .count { display: inline-block; margin-left: 5px; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 0.75rem; text-align: center; }
 .banner { padding: 8px 16px; background: var(--warn-bg); color: var(--warn-ink); font-size: 0.9rem; }
-.who { padding: 0 16px; font-size: 0.8rem; color: var(--muted); text-align: right; }
+/* Right side of the header: the menu, and under it the signed-in member's
+   chip (photo, name, blessings, badges, "?"), inside the header's own space. */
+.top-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 0; }
+/* Signed out there's no chip: the menu sits in the header as before. */
+.topbar:has(#who:empty) .top-right { display: contents; }
+.who { display: flex; align-items: center; justify-content: flex-end; min-width: 0; max-width: 100%; padding: 0 4px 0 0; font-size: 0.8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .who:empty { display: none; }
+.who .me-chip { margin: 0; }
+/* When the menu can't share the first row with the search box (main.js adds
+   .stacked), it drops to a row of its own and the chip stays up on the first
+   row, at the right, so it still takes no extra height. */
+.topbar.stacked .top-right { display: contents; }
+.topbar.stacked #who { order: 1; margin-left: auto; }
+.topbar.stacked nav { order: 2; flex-basis: 100%; }
+/* Narrower screens: the chip drops the name (photo, points and badges stay). */
+@media (max-width: 900px) { .who .me-name { display: none; } .me-chip { gap: 6px; } }
 
 @media (max-width: 760px) {
   .topbar { flex-wrap: wrap; gap: 6px 10px; }
   .search-wrap { order: 3; flex-basis: 100%; max-width: none; }
+  .top-right { display: contents; }
+  .topbar #who { order: 0; margin-left: auto; }
+  .topbar:has(#who:not(:empty)) nav { order: 2; flex-basis: 100%; }
   nav { gap: 0; }
   nav a, .linkish { padding: 6px 7px; font-size: 0.9rem; }
 }
@@ -392,6 +409,14 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
      its own row, scrolling sideways if needed. */
   .topbar:has(nav > :nth-child(5)) .site-title { white-space: nowrap; }
   .topbar:has(nav > :nth-child(5)) .brand { flex: 1 0 100%; }
+  /* Signed in: the chip shares the logo's row, so the title may wrap. */
+  .topbar:has(#who:not(:empty)) .brand { flex: 1 1 0; min-width: 0; }
+  .topbar:has(#who:not(:empty)) .site-title { white-space: normal; min-width: 0; }
+  /* Phone: the chip shares the logo's row; just photo, points and badges. */
+  .me-chip { gap: 5px; padding-right: 7px; }
+  .me-chip .me-name { display: none; }
+  .me-photo { width: 26px; height: 26px; }
+  .me-help { margin-left: 3px; width: 22px; height: 22px; font-size: 0.7rem; }
   .topbar:has(nav > :nth-child(5)) nav {
     order: 2; flex-basis: 100%; justify-content: flex-start; flex-wrap: nowrap;
     overflow-x: auto; scrollbar-width: none; margin: 0 -6px;

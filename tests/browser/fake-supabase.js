@@ -7,7 +7,7 @@ const uid = 'u-1';
 if (!window.__FAKE_INTRO__) try { localStorage.setItem('blessings-intro-seen:' + uid, '1'); } catch {}
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
-  profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' ? SUNIL : null, created_at: new Date().toISOString() }],
+  profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' || window.__FAKE_CLAIMED__ ? SUNIL : null, created_at: new Date().toISOString() }],
   invites: [], change_requests: [], research_questions: [], page_views: [], removed_members: [],
 };
 // A second member with some visits, for the admin's Visits report.
@@ -96,6 +96,7 @@ export function createClient() {
           .map((r) => ({ user_id: r.submitted_by, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: r.kind === 'add_person' ? 5 : 2, kind: r.kind, story: false, reason: r.summary }));
         if (me.claimed_person_id) rows.push({ user_id: me.id, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: 5, kind: 'claim', story: false, reason: 'Claimed their own box' });
         if (window.__FAKE_BONUS__) rows.push({ user_id: me.id, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: window.__FAKE_BONUS__, kind: 'edit_person', story: true, reason: 'Added a story' });
+        if (window.__FAKE_BADGES__) for (const [kind, story, n] of [['add_person', false, 10], ['edit_person', true, 5], ['set_photo', false, 10]]) for (let i = 0; i < n; i++) rows.push({ user_id: me.id, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: 1, kind, story, reason: 'Badge test' });
         rows.push({ user_id: 'u-9', name: 'Cousin Neha', person_id: null, role: 'member', at: new Date().toISOString(), points: 12, kind: 'add_person', story: true, reason: 'Add someone' });
         return { data: rows, error: null };
       }

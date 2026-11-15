@@ -279,6 +279,7 @@ async function renderHeader() {
   $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   // Once they've claimed their box: their photo, blessings and badges instead.
   if (signed) await renderCorner($('who')).catch(() => false);
+  fitHeader();
   if (signed && !maybeShowFounderThanks() && !maybeShowBlessingsIntro()) maybeShowHistorianCongrats().catch(() => false);
   $('preview-banner').hidden = !store.preview;
   await renderClaimBanner();
@@ -384,6 +385,24 @@ async function start() {
 start();
 
 // Light/dark switch in the menu. The label names the look you switch to.
+// The member's chip sits under the menu at the top right. When the menu is too
+// long to share the first row with the search box, it gets a row of its own
+// and the chip moves up beside the search box instead (.stacked), so the chip
+// never needs a row of its own.
+function fitHeader() {
+  const bar = document.querySelector('.topbar');
+  const right = bar.querySelector('.top-right');
+  bar.classList.remove('stacked');
+  if (!$('who').childNodes.length || getComputedStyle(right).display === 'contents') return;
+  if (right.offsetTop > bar.querySelector('.brand').offsetTop + 10) bar.classList.add('stacked');
+}
+let fitQueued = false;
+addEventListener('resize', () => {
+  if (fitQueued) return;
+  fitQueued = true;
+  requestAnimationFrame(() => { fitQueued = false; fitHeader(); });
+});
+
 function themeButton() {
   const label = () => (currentTheme() === 'dark' ? '☀ Light' : '☾ Dark');
   const b = h('button.linkish.theme-toggle', { type: 'button', title: 'Switch between light and dark colours (remembered on this device)', onclick: () => {
