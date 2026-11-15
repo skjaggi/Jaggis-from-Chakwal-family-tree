@@ -2,9 +2,9 @@
 // Everything is worked out from the data this visitor can already see, so it
 // follows the same privacy rules as the rest of the site.
 import {
-  store, pendingCount, listProfiles, listInvites, listViews, visitorStats, sendWeeklySummary, listQuestions, addQuestion, updateQuestion, deleteQuestion, personLabel,
+  store, pendingCount, listProfiles, listInvites, listViews, visitorStats, sendWeeklySummary, listQuestions, addQuestion, listNotDuplicates, markNotDuplicate, updateQuestion, deleteQuestion, personLabel,
 } from './data.js';
-import { fullName, birthYear, skeleton, lifeLine } from './model.js';
+import { fullName, shortName, birthYear, skeleton, lifeLine } from './model.js';
 import { branchesOf, BRANCH_GEN } from './branches.js';
 import { h, clear, toast, field, formatWhen, confirmDialog } from './ui.js';
 import { personPicker } from './forms.js';
@@ -44,19 +44,7 @@ export function computeStats(fam) {
   const noSources = seen.filter((p) => !det(p).sources);
   const noPhoto = people.filter((p) => !p.photo_path);
 
-  // Possible duplicates: same name (allowing for spelling) within a generation of each other.
-  const byKey = new Map();
-  for (const p of people) {
-    const key = skeleton(`${p.given_name || ''}${p.surname || ''}`);
-    if (!key) continue;
-    (byKey.get(key) || byKey.set(key, []).get(key)).push(p);
-  }
-  const dupes = [];
-  for (const group of byKey.values()) {
-    if (group.length < 2) continue;
-    const close = group.filter((p) => group.some((q) => q !== p && Math.abs((p.generation ?? 0) - (q.generation ?? 0)) <= 1));
-    dupes.push(...close);
-  }
+  const dupes = findDuplicatePairs(fam, people);
 
   const br = branchesOf(fam);
 
@@ -106,7 +94,7 @@ export function computeStats(fam) {
       { key: 'no-gender', label: 'Gender not recorded', list: noGender, where: 'details', edit: true },
       { key: 'missing-parent', label: 'No parent in the tree', list: missingParent, where: 'relationships' },
       { key: 'uncertain-parent', label: 'Parent not confirmed', list: uncertainParent, where: 'relationships' },
-      { key: 'possible-dupes', label: 'Possible duplicates (similar names)', list: dupes, where: 'people' },
+      { key: 'possible-dupes', label: 'Possible duplicates (similar names)', list: dupes, pairs: true, where: 'people' },
       { key: 'no-sources', label: 'No sources noted', list: noSources, where: 'sources' },
       { key: 'no-photo', label: 'No photo', list: noPhoto, where: 'photos' },
     ],
@@ -115,6 +103,74 @@ export function computeStats(fam) {
 }
 
 const personHref = (id) => `#/tree/${store.fam.defaultRootId}?p=${id}`;
+
+// ---------------------------------------------------------------- duplicates
+// Names we don't know yet ("Daughter Name (?)", "Unknown") are placeholders, not duplicates.
+const PLACEHOLDER = /\(\?\)|\?\s*$|\bunknown\b|\bname\b/i;
+const letters = (s) => s.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1');
+
+function editDistance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+export const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
+let dismissed = new Set(); // pairKey()s an admin marked "Not a duplicate"
+
+// Possible duplicates, as pairs: the same name allowing for small spelling
+// differences (Parkash/Prakash, Surinder/Surender), within a generation of each
+// other, and not of different recorded genders.
+export function findDuplicatePairs(fam, people = [...fam.byId.values()]) {
+  const byKey = new Map();
+  for (const p of people) {
+    const name = `${p.given_name || ''} ${p.surname || ''}`;
+    if (PLACEHOLDER.test(p.given_name || '')) continue;
+    const key = skeleton(name);
+    if (!key) continue;
+    (byKey.get(key) || byKey.set(key, []).get(key)).push(p);
+  }
+  const knownGender = (p) => (p.gender && p.gender !== 'unknown' ? p.gender : null);
+  const pairs = [];
+  for (const group of byKey.values()) {
+    for (let i = 0; i < group.length; i++) for (let j = i + 1; j < group.length; j++) {
+      const [a, b] = [group[i], group[j]];
+      if (Math.abs((a.generation ?? 0) - (b.generation ?? 0)) > 1) continue;
+      if (knownGender(a) && knownGender(b) && knownGender(a) !== knownGender(b)) continue;
+      if (editDistance(letters(shortName(a)), letters(shortName(b))) > 2) continue;
+      if (dismissed.has(pairKey(a.id, b.id))) continue;
+      pairs.push([a, b]);
+    }
+  }
+  return pairs;
+}
+
+const parentNames = (fam, p) => fam.parents(p.id).map((x) => x.person && shortName(x.person)).filter(Boolean);
+
+function pairList(pairs, fam, refresh) {
+  const who = (p) => {
+    const parents = parentNames(fam, p);
+    return h('div.dupe-person',
+      h('a', { href: personHref(p.id) }, fullName(p)),
+      h('span.muted', ` · gen ${p.generation ?? '?'}`),
+      h('div.muted.small', parents.length ? `child of ${parents.join(' & ')}` : (fam.isMarriedIn(p.id) ? 'married into the family' : 'no parents in the tree')));
+  };
+  return h('ul.dupe-pairs', pairs.map(([a, b]) => h('li',
+    h('div.dupe-two', who(a), h('span.dupe-and', 'and'), who(b)),
+    store.isAdmin ? h('button.btn.small', { type: 'button', title: 'These are two different people: stop listing them', onclick: async (e) => {
+      e.target.disabled = true;
+      try {
+        await markNotDuplicate(a.id, b.id);
+        dismissed.add(pairKey(a.id, b.id));
+        toast(`${shortName(a)} and ${shortName(b)} won't be listed again.`);
+        refresh();
+      } catch (err) { e.target.disabled = false; toast(err.message, 'error'); }
+    } }, 'Not a duplicate') : null)));
+}
 
 function tile(value, label, sub) {
   return h('div.stat', h('div.stat-label', label), h('div.stat-value', String(value)), sub ? h('div.stat-sub', sub) : null);
@@ -393,8 +449,17 @@ async function questionsSection() {
   return box;
 }
 
+// After a re-render, open the same Needs attention row again.
+function reopen(container, key) {
+  const t = container.querySelector(`.row-toggle[data-key="${key}"]`);
+  if (t) t.click();
+}
+
 export async function renderDashboard(container) {
   const fam = store.fam;
+  if (store.signedIn) {
+    try { dismissed = new Set((await listNotDuplicates()).map((r) => pairKey(r.person_a, r.person_b))); } catch { /* table not there yet */ }
+  }
   const s = computeStats(fam);
   const pct = (n, d) => (d ? Math.round((n / d) * 100) : 0);
   const total = s.people.length;
@@ -425,11 +490,15 @@ export async function renderDashboard(container) {
         return [h('tr', h('td', a.label), h('td.num', h('span.muted', '0')), h('td.muted.area', a.where))];
       }
       // The names open in a full-width row underneath, so they fit on a phone.
-      const names = h('tr.names-row', { hidden: true }, h('td', { colspan: 3 }, peopleList(a.list, { edit: a.edit })));
+      const names = h('tr.names-row', { hidden: true }, h('td', { colspan: 3 }, a.pairs
+        ? [h('p.muted.small', 'Each line is a pair whose names are spelled alike. If they are really two different people, an admin can tap "Not a duplicate".'),
+          pairList(a.list, fam, () => renderDashboard(container).then(() => reopen(container, a.key)))]
+        : peopleList(a.list, { edit: a.edit })));
       const toggle = h('button.linkish.row-toggle', { type: 'button', 'aria-expanded': 'false', onclick: () => {
         names.hidden = !names.hidden;
         toggle.setAttribute('aria-expanded', String(!names.hidden));
       } }, a.label);
+      toggle.dataset.key = a.key;
       return [h('tr', h('td', toggle), h('td.num', h('strong', String(a.list.length))), h('td.muted.area', a.where)), names];
     })));
 

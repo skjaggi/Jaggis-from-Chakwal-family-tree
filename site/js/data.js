@@ -446,6 +446,20 @@ export async function deleteQuestion(id) {
   if (error) throw error;
 }
 
+// ---------------------------------------------------------------- not duplicates
+// Pairs an admin has said are two different people, so the Dashboard stops listing them.
+export async function listNotDuplicates() {
+  const { data, error } = await store.sb.from('not_duplicates').select('person_a, person_b');
+  if (error) throw error;
+  return data;
+}
+
+export async function markNotDuplicate(a, b) {
+  const [person_a, person_b] = a < b ? [a, b] : [b, a];
+  const { error } = await store.sb.from('not_duplicates').insert({ person_a, person_b, marked_by: store.session.user.id });
+  if (error) throw error;
+}
+
 // ---------------------------------------------------------------- visits
 // Signed-in members' page and person views, for the admin's Visits report.
 // Quietly does nothing if it fails (for example before the table exists).

@@ -200,6 +200,27 @@ set local role anon;
 select pg_temp.expect((select count(*) from public.research_questions) = 0, 'visitors cannot read questions');
 rollback;
 
+-- "Not a duplicate" marks: only the admin adds them; family can read them
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+do $$ begin
+  begin
+    insert into public.not_duplicates (person_a, person_b)
+      select least(a, b), greatest(a, b) from (select pg_temp.pid('Kesar Mal') a, pg_temp.pid('Sunil Kumar') b) x;
+    raise exception 'FAILED: member marked a pair not-duplicate';
+  exception when insufficient_privilege then raise notice 'ok: member cannot mark pairs as not duplicates';
+  end;
+end $$;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+insert into public.not_duplicates (person_a, person_b)
+  select least(a, b), greatest(a, b) from (select pg_temp.pid('Kesar Mal') a, pg_temp.pid('Sunil Kumar') b) x;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect((select count(*) from public.not_duplicates) = 1, 'family reads not-duplicate marks');
+set local role anon;
+select pg_temp.expect((select count(*) from public.not_duplicates) = 0, 'visitors cannot read not-duplicate marks');
+rollback;
+
 -- Storage: branch photo readable only by branch
 insert into storage.objects (bucket_id, name) values ('photos-branch', pg_temp.pid('Sunil Kumar')::text || '/a.jpg');
 alter table storage.objects enable row level security;
