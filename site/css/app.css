@@ -673,3 +673,8 @@ table.rules.mult { margin-top: 12px; }
 .historian-pop .founder-medal { filter: drop-shadow(0 4px 12px rgb(23 112 107 / .45)); }
 .badge.special { grid-column: 1 / -1; border-color: var(--gold); background: linear-gradient(180deg, rgb(196 154 58 / .12), transparent); }
 .badge.special .medal { width: 60px; height: 60px; }
+.founder-ribbon { display: flex; align-items: center; gap: 12px; margin: 8px 0 10px; padding: 10px 12px; border: 1px solid var(--gold); border-radius: 12px; background: linear-gradient(180deg, rgb(196 154 58 / .14), rgb(196 154 58 / .04)); text-align: left; }
+.founder-ribbon .medal { width: 46px; height: 46px; flex: none; }
+.founder-ribbon div { display: grid; gap: 2px; line-height: 1.35; }
+.founder-ribbon small { color: var(--muted); font-size: 0.82rem; }
+svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3)); pointer-events: none; }

@@ -1,4 +1,5 @@
 // The person card that slides in when someone is tapped.
+import { medal, FOUNDER, isFounderPerson } from './blessings.js';
 import { store, listRequests, canManage, claimPerson, personClaimedBy, refreshProfile } from './data.js';
 import { describe } from './admin.js';
 import { config } from './config.js';
@@ -111,6 +112,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
       !photo && p.photo_path && p.photo_visibility === 'branch' ? h('p.muted.small', 'Photo visible to this branch only.') : null),
     h('h2.panel-name', fullName(p)),
     p.other_names ? h('p.muted', p.other_names) : null,
+    isFounderPerson(p.id) ? h('div.founder-ribbon', medal(FOUNDER), h('div', h('b', FOUNDER.name), h('small', 'He had the idea for this family tree and made the first two family trees it grew from.'))) : null,
     claimBox,
     h('p.tags',
       p.generation ? h('span.tag', `Generation ${p.generation}`) : null,

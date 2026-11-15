@@ -28,6 +28,9 @@ export const BADGES = [
 export const FOUNDER = { id: 'founder', name: 'Founder of the Jaggi Family Tree', how: 'Had the idea and made the first family trees this one grew from', color: '#17706b', icon: ICON.seed, special: true };
 const FOUNDERS = new Set(['fb6fc331-a891-4756-8cfe-37a178b54fe4']);
 export const isFounder = (userId) => FOUNDERS.has(userId);
+// The founder's own box in the tree (Suraj Parkash Jaggi), for everyone to see.
+const FOUNDER_PEOPLE = new Set(['71296ea4-33fc-50e4-9924-8b156fdb27e9']);
+export const isFounderPerson = (personId) => FOUNDER_PEOPLE.has(personId);
 
 export function medal(b, cls = 'medal') {
   const ns = 'http://www.w3.org/2000/svg';
