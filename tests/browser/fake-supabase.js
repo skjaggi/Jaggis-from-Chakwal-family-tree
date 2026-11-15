@@ -71,6 +71,10 @@ export function createClient() {
         if (body.action === 'remove') { const i = db.invites.findIndex((x) => x.email === body.email); const inv = db.invites.splice(i, 1)[0]; (db.removed_members ||= []).push({ email: body.email, snapshot: { invite: inv, profile: null }, removed_at: new Date().toISOString() }); return { data: { removed: true }, error: null }; }
         const j = db.removed_members.findIndex((x) => x.email === body.email); const r = db.removed_members.splice(j, 1)[0]; db.invites.push(r.snapshot.invite); return { data: { restored: true }, error: null };
       }
+      if (name === 'send-reminder') {
+        if (body.preview) return { data: { html: `<p>Dear ${body.previewName},</p><p>${body.message}</p>`, subject: body.subject }, error: null };
+        window.__reminder = body; return { data: { sent: body.emails, failed: [], skipped: [] }, error: null };
+      }
       if (name === 'weekly-summary') return { data: { sent: true, to: ['me@example.com'] }, error: null };
       return { data: { sent: true }, error: null };
     } },
@@ -84,6 +88,14 @@ export function createClient() {
       }
       if (name === 'person_claimed_by') return { data: db.profiles.find(x => x.claimed_person_id === args.p)?.display_name ?? null, error: null };
       if (name === 'revoke_claim') { db.profiles.find(x => x.id === args.u).claimed_person_id = null; return { data: null, error: null }; }
+      if (name === 'blessings_ledger') {
+        const me = db.profiles[0];
+        const rows = db.change_requests.filter((r) => r.status === 'approved' && ['add_person', 'edit_person', 'set_photo', 'add_link'].includes(r.kind))
+          .map((r) => ({ user_id: r.submitted_by, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: r.kind === 'add_person' ? 5 : 2, kind: r.kind, story: false, reason: r.summary }));
+        if (me.claimed_person_id) rows.push({ user_id: me.id, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: 5, kind: 'claim', story: false, reason: 'Claimed their own box' });
+        rows.push({ user_id: 'u-9', name: 'Cousin Neha', person_id: null, role: 'member', at: new Date().toISOString(), points: 12, kind: 'add_person', story: true, reason: 'Add someone' });
+        return { data: rows, error: null };
+      }
       if (name === 'member_name') return { data: 'Cousin Neha', error: null };
       if (name === 'undo_change_request') { const r = db.change_requests.find(x => x.id === args.request_id); r.status = 'undone'; return { data: null, error: null }; }
       if (name === 'person_history') {

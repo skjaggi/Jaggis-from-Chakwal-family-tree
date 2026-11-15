@@ -4,6 +4,7 @@ import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint, birthYear } from './model.js';
 import { h, clear, modal, toast, field, select, confirmDialog } from './ui.js';
 import { photoEditor } from './photo-editor.js';
+import { thankYou, forgetBlessings } from './blessings.js';
 
 // "Added and updated by": who added this person and who changed them since,
 // filled in from approved changes (not editable). Calls onShown when there is
@@ -58,7 +59,10 @@ async function send(kind, payload, opts, close) {
   try {
     const { applied } = await submitChange(kind, payload, opts);
     close();
-    toast(applied ? 'Saved. It is in the tree now.' : 'Sent for approval. You can follow it under "My changes".', 'ok');
+    forgetBlessings();
+    const thanks = thankYou(kind, payload, opts?.summary || '', applied);
+    toast((applied ? 'Saved. It is in the tree now.' : 'Sent for approval. You can follow it under "My changes".') + thanks, 'ok');
+    if (applied && thanks) store.emit(); // update the blessings in the top corner
   } catch (e) {
     console.error(e);
     toast(e.message || 'Something went wrong.', 'error');

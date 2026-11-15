@@ -11,6 +11,7 @@ import { openPersonForm } from './forms.js';
 import { renderReview, renderMine, renderAdmin } from './admin.js';
 import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
+import { renderBlessings, renderCorner } from './blessings.js';
 import { renderExport } from './export.js';
 import { downloadGedcom } from './gedcom.js';
 import { countView } from './count.js';
@@ -25,7 +26,7 @@ function parseHash() {
   if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
-  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export'].includes(view) ? view : 'tree';
+  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings'].includes(view) ? view : 'tree';
   state.root = root && store.fam.byId.has(root) ? root : store.fam.defaultRootId;
   const p = new URLSearchParams(query).get('p');
   state.selected = p && store.fam.byId.has(p) ? p : null;
@@ -77,6 +78,7 @@ async function route() {
     if (state.view === 'members') return store.isAdmin ? renderAdmin(page) : clear(page, h('p', 'Only the admin can manage members.'));
     if (state.view === 'mine') return renderMine(page);
     if (state.view === 'invite') return renderInvite(page);
+    if (state.view === 'blessings') return renderBlessings(page);
     return;
   }
 
@@ -260,6 +262,7 @@ async function renderHeader() {
     h('a', { href: '#/dashboard', 'data-nav': 'dashboard' }, 'Dashboard'),
     signed ? h('a', { href: '#/mine', 'data-nav': 'mine' }, 'My changes') : null,
     signed ? h('a', { href: '#/invite', 'data-nav': 'invite' }, 'Invite') : null,
+    signed && !store.preview ? h('a', { href: '#/blessings', 'data-nav': 'blessings' }, 'Blessings') : null,
     store.isAdmin || store.claimedId || count ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
     h('a', { href: 'people/', title: 'Family members who have passed away, one page each' }, 'Ancestors'),
@@ -274,6 +277,8 @@ async function renderHeader() {
       : h('button.btn.small.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
   for (const a of nav.querySelectorAll('[data-nav]')) a.classList.toggle('active', a.dataset.nav === state.view);
   $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
+  // Once they've claimed their box: their photo, blessings and badges instead.
+  if (signed) await renderCorner($('who')).catch(() => false);
   $('preview-banner').hidden = !store.preview;
   await renderClaimBanner();
 }
@@ -360,6 +365,9 @@ async function start() {
   $('expand-all').onclick = () => tree.expandAll();
   $('collapse-all').onclick = () => tree.collapseAll();
   setupSearch();
+  // The side panel starts just under the top bar, whose height changes when the menu wraps.
+  const bar = document.querySelector('.topbar');
+  if (bar && 'ResizeObserver' in window) new ResizeObserver(() => document.documentElement.style.setProperty('--panel-top', `${bar.getBoundingClientRect().bottom}px`)).observe(bar);
   window.addEventListener('hashchange', route);
   store.onChange(async () => {
     await renderHeader();

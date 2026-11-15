@@ -412,7 +412,7 @@ export async function listRemoved() {
   return data || [];
 }
 
-async function functionError(error) {
+export async function functionError(error) {
   try { return (await error.context?.json())?.error || error.message; } catch { return error.message; }
 }
 

@@ -11,6 +11,7 @@ import { h, clear, toast, formatWhen, field, select, confirmDialog } from './ui.
 import { LABELS, personPicker } from './forms.js';
 import { downloadGedcom } from './gedcom.js';
 import { sendButtons } from './invite.js';
+import { reminderSection } from './reminders.js';
 
 const KIND_TITLE = {
   add_person: 'Add a person', edit_person: 'Edit details', add_link: 'Add a relationship',
@@ -286,6 +287,7 @@ export async function renderAdmin(container) {
     h('section', h('h2', 'Invite someone'),
       h('p.muted', 'Only invited emails can sign in. After you add them here, the site emails them an invitation; the WhatsApp and Copy buttons are there if you would rather send it yourself. Family members can also invite relatives from Invite in the menu; you will see who invited whom below. Removing someone also stops them from signing in, and can be undone.'),
       form),
+    reminderSection(invites, profiles),
     h('section', h('h2', `Invites (${invites.length})`),
       invites.length ? h('ul.history', invites.map((i) => h('li',
         h('strong', i.email), i.display_name ? ` (${i.display_name})` : '',

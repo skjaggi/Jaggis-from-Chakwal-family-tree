@@ -191,3 +191,45 @@ end $$;
 select pg_temp.as_user(:'ADMIN');
 select pg_temp.expect((select count(*) from public.page_views where user_id = '00000000-0000-0000-0000-00000000000b' and view = 'tree') = 1, 'admin reads member visits');
 commit;
+
+-- Blessings
+begin;
+set local role authenticated;
+select pg_temp.as_user(:'SUNIL');
+select pg_temp.req(:'SUNIL', 'add_person', jsonb_build_object('person', jsonb_build_object('given_name', 'Blessed Baby'),
+  'details', jsonb_build_object('birth_place', 'Delhi', 'notes', 'A story', 'visibility', 'branch', 'profession', ''),
+  'link', jsonb_build_object('as', 'child', 'of', pg_temp.pid('Sunil Kumar')))) as bid \gset
+select pg_temp.as_user(:'ADMIN');
+select pg_temp.try_approve(:'bid') = 'ok' as approved \gset
+select pg_temp.expect(:'approved', 'blessing test change approved');
+select pg_temp.as_user(:'SUNIL');
+select pg_temp.expect((select points = 12 and story and kind = 'add_person' from public.blessings_ledger() where reason = 'add_person' and user_id = :'SUNIL' order by at desc limit 1),
+  'adding a person with a place and a story earns 5 + 2 + 5 blessings, empty and privacy fields earn nothing');
+do $$ begin
+  insert into public.blessing_adjustments (user_id, points, reason) values ('00000000-0000-0000-0000-00000000000b', 50, 'self-award');
+  raise exception 'FAILED: member gave themselves blessings';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: members cannot give themselves blessings';
+end $$;
+select pg_temp.as_user(:'ADMIN');
+select pg_temp.expect((select count(*) from public.blessings_ledger() where kind = 'claim') = (select count(*) from public.profiles where claimed_person_id is not null) and (select count(*) from public.blessings_ledger() where kind = 'claim') > 0, 'everyone who has claimed their box earns a blessing for it');
+insert into public.blessing_adjustments (user_id, points, reason) values (:'SUNIL', 7, 'Found the 1947 papers');
+select pg_temp.expect((select count(*) from public.blessings_ledger() where kind = 'adjust' and points = 7) = 1, 'admin adjustments show in the ledger');
+select pg_temp.req(:'ADMIN', 'edit_person', jsonb_build_object('person_id', pg_temp.pid('Bhanna Mal'), 'person', '{}'::jsonb,
+  'details', jsonb_build_object('profession', 'Trader', 'visibility', 'public')), pg_temp.pid('Bhanna Mal')) as gid \gset
+select pg_temp.try_approve(:'gid') = 'ok' as gok \gset
+select pg_temp.expect(:'gok', 'generation test change approved');
+select pg_temp.expect((select points from public.blessings_ledger() where reason = 'edit_person' and user_id = :'ADMIN' order by at desc limit 1) = 10,
+  'a detail about Generation 1 earns five times the blessings (2 x 5)');
+commit;
+begin;
+set local role anon;
+do $$ begin
+  perform public.blessings_ledger();
+  raise exception 'FAILED: anonymous visitor read the blessings';
+exception when others then
+  if sqlerrm like 'FAILED%' then raise; end if;
+  raise notice 'ok: anonymous visitors cannot read blessings';
+end $$;
+commit;
