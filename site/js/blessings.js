@@ -126,7 +126,7 @@ export async function renderCorner(el) {
 export async function renderBlessings(page) {
   clear(page, h('p.muted', 'Loading blessings…'));
   let rows;
-  try { rows = await loadBlessings(); } catch (e) { clear(page, h('p.error', e.message)); return; }
+  try { rows = await loadBlessings(); } catch (e) { clear(page, h('h1', 'Family Blessings'), h('p.muted', 'Blessings are being set up. Please check back in a little while.')); console.warn(e); return; }
   const people = summarize(rows);
   const meId = store.session.user.id;
   const me = people.find((m) => m.id === meId);
