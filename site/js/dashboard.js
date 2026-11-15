@@ -102,8 +102,8 @@ export function computeStats(fam) {
       { key: 'no-birth-year', label: 'No birth year', list: noBirthYear, where: 'details' },
       { key: 'no-birth-place', label: 'No birthplace', list: noBirthPlace, where: 'details' },
       { key: 'dead-no-year', label: 'Died, but no year of death', list: deadNoYear, where: 'details' },
-      { key: 'unknown-status', label: 'Not known if living', list: unknownStatus, where: 'details' },
-      { key: 'no-gender', label: 'Gender not recorded', list: noGender, where: 'details' },
+      { key: 'unknown-status', label: 'Not known if living', list: unknownStatus, where: 'details', edit: true },
+      { key: 'no-gender', label: 'Gender not recorded', list: noGender, where: 'details', edit: true },
       { key: 'missing-parent', label: 'No parent in the tree', list: missingParent, where: 'relationships' },
       { key: 'uncertain-parent', label: 'Parent not confirmed', list: uncertainParent, where: 'relationships' },
       { key: 'possible-dupes', label: 'Possible duplicates (similar names)', list: dupes, where: 'people' },
@@ -120,9 +120,11 @@ function tile(value, label, sub) {
   return h('div.stat', h('div.stat-label', label), h('div.stat-value', String(value)), sub ? h('div.stat-sub', sub) : null);
 }
 
-function peopleList(list) {
+// edit: the name opens the person's edit form straight away (for missing required fields).
+function peopleList(list, { edit = false } = {}) {
   const sorted = [...list].sort((a, b) => (a.generation ?? 99) - (b.generation ?? 99) || fullName(a).localeCompare(fullName(b)));
-  return h('ul.dash-people', sorted.map((p) => h('li', h('a', { href: personHref(p.id) }, fullName(p)),
+  const withEdit = edit && store.signedIn;
+  return h('ul.dash-people', sorted.map((p) => h('li', h('a', { href: personHref(p.id) + (withEdit ? '&edit=1' : ''), title: withEdit ? 'Open the edit form' : null }, fullName(p), withEdit ? ' ✎' : null),
     p.generation ? h('span.muted', ` · gen ${p.generation}`) : null)));
 }
 
@@ -423,7 +425,7 @@ export async function renderDashboard(container) {
         return [h('tr', h('td', a.label), h('td.num', h('span.muted', '0')), h('td.muted.area', a.where))];
       }
       // The names open in a full-width row underneath, so they fit on a phone.
-      const names = h('tr.names-row', { hidden: true }, h('td', { colspan: 3 }, peopleList(a.list)));
+      const names = h('tr.names-row', { hidden: true }, h('td', { colspan: 3 }, peopleList(a.list, { edit: a.edit })));
       const toggle = h('button.linkish.row-toggle', { type: 'button', 'aria-expanded': 'false', onclick: () => {
         names.hidden = !names.hidden;
         toggle.setAttribute('aria-expanded', String(!names.hidden));

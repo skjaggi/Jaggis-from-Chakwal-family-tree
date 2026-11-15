@@ -49,6 +49,12 @@ let lastView = null;
 let needsRedraw = false;
 async function route() {
   parseHash();
+  // "&edit=1" (from the Dashboard's missing-field lists): open the card and its edit form.
+  if (/[?&]edit=1\b/.test(location.hash)) {
+    history.replaceState(null, '', location.hash.replace(/&edit=1\b|\?edit=1&?/, (m) => (m.startsWith('?') && m.endsWith('&') ? '?' : '')));
+    const person = state.selected && store.fam.byId.get(state.selected);
+    if (person && store.signedIn) setTimeout(() => openPersonForm({ mode: 'edit', person }), 250);
+  }
   logView(state.view, state.selected);
   countView(`${location.pathname}#/${state.view}`, `${config.siteTitle}: ${state.view}`);
   const isTreeish = state.view === 'tree' || state.view === 'outline';
