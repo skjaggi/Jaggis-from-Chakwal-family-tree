@@ -670,3 +670,6 @@ table.rules.mult { margin-top: 12px; }
 .historian-pop .big-medal { width: 96px; height: 96px; filter: drop-shadow(0 4px 10px rgb(196 154 58 / .45)); }
 .historian-pop .hp-title { font-size: 1.35rem; font-weight: 700; color: var(--ink); }
 .historian-pop .form-actions { justify-content: center; width: 100%; }
+.historian-pop .founder-medal { filter: drop-shadow(0 4px 12px rgb(23 112 107 / .45)); }
+.badge.special { grid-column: 1 / -1; border-color: var(--gold); background: linear-gradient(180deg, rgb(196 154 58 / .12), transparent); }
+.badge.special .medal { width: 60px; height: 60px; }

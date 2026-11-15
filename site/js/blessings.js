@@ -12,6 +12,7 @@ const ICON = {
   story: 'M6 5h9l3 3v11H6z M9 11h6 M9 14h6',
   photo: 'M5 8h3l1.5-2h5L16 8h3v10H5z M12 15.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   link: 'M8 9a2 2 0 1 0 0-.1M16 9a2 2 0 1 0 0-.1M12 16a2 2 0 1 0 0-.1M9 10.5l2 4M15 10.5l-2 4',
+  seed: 'M12 20v-7 M12 13c0-3.5-2.4-6-6-6 0 3.5 2.4 6 6 6z M12 11c0-3.5 2.4-6 6-6 0 3.5-2.4 6-6 6z M8.5 20h7',
   star: 'M12 4l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.4 7.2 18.9l.9-5.4L4.2 9.7l5.4-.8z',
 };
 export const BADGES = [
@@ -22,6 +23,12 @@ export const BADGES = [
   { id: 'hist', name: 'Family Historian', how: 'Most blessings this month', need: 1, count: 'historian', color: '#c49a3a', icon: ICON.star },
 ];
 
+// Special badges given by hand, not earned. Suraj Jaggi started the family
+// tree: he had the idea and made the first two family trees it began from.
+export const FOUNDER = { id: 'founder', name: 'Founder of the Jaggi Family Tree', how: 'Had the idea and made the first family trees this one grew from', color: '#17706b', icon: ICON.seed, special: true };
+const FOUNDERS = new Set(['fb6fc331-a891-4756-8cfe-37a178b54fe4']);
+export const isFounder = (userId) => FOUNDERS.has(userId);
+
 export function medal(b, cls = 'medal') {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
@@ -29,7 +36,9 @@ export function medal(b, cls = 'medal') {
   svg.setAttribute('class', cls);
   svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', b.name);
-  svg.innerHTML = `<title>${b.name}</title><circle cx="12" cy="12" r="11" fill="${b.color}"/><circle cx="12" cy="12" r="9.2" fill="none" stroke="#f3dc95" stroke-width=".8"/><path d="${b.icon}" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  svg.innerHTML = b.special
+    ? `<title>${b.name}</title><circle cx="12" cy="12" r="11.4" fill="#c49a3a"/><circle cx="12" cy="12" r="9.6" fill="${b.color}"/><circle cx="12" cy="12" r="8.4" fill="none" stroke="#f3dc95" stroke-width=".7"/><path d="${b.icon}" fill="none" stroke="#f3dc95" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`
+    : `<title>${b.name}</title><circle cx="12" cy="12" r="11" fill="${b.color}"/><circle cx="12" cy="12" r="9.2" fill="none" stroke="#f3dc95" stroke-width=".8"/><path d="${b.icon}" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
   return svg;
 }
 const coin = () => h('span.coin', { 'aria-hidden': 'true' }, '✦');
@@ -70,7 +79,7 @@ export function summarize(rows) {
   const top = list.filter((m) => m.role !== 'admin' && m.month > 0).sort((a, b) => b.month - a.month)[0];
   for (const m of list) {
     m.counts.historian = m === top ? 1 : 0;
-    m.badges = BADGES.filter((b) => m.counts[b.count] >= b.need);
+    m.badges = [...(FOUNDERS.has(m.id) ? [FOUNDER] : []), ...BADGES.filter((b) => m.counts[b.count] >= b.need)];
     m.rows.sort((a, b) => (a.at < b.at ? 1 : -1));
   }
   return list;
@@ -118,6 +127,23 @@ export function maybeShowBlessingsIntro() {
 
 // Congratulations, once a month, to whoever holds Family Historian (the most
 // blessings this month). It can change hands, so a new leader is greeted too.
+// A one-time thank-you to the founder, the first time he signs in after this.
+export function maybeShowFounderThanks() {
+  if (!store.signedIn || store.preview || !isFounder(store.session.user.id) || document.querySelector('dialog[open]')) return false;
+  const key = `founder-thanks:${store.session.user.id}`;
+  try { if (localStorage.getItem(key)) return false; localStorage.setItem(key, '1'); } catch { return false; }
+  const first = (store.profile?.display_name || '').trim().split(/\s+/)[0];
+  const m = modal('A special badge', h('div.historian-pop',
+    medal(FOUNDER, 'medal big-medal founder-medal'),
+    h('p.hp-title', `Thank you${first ? `, ${first}` : ''}!`),
+    h('p', 'You are the ', h('b', 'Founder of the Jaggi Family Tree'), '. This tree began with your idea and the first two family trees you put together.'),
+    h('p', 'Everything the family adds here grows from that work. This badge is yours alone, and it shows next to your name for everyone to see.'),
+    h('div.form-actions',
+      h('button.btn', { type: 'button', onclick: () => { m.close(); location.hash = '#/blessings'; } }, 'See the leaderboard'),
+      h('button.btn.primary', { type: 'button', onclick: () => m.close() }, 'Thank you'))));
+  return true;
+}
+
 let congratsChecked = false;
 export async function maybeShowHistorianCongrats() {
   if (congratsChecked) return false;
@@ -202,7 +228,7 @@ export async function renderBlessings(page) {
       return h('li' + (m.id === meId ? '.me' : ''),
         h('span.rank', String(i + 1)),
         photo ? h('img.av', { src: photo, alt: '' }) : h('span.av', initials(m.name)),
-        h('span.who-cell', h('b', m.name), h('small', [br ? `${fullName(br.person, { title: false })} branch` : 'No box claimed yet', m.role === 'admin' ? ' · admin' : ''].join(''))),
+        h('span.who-cell', h('b', m.name), h('small', [br ? `${fullName(br.person, { title: false })} branch` : 'No box claimed yet', m.role === 'admin' ? ' · admin' : '', isFounder(m.id) ? ' · Founder' : ''].join(''))),
         h('span.pts', h('span.mini-badges', m.badges.map((b) => medal(b, 'mini-medal'))), String(m[key]), coin()));
     }) : h('li.empty', period === 'month' ? 'No blessings yet this month. Be the first!' : 'No blessings yet.'));
   };
@@ -234,7 +260,7 @@ export async function renderBlessings(page) {
         h('section.bless-card',
           h('h2', 'Your badges'),
           h('p.muted.small', me ? `${me.total} blessings so far, ${me.month} this month.` : 'Add something to the tree to earn your first blessings.'),
-          h('div.badges', BADGES.map((b) => {
+          h('div.badges', isFounder(meId) ? h('div.badge.special', medal(FOUNDER), h('b', FOUNDER.name), h('small', FOUNDER.how), h('small.num', 'Special badge')) : null, BADGES.map((b) => {
             const have = Math.min(myCounts[b.count] || 0, b.need);
             const done = have >= b.need;
             return h('div.badge' + (done ? '' : '.locked'), medal(b), h('b', b.name), h('small', b.how),
