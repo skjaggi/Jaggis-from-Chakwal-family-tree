@@ -1,6 +1,6 @@
 // Top-down tree drawn with d3: scroll to move, pinch to zoom, tap a card to open the
 // person, tap the round button under a card to show or hide their children.
-import { medal, FOUNDER, isFounderPerson } from './blessings.js';
+import { medal, specialOfPerson } from './blessings.js';
 import { store, canManage } from './data.js';
 import { shortName, lifeLine } from './model.js';
 import { initials } from './ui.js';
@@ -401,9 +401,9 @@ export class TreeView {
     const tx = ax + r + 7;
     const chars = Math.floor((w / 2 - tx - 6) / 7.2);
     drawAvatar(el.append('g').attr('class', 'avatar').attr('transform', `translate(${ax},0)`), p, r);
-    if (isFounderPerson(p.id)) {
-      // The Founder medal sits on the corner of the photo.
-      const m = medal(FOUNDER, 'tree-medal');
+    for (const b of specialOfPerson(p.id).slice(0, 1)) {
+      // A special badge (Founder, Creator) sits on the corner of the photo.
+      const m = medal(b, 'tree-medal');
       const s = Math.max(18, Math.round(r * 1.1));
       for (const [k, v] of Object.entries({ x: ax + r * 0.6 - s / 2, y: r * 0.75 - s / 2, width: s, height: s })) m.setAttribute(k, v);
       el.node().appendChild(m);

@@ -12,6 +12,7 @@ const ICON = {
   story: 'M6 5h9l3 3v11H6z M9 11h6 M9 14h6',
   photo: 'M5 8h3l1.5-2h5L16 8h3v10H5z M12 15.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   link: 'M8 9a2 2 0 1 0 0-.1M16 9a2 2 0 1 0 0-.1M12 16a2 2 0 1 0 0-.1M9 10.5l2 4M15 10.5l-2 4',
+  branch: 'M12 20v-9 M12 14l-4-3 M12 12l4-3.5 M8 11l-1.5-2.5 M8 11H5.5 M16 8.5l1.5-2.5 M16 8.5h2.5 M12 11V6.5 M9 20h6',
   seed: 'M12 20v-7 M12 13c0-3.5-2.4-6-6-6 0 3.5 2.4 6 6 6z M12 11c0-3.5 2.4-6 6-6 0 3.5-2.4 6-6 6z M8.5 20h7',
   star: 'M12 4l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.4 7.2 18.9l.9-5.4L4.2 9.7l5.4-.8z',
 };
@@ -23,14 +24,16 @@ export const BADGES = [
   { id: 'hist', name: 'Family Historian', how: 'Most blessings this month', need: 1, count: 'historian', color: '#c49a3a', icon: ICON.star },
 ];
 
-// Special badges given by hand, not earned. Suraj Jaggi started the family
-// tree: he had the idea and made the first two family trees it began from.
-export const FOUNDER = { id: 'founder', name: 'Founder of the Jaggi Family Tree', how: 'Had the idea and made the first family trees this one grew from', color: '#17706b', icon: ICON.seed, special: true };
-const FOUNDERS = new Set(['fb6fc331-a891-4756-8cfe-37a178b54fe4']);
-export const isFounder = (userId) => FOUNDERS.has(userId);
-// The founder's own box in the tree (Suraj Parkash Jaggi), for everyone to see.
-const FOUNDER_PEOPLE = new Set(['71296ea4-33fc-50e4-9924-8b156fdb27e9']);
-export const isFounderPerson = (personId) => FOUNDER_PEOPLE.has(personId);
+// Special badges given by hand, not earned, each tied to one account and to
+// that person's own box in the tree (so everyone sees it on the tree too).
+export const FOUNDER = { id: 'founder', name: 'Founder of the Jaggi Family Tree', short: 'Founder', how: 'Had the idea and made the first family trees this one grew from', card: 'He had the idea for this family tree and made the first two family trees it grew from.', color: '#17706b', icon: ICON.seed, special: true,
+  user: 'fb6fc331-a891-4756-8cfe-37a178b54fe4', person: '71296ea4-33fc-50e4-9924-8b156fdb27e9' }; // Suraj Parkash Jaggi
+export const CREATOR = { id: 'creator', name: 'Creator of the Jaggi Family Tree', short: 'Creator', how: 'Built this family tree, with the idea and blessing of the founder', card: 'He built this family tree, with the idea and blessing of the founder, Suraj Parkash Jaggi.', color: '#7a2e3a', icon: ICON.branch, special: true,
+  user: '80115979-6027-4f4a-939e-7fbad4c489a2', person: '143f144c-493b-5c9f-9996-9f7de3feafcc' }; // Sunil Kumar Jaggi
+const SPECIAL = [FOUNDER, CREATOR];
+export const specialOf = (userId) => SPECIAL.filter((b) => b.user === userId);
+export const specialOfPerson = (personId) => SPECIAL.filter((b) => b.person === personId);
+const isFounder = (userId) => FOUNDER.user === userId;
 
 export function medal(b, cls = 'medal') {
   const ns = 'http://www.w3.org/2000/svg';
@@ -82,7 +85,7 @@ export function summarize(rows) {
   const top = list.filter((m) => m.role !== 'admin' && m.month > 0).sort((a, b) => b.month - a.month)[0];
   for (const m of list) {
     m.counts.historian = m === top ? 1 : 0;
-    m.badges = [...(FOUNDERS.has(m.id) ? [FOUNDER] : []), ...BADGES.filter((b) => m.counts[b.count] >= b.need)];
+    m.badges = [...specialOf(m.id), ...BADGES.filter((b) => m.counts[b.count] >= b.need)];
     m.rows.sort((a, b) => (a.at < b.at ? 1 : -1));
   }
   return list;
@@ -231,7 +234,7 @@ export async function renderBlessings(page) {
       return h('li' + (m.id === meId ? '.me' : ''),
         h('span.rank', String(i + 1)),
         photo ? h('img.av', { src: photo, alt: '' }) : h('span.av', initials(m.name)),
-        h('span.who-cell', h('b', m.name), h('small', [br ? `${fullName(br.person, { title: false })} branch` : 'No box claimed yet', m.role === 'admin' ? ' · admin' : '', isFounder(m.id) ? ' · Founder' : ''].join(''))),
+        h('span.who-cell', h('b', m.name), h('small', [br ? `${fullName(br.person, { title: false })} branch` : 'No box claimed yet', m.role === 'admin' ? ' · admin' : '', ...specialOf(m.id).map((b) => ` · ${b.short}`)].join(''))),
         h('span.pts', h('span.mini-badges', m.badges.map((b) => medal(b, 'mini-medal'))), String(m[key]), coin()));
     }) : h('li.empty', period === 'month' ? 'No blessings yet this month. Be the first!' : 'No blessings yet.'));
   };
@@ -263,7 +266,7 @@ export async function renderBlessings(page) {
         h('section.bless-card',
           h('h2', 'Your badges'),
           h('p.muted.small', me ? `${me.total} blessings so far, ${me.month} this month.` : 'Add something to the tree to earn your first blessings.'),
-          h('div.badges', isFounder(meId) ? h('div.badge.special', medal(FOUNDER), h('b', FOUNDER.name), h('small', FOUNDER.how), h('small.num', 'Special badge')) : null, BADGES.map((b) => {
+          h('div.badges', specialOf(meId).map((b) => h('div.badge.special', medal(b), h('b', b.name), h('small', b.how), h('small.num', 'Special badge'))), BADGES.map((b) => {
             const have = Math.min(myCounts[b.count] || 0, b.need);
             const done = have >= b.need;
             return h('div.badge' + (done ? '' : '.locked'), medal(b), h('b', b.name), h('small', b.how),
