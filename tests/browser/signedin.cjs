@@ -1,5 +1,12 @@
 const { chromium, devices } = require('playwright'); const fs = require('fs');
 const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
+// Gender and Living? are required in the person form; pick them when the seed left them blank.
+const fillRequired = (pg) => pg.evaluate(() => {
+  for (const [n, v] of [['gender', 'male'], ['is_living', 'true']]) {
+    const s = document.querySelector(`dialog select[name=${n}]`);
+    if (s && !s.value) { s.value = v; s.dispatchEvent(new Event('change')); }
+  }
+});
 (async () => {
   const b = await chromium.launch(); const errors = [];
   for (const role of ['member', 'admin']) {
@@ -21,6 +28,7 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     await pg.waitForSelector('dialog form');
     await pg.screenshot({ path: `${SHOTS}${role}-addchild.png` });
     await pg.fill('dialog input[name=given_name]', 'Test Baby');
+    await pg.selectOption('dialog select[name=gender]', 'female');
     await pg.selectOption('dialog select[name=is_living]', 'true');
     await pg.fill('dialog input[name=birth_date]', '4 March 2020');
     await pg.click('dialog button[type=submit]');
@@ -28,7 +36,7 @@ const SHOTS = (process.env.SHOTS_DIR || require('os').tmpdir()) + '/';
     console.log(role, 'birth saved as', await pg.evaluate(() => window.__db.change_requests[0].payload.details.birth_date), 'toast:', await pg.locator('#toast').innerText(), '| requests:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.map(r => [r.kind, r.summary, r.status, r.payload.link]))));
     // edit
     await pg.click('.panel-actions button:has-text("dit")');
-    await pg.fill('dialog input[name=profession]', 'Engineer');
+    await fillRequired(pg); await pg.fill('dialog input[name=profession]', 'Engineer');
     await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(400);
     console.log(role, 'edit payload:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.at(-1).payload)), await pg.evaluate(() => window.__db.change_requests.at(-1).summary));
     if (role === 'member') {

@@ -40,6 +40,7 @@ export function computeStats(fam) {
   const noBirthPlace = seen.filter((p) => !det(p).birth_place);
   const deadNoYear = seen.filter((p) => p.is_living === false && !birthYear(det(p).death_date));
   const unknownStatus = people.filter((p) => p.is_living !== true && p.is_living !== false);
+  const noGender = people.filter((p) => !p.gender || p.gender === 'unknown');
   const noSources = seen.filter((p) => !det(p).sources);
   const noPhoto = people.filter((p) => !p.photo_path);
 
@@ -102,6 +103,7 @@ export function computeStats(fam) {
       { key: 'no-birth-place', label: 'No birthplace', list: noBirthPlace, where: 'details' },
       { key: 'dead-no-year', label: 'Died, but no year of death', list: deadNoYear, where: 'details' },
       { key: 'unknown-status', label: 'Not known if living', list: unknownStatus, where: 'details' },
+      { key: 'no-gender', label: 'Gender not recorded', list: noGender, where: 'details' },
       { key: 'missing-parent', label: 'No parent in the tree', list: missingParent, where: 'relationships' },
       { key: 'uncertain-parent', label: 'Parent not confirmed', list: uncertainParent, where: 'relationships' },
       { key: 'possible-dupes', label: 'Possible duplicates (similar names)', list: dupes, where: 'people' },

@@ -1,5 +1,12 @@
 // "This is me" and branch owners, against the fake backend.
 const { chromium } = require('playwright'); const fs = require('fs');
+// Gender and Living? are required in the person form; pick them when the seed left them blank.
+const fillRequired = (pg) => pg.evaluate(() => {
+  for (const [n, v] of [['gender', 'male'], ['is_living', 'true']]) {
+    const s = document.querySelector(`dialog select[name=${n}]`);
+    if (s && !s.value) { s.value = v; s.dispatchEvent(new Event('change')); }
+  }
+});
 const seed = JSON.parse(fs.readFileSync(__dirname + '/../../site/data/seed.json', 'utf8'));
 const idOf = (g) => seed.people.find((p) => p.given_name === g).id;
 const SUNIL = idOf('Sunil Kumar'); const HARBANS = idOf('Harbans Lal');
@@ -24,7 +31,7 @@ const SUNIL = idOf('Sunil Kumar'); const HARBANS = idOf('Harbans Lal');
     if (role === 'owner') {
       await pg.locator('#panel .panel-top button', { hasText: 'Edit' }).click(); await pg.waitForSelector('dialog form');
       console.log(role, '| form button:', await pg.locator('dialog button[type=submit]').innerText());
-      await pg.fill('dialog [name=profession]', 'Engineer'); await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);
+      await fillRequired(pg); await pg.fill('dialog [name=profession]', 'Engineer'); await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);
       console.log(role, '| edit toast:', await pg.locator('#toast').innerText(), '| status:', await pg.evaluate(() => window.__db.change_requests.at(-1).status));
       await open(HARBANS);
       console.log(role, '| parent edit button:', await pg.locator('#panel .panel-top .main-row > button').first().innerText());
@@ -33,7 +40,7 @@ const SUNIL = idOf('Sunil Kumar'); const HARBANS = idOf('Harbans Lal');
     }
     if (role === 'admin') {
       await pg.locator('#panel .panel-top button', { hasText: 'Edit' }).click(); await pg.waitForSelector('dialog form');
-      await pg.fill('dialog [name=profession]', 'Doctor'); await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);
+      await fillRequired(pg); await pg.fill('dialog [name=profession]', 'Doctor'); await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);
       await pg.goto('http://localhost:8765/#/review'); await pg.waitForSelector('#page .history');
       console.log(role, '| undo buttons:', await pg.locator('#page .history button', { hasText: 'Undo' }).count());
       await pg.locator('#page .history button', { hasText: 'Undo' }).first().click(); await pg.locator('dialog button', { hasText: 'Undo' }).click(); await pg.waitForTimeout(600);

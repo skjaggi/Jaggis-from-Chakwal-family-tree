@@ -2,6 +2,13 @@
 // the fake backend (sample data only: no real private details or photos).
 //   tests/browser/run.sh shots   (or: node help-shots.cjs with the server running)
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
+// Gender and Living? are required in the person form; pick them when the seed left them blank.
+const fillRequired = (pg) => pg.evaluate(() => {
+  for (const [n, v] of [['gender', 'male'], ['is_living', 'true']]) {
+    const s = document.querySelector(`dialog select[name=${n}]`);
+    if (s && !s.value) { s.value = v; s.dispatchEvent(new Event('change')); }
+  }
+});
 const OUT = path.join(__dirname, '../../site/img/help');
 const SITE = 'http://localhost:8765/';
 const seed = JSON.parse(fs.readFileSync(path.join(__dirname, '../../site/data/seed.json'), 'utf8'));
@@ -51,7 +58,7 @@ const quiet = (pg) => pg.evaluate(() => { const t = document.getElementById('toa
 
   await pg.locator('#panel button', { hasText: 'Suggest an edit' }).click();
   await pg.waitForSelector('dialog form');
-  await pg.fill('dialog [name=uncertainty]', 'Example: not sure of the exact year');
+  await fillRequired(pg); await pg.fill('dialog [name=uncertainty]', 'Example: not sure of the exact year');
   await pg.locator('dialog [name=uncertainty]').scrollIntoViewIfNeeded();
   await shot(pg, 'suggest-edit');
   await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(600);

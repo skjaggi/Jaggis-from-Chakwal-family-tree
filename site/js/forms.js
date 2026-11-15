@@ -38,8 +38,9 @@ function liveNow(mode, person, relation) {
   return relation?.as !== 'parent' && canManage(relation?.of, 'branch');
 }
 
-const GENDERS = [['unknown', 'Not recorded'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
-const LIVING = [['', 'Not sure'], ['true', 'Living'], ['false', 'Deceased']];
+// Gender and Living? are required: an empty "Choose..." shows until one is picked.
+const GENDERS = [['', 'Choose...'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
+const LIVING = [['', 'Choose...'], ['true', 'Living'], ['false', 'Deceased']];
 const VIS = [['branch', 'Branch only: family in this branch'], ['public', 'Public: anyone']];
 const KINDS = [['biological', 'Birth'], ['adoptive', 'Adopted'], ['step', 'Step'], ['foster', 'Foster']];
 const CONF = [['confirmed', 'Confirmed'], ['uncertain', 'Not certain']];
@@ -103,13 +104,13 @@ export function openPersonForm({ mode, person = null, relation = null }) {
   const form = h('form.form', { novalidate: true },
     relation ? h('p.form-note', `Adding a ${relation.as} of ${fullName(of)}.`) : null,
     h('fieldset', h('legend', 'Name'),
-      h('div.row2', field('Title', textInput('title', p.title, { placeholder: 'e.g. Bakhshi' })), field('Gender', select('gender', GENDERS, p.gender || 'unknown'))),
+      h('div.row2', field('Title', textInput('title', p.title, { placeholder: 'e.g. Bakhshi' })), field('Gender *', select('gender', GENDERS, p.gender && p.gender !== 'unknown' ? p.gender : ''))),
       field('First name(s) *', textInput('given_name', p.given_name, { required: true })),
       field('Surname', textInput('surname', p.surname ?? (relation?.as === 'child' ? of.surname : ''))),
       field('Other names', textInput('other_names', p.other_names), 'Married name, nickname, other spellings')),
     relBox.length ? h('fieldset', h('legend', 'Relationship'), relBox) : null,
     h('fieldset', h('legend', 'Life'),
-      field('Living?', select('is_living', LIVING, livingVal)),
+      field('Living? *', select('is_living', LIVING, livingVal)),
       h('div.row2', field('Birth year', textInput('birth_date', birthYear(d.birth_date), { placeholder: 'e.g. 1952 or c. 1890', inputmode: 'text', maxlength: 12 })), field('Birth place', textInput('birth_place', d.birth_place))),
       h('div.row2', field('Death year', textInput('death_date', birthYear(d.death_date), { placeholder: 'e.g. 1987', maxlength: 12 })), field('Death place', textInput('death_place', d.death_place))),
       field('Profession', textInput('profession', d.profession)),
@@ -127,6 +128,7 @@ export function openPersonForm({ mode, person = null, relation = null }) {
   // Deceased defaults to public, living to branch only, until the person picks one.
   let visTouched = !!person;
   visSelect.addEventListener('change', () => (visTouched = true));
+  for (const k of ['gender', 'is_living']) form[k].addEventListener('change', () => form[k].classList.remove('missing'));
   form.is_living.addEventListener('change', () => {
     if (!visTouched) visSelect.value = form.is_living.value === 'false' ? 'public' : 'branch';
   });
@@ -138,6 +140,13 @@ export function openPersonForm({ mode, person = null, relation = null }) {
     if (!val('given_name')) {
       toast('Please enter a first name.', 'error');
       form.given_name.focus();
+      return;
+    }
+    const missing = [['gender', 'Gender'], ['is_living', 'Living or Deceased']].filter(([k]) => !val(k));
+    for (const k of ['gender', 'is_living']) form[k].classList.toggle('missing', missing.some(([m]) => m === k));
+    if (missing.length) {
+      toast(`Please choose ${missing.map(([, w]) => w).join(' and ')}. Both are required.`, 'error');
+      form[missing[0][0]].focus();
       return;
     }
     const newPerson = {};
