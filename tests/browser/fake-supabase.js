@@ -95,6 +95,7 @@ export function createClient() {
         const rows = db.change_requests.filter((r) => r.status === 'approved' && ['add_person', 'edit_person', 'set_photo', 'add_link'].includes(r.kind))
           .map((r) => ({ user_id: r.submitted_by, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: r.kind === 'add_person' ? 5 : 2, kind: r.kind, story: false, reason: r.summary }));
         if (me.claimed_person_id) rows.push({ user_id: me.id, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: 5, kind: 'claim', story: false, reason: 'Claimed their own box' });
+        if (window.__FAKE_BONUS__) rows.push({ user_id: me.id, name: me.display_name, person_id: me.claimed_person_id, role: me.role, at: new Date().toISOString(), points: window.__FAKE_BONUS__, kind: 'edit_person', story: true, reason: 'Added a story' });
         rows.push({ user_id: 'u-9', name: 'Cousin Neha', person_id: null, role: 'member', at: new Date().toISOString(), points: 12, kind: 'add_person', story: true, reason: 'Add someone' });
         return { data: rows, error: null };
       }

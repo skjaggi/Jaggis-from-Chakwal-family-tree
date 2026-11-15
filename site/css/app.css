@@ -663,3 +663,10 @@ table.rules.mult { margin-top: 12px; }
 .rem-preview { margin-top: 12px; }
 .rem-preview iframe { width: 100%; height: 460px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
 @media (max-width: 560px) { .rem-tag { display: none; } }
+
+/* Family Historian congratulations. */
+.historian-pop { display: grid; justify-items: center; text-align: center; gap: 10px; max-width: 420px; }
+.historian-pop p { margin: 0; }
+.historian-pop .big-medal { width: 96px; height: 96px; filter: drop-shadow(0 4px 10px rgb(196 154 58 / .45)); }
+.historian-pop .hp-title { font-size: 1.35rem; font-weight: 700; color: var(--ink); }
+.historian-pop .form-actions { justify-content: center; width: 100%; }

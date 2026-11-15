@@ -11,7 +11,7 @@ import { openPersonForm } from './forms.js';
 import { renderReview, renderMine, renderAdmin } from './admin.js';
 import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
-import { renderBlessings, renderCorner, maybeShowBlessingsIntro } from './blessings.js';
+import { renderBlessings, renderCorner, maybeShowBlessingsIntro, maybeShowHistorianCongrats } from './blessings.js';
 import { renderExport } from './export.js';
 import { downloadGedcom } from './gedcom.js';
 import { countView } from './count.js';
@@ -279,7 +279,7 @@ async function renderHeader() {
   $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   // Once they've claimed their box: their photo, blessings and badges instead.
   if (signed) await renderCorner($('who')).catch(() => false);
-  if (signed) maybeShowBlessingsIntro();
+  if (signed && !maybeShowBlessingsIntro()) maybeShowHistorianCongrats().catch(() => false);
   $('preview-banner').hidden = !store.preview;
   await renderClaimBanner();
 }

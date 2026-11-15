@@ -110,9 +110,41 @@ export function thankYou(kind, payload, summary, applied) {
 // after Blessings arrived, and again from "How it works" whenever they like.
 const seenKey = () => `blessings-intro-seen:${store.session?.user?.id || ''}`;
 export function maybeShowBlessingsIntro() {
-  if (!store.signedIn || store.preview || document.querySelector('dialog[open]')) return;
-  try { if (localStorage.getItem(seenKey())) return; localStorage.setItem(seenKey(), '1'); } catch { return; }
+  if (!store.signedIn || store.preview || document.querySelector('dialog[open]')) return false;
+  try { if (localStorage.getItem(seenKey())) return false; localStorage.setItem(seenKey(), '1'); } catch { return false; }
   showBlessingsIntro();
+  return true;
+}
+
+// Congratulations, once a month, to whoever holds Family Historian (the most
+// blessings this month). It can change hands, so a new leader is greeted too.
+let congratsChecked = false;
+export async function maybeShowHistorianCongrats() {
+  if (congratsChecked) return false;
+  congratsChecked = true;
+  if (!store.signedIn || store.preview || document.querySelector('dialog[open]')) return false;
+  const now = new Date();
+  const key = `historian-congrats:${store.session.user.id}:${now.getFullYear()}-${now.getMonth() + 1}`;
+  try { if (localStorage.getItem(key)) return false; } catch { return false; }
+  let me;
+  try { me = summarize(await loadBlessings()).find((m) => m.id === store.session.user.id); } catch { return false; }
+  if (!me?.counts.historian || document.querySelector('dialog[open]')) return false;
+  try { localStorage.setItem(key, '1'); } catch { /* shown anyway */ }
+  showHistorianCongrats(me);
+  return true;
+}
+export function showHistorianCongrats(me) {
+  const month = new Date().toLocaleString('en', { month: 'long' });
+  const first = (store.profile?.display_name || me.name || '').trim().split(/\s+/)[0];
+  const m = modal('Family Historian', h('div.historian-pop',
+    medal(BADGES.find((b) => b.id === 'hist'), 'medal big-medal'),
+    h('p.hp-title', `Congratulations${first ? `, ${first}` : ''}!`),
+    h('p', 'You are our ', h('b', `Family Historian for ${month}`), `. You have earned the most blessings in the family this month, `, h('b', `${me.month}`), ' so far.'),
+    h('p', 'Thank you for keeping our family\'s story alive. Keep adding what you know to hold on to the badge until the end of the month.'),
+    h('div.form-actions',
+      h('button.btn', { type: 'button', onclick: () => { m.close(); location.hash = '#/blessings'; } }, 'See the leaderboard'),
+      h('button.btn.primary', { type: 'button', onclick: () => m.close() }, 'Thank you'))));
+  return m;
 }
 export function showBlessingsIntro() {
   const step = (n, title, text, extra) => h('section.intro-step', h('h3', h('span.intro-n', String(n)), title), h('p', text), extra);
