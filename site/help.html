@@ -37,7 +37,18 @@
       <span class="brand-logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="img/brand/jaggis-logo3-168.webp" srcset="img/brand/jaggis-logo3-320.webp 2x" width="124" height="88" alt=""><span class="logo-pop" role="img" aria-label="Jaggis of Chakwal logo: Generations today, a brighter tomorrow. Our roots, our strength, our family. Legacy, family, heritage."><img src="img/brand/jaggis-logo3-800.webp" loading="lazy" width="558" height="400" alt=""></span></span>
       <a href="./" class="site-title">Jaggis of Chakwal</a>
     </div>
-    <nav aria-label="Main"><a href="./">Back to the tree</a></nav>
+    <nav aria-label="Main">
+      <a href="./#/tree">Tree</a>
+      <a href="./#/outline">List</a>
+      <a href="./#/dashboard">Dashboard</a>
+      <a href="./#/mine" data-signed hidden>My changes</a>
+      <a href="./#/invite" data-signed hidden>Invite</a>
+      <a href="./#/blessings" data-signed hidden>Blessings</a>
+      <a href="people/" title="Family members who have passed away, one page each">Ancestors</a>
+      <a href="help.html" class="active" aria-current="page">Help</a>
+      <a href="./#/export" title="Download the tree as a PDF or a GEDCOM file">Export</a>
+    </nav>
+    <script>try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) for (const a of document.querySelectorAll('[data-signed]')) a.hidden = false; } catch {}</script>
   </header>
 
   <main class="help">
