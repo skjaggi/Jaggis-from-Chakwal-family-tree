@@ -60,18 +60,34 @@ function directory(fam) {
     }))));
 }
 
+const COPYRIGHT = '© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved.';
+const qnMark = () => h('img.bk-qn', { src: 'img/brand/qn-mark-96.webp', alt: 'Quantum Nexus LLC logo' });
+
+// Logo and copyright on every printed page. The running header and footer are
+// fixed in print (so the browser repeats them on each page), and the book sits
+// in a table whose empty thead/tfoot keep the same space free on every page.
 function book(fam, rootId) {
   const root = fam.byId.get(rootId);
+  const title = config.siteTitle || 'Family tree';
   const today = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   return h('div.book',
+    h('div.bk-run-head',
+      h('img.bk-run-logo', { src: 'img/brand/jaggis-logo3-320.webp', alt: '' }),
+      h('span.bk-run-title', title, h('span', ' · The family book'))),
+    h('div.bk-run-foot', qnMark(), h('span', COPYRIGHT)),
     h('section.bk-cover',
-      h('div.bk-mark'),
-      h('h1', config.siteTitle || 'Family tree'),
+      h('img.bk-cover-logo', { src: 'img/brand/jaggis-logo3-800.webp', alt: 'Jaggis of Chakwal: Legacy, Family, Heritage' }),
+      h('h1', title),
       h('p.bk-sub', `The descendants of ${fullName(root)}`),
       h('p.bk-meta', `${fam.byId.size} people · printed ${today}`),
-      h('p.bk-meta', store.signedIn ? 'Includes the private details the person who printed it is allowed to see. Please share with care.' : 'Public details only.')),
-    h('section.bk-section', h('h2', 'The family tree'), treeChart(fam, rootId)),
-    h('section.bk-section.bk-dir', h('h2', 'Everyone in the tree'), directory(fam)));
+      h('p.bk-meta', store.signedIn ? 'Includes the private details the person who printed it is allowed to see. Please share with care.' : 'Public details only.'),
+      h('p.bk-cover-foot', qnMark(), h('span', COPYRIGHT))),
+    h('table.bk-pages',
+      h('thead', h('tr', h('td', h('div.bk-head-space')))),
+      h('tfoot', h('tr', h('td', h('div.bk-foot-space')))),
+      h('tbody', h('tr', h('td',
+        h('section.bk-section', h('h2', 'The family tree'), treeChart(fam, rootId)),
+        h('section.bk-section.bk-dir', h('h2', 'Everyone in the tree'), directory(fam)))))));
 }
 
 export function renderExport(container) {
