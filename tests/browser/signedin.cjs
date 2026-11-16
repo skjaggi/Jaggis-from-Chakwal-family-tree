@@ -130,6 +130,8 @@ const fillRequired = (pg) => pg.evaluate(() => {
       await pg.click('.req-card button:has-text("Approve")'); await pg.waitForTimeout(400);
       console.log(role, 'review after approve:', (await pg.locator('#page').innerText()).replace(/\n/g, ' | ').slice(0, 250));
       await pg.goto('http://localhost:8765/#/members'); await pg.waitForSelector('.invite-form');
+      console.log(role, 'reminder tags:', (await pg.locator('.reminder-list li').allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim()).join(' / '));
+      await pg.locator('.reminder-list').screenshot({ path: `${SHOTS}admin-reminder-tags.png` });
       await pg.fill('.invite-form input[name=email]', 'Cousin@Example.com');
       await pg.fill('.invite-form .picker input', 'rekha'); await pg.click('.invite-form .pick-list button');
       await pg.click('.invite-form button[type=submit]'); await pg.waitForTimeout(400);

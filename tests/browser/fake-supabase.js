@@ -14,6 +14,11 @@ const db = {
 if (ADMIN) {
   db.profiles.push({ id: 'u-2', email: 'cousin@example.com', display_name: 'Cousin', role: 'member', person_id: null, claimed_person_id: null, created_at: new Date().toISOString() });
   db.invites.push({ email: 'pending@example.com', display_name: 'Not Yet', role: 'member', created_at: new Date().toISOString(), accepted_at: null });
+  // Sending an invitation creates the login (and profile) before they ever sign in.
+  db.profiles.push({ id: 'u-3', email: 'invited@example.com', display_name: 'Invited Only', role: 'member', person_id: null, claimed_person_id: null, created_at: new Date().toISOString() });
+  db.invites.push({ email: 'invited@example.com', display_name: 'Invited Only', role: 'member', created_at: new Date().toISOString(), accepted_at: null });
+  db.profiles.push({ id: 'u-4', email: 'came@example.com', display_name: 'Came Once', role: 'member', person_id: null, claimed_person_id: null, created_at: new Date().toISOString() });
+  db.invites.push({ email: 'came@example.com', display_name: 'Came Once', role: 'member', created_at: new Date().toISOString(), accepted_at: new Date().toISOString() });
   const someone = seed.people.find((p) => p.given_name === 'Tapashi Ram').id;
   for (let i = 0; i < 6; i++) db.page_views.push({ id: i, user_id: 'u-2', viewed_at: new Date(Date.now() - i * 3 * 864e5).toISOString(), view: 'tree', person_id: someone });
 }
