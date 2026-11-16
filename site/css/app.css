@@ -513,8 +513,13 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .bk-cover h1 { font-size: 2.2rem; color: #17706b; margin: 12px 0 4px; }
 .bk-sub { font-size: 1.1rem; margin: 0 0 18px; }
 .bk-meta { color: #5b6a61; margin: 4px 0; }
-.bk-mark { width: 220px; height: 150px; margin: 0 auto; background: no-repeat center / contain; opacity: 0.55;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 420' fill='none' stroke='%2317706b' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 190Q40 150 80 130Q80 90 130 85Q150 50 200 60Q230 30 280 45Q320 25 360 48Q410 35 435 70Q485 70 495 110Q545 120 535 160Q560 195 520 210Q500 235 460 225Q430 245 390 230Q350 250 310 232Q270 250 230 232Q190 248 160 228Q120 240 100 220Q55 225 60 190Z'/%3E%3Cpath d='M288 232C283 290 272 340 252 392M322 232C327 290 338 340 360 392M130 222C127 280 134 340 130 392M200 238C197 300 204 350 200 392M415 232C418 290 410 350 416 392M482 222C485 285 478 345 482 392M40 395Q300 383 560 395' stroke='%23c49a3a'/%3E%3C/svg%3E"); }
+.bk-cover-logo { display: block; width: min(100%, 420px); height: auto; margin: 0 auto; }
+.bk-cover-foot, .bk-run-foot { display: flex; align-items: center; justify-content: center; gap: 8px; color: #5b6a61; font-size: 11px; }
+.bk-cover-foot { margin-top: 28px; }
+.bk-qn { width: 32px; height: auto; }
+.bk-run-head, .bk-run-foot { display: none; }
+.bk-pages { width: 100%; border-collapse: collapse; }
+.bk-pages > * > tr > td { padding: 0; }
 .bk-tree, .bk-tree ul { list-style: none; margin: 0; padding-left: 18px; }
 .bk-tree { padding-left: 0; }
 .bk-tree li { position: relative; padding: 1px 0 1px 12px; border-left: 1px solid #cdd9cb; }
@@ -541,12 +546,26 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .bk-person dd { margin: 0; }
 
 @media print {
-  @page { size: A4; margin: 14mm 12mm; }
+  @page { size: A4; margin: 10mm 12mm; }
   html, body { height: auto !important; overflow: visible !important; display: block !important; background: #fff !important; }
   body.printing > *:not(main), body.printing main > *:not(#page), body.printing #page > *:not(.book-preview) { display: none !important; }
   body.printing main, body.printing #page { display: block !important; overflow: visible !important; max-width: none !important; padding: 0 !important; }
   .book { box-shadow: none; padding: 0; margin: 0; border-radius: 0; }
-  .bk-cover { min-height: 240mm; display: flex; flex-direction: column; justify-content: center; break-after: page; }
+  /* Cover: the big logo fills page 1 and hides the small running header. */
+  .bk-cover { position: relative; z-index: 2; background: #fff; height: 276mm; box-sizing: border-box; padding: 6mm 0 0; display: flex; flex-direction: column; justify-content: center; break-after: page; }
+  .bk-cover-logo { width: 150mm; max-width: 100%; }
+  .bk-cover h1 { font-size: 30pt; margin-top: 8mm; }
+  .bk-cover-foot { margin-top: auto; padding-top: 3mm; border-top: 1px solid #c49a3a; }
+  /* Running header (small logo) and footer (copyright) on every other page. */
+  .bk-run-head, .bk-run-foot { display: flex; position: fixed; left: 0; right: 0; z-index: 1; background: #fff; }
+  .bk-run-head { top: 0; height: 15mm; align-items: center; gap: 10px; border-bottom: 1px solid #c49a3a; }
+  .bk-run-logo { height: 13mm; width: auto; }
+  .bk-run-title { margin-left: auto; color: #17706b; font-weight: 700; font-size: 11pt; }
+  .bk-run-title span { color: #5b6a61; font-weight: 400; }
+  .bk-run-foot { bottom: 0; height: 9mm; border-top: 1px solid #c49a3a; font-size: 9pt; }
+  .bk-run-foot .bk-qn { width: 9mm; }
+  .bk-head-space { height: 19mm; }
+  .bk-foot-space { height: 12mm; }
   .bk-dir { break-before: page; }
   .bk-people { grid-template-columns: 1fr 1fr; }
   .bk-gen h3 { break-after: avoid; }
