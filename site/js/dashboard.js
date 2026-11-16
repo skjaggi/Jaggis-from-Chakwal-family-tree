@@ -368,6 +368,7 @@ async function publicVisitorsSection() {
           barChart(stats(d.sizes), 'Screen sizes', { unit }) || h('p.muted', 'No visitors yet.'),
           h('h3', 'Browsers'), barChart(stats(d.browsers), 'Browsers', { unit }) || h('p.muted', '—'),
           h('h3', 'Systems'), barChart(stats(d.systems), 'Systems', { unit }) || h('p.muted', '—'))),
+      d.errors ? h('p.muted.small', `Some parts could not be loaded from GoatCounter: ${Object.keys(d.errors).join(', ')}.`) : null,
       h('p.muted.small', 'More detail: ', h('a', { href: 'https://jaggis-chakwal.goatcounter.com', target: '_blank', rel: 'noopener' }, 'open GoatCounter'), '.'));
   }).catch((e) => {
     const msg = /not_configured/.test(e.message)

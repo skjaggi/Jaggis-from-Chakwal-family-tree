@@ -48,33 +48,59 @@ Deno.serve(async (req) => {
   const start = new Date(end.getTime() - days * 864e5);
   const range = `start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`;
 
-  const get = async (path: string) => {
-    const r = await fetch(`${API}${path}${path.includes('?') ? '&' : '?'}${range}`, {
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    });
-    if (!r.ok) throw new Error(`${path}: GoatCounter said ${r.status} ${(await r.text()).slice(0, 200)}`);
+  const get = async (path: string, withRange = true) => {
+    const url = `${API}${path}${withRange ? `${path.includes('?') ? '&' : '?'}${range}` : ''}`;
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+    if (!r.ok) throw new Error(`${path.split('?')[0]}: GoatCounter said ${r.status} ${(await r.text()).slice(0, 200)}`);
     return r.json();
   };
 
-  try {
-    // GoatCounter allows 4 requests a second, so space them out a little.
-    const out: Record<string, unknown> = { days, start: start.toISOString(), end: end.toISOString() };
-    const calls: [string, string][] = [
-      ['total', '/stats/total'],
-      ['pages', '/stats/hits?limit=25'],
-      ['locations', '/stats/locations?limit=25'],
-      ['referrers', '/stats/toprefs?limit=15'],
-      ['browsers', '/stats/browsers?limit=10'],
-      ['systems', '/stats/systems?limit=10'],
-      ['sizes', '/stats/sizes?limit=10'],
-    ];
-    for (const [key, path] of calls) {
-      out[key] = await get(path);
-      await sleep(280);
+  // Build the same shape as /stats/total from /stats/hits, for when the total
+  // endpoint fails: sum each day's visitors over all pages.
+  const totalFromHits = (pages: { total?: number; hits?: { stats?: { day: string; daily?: number; hourly?: number[] }[] }[] }) => {
+    const byDay = new Map<string, { day: string; daily: number; hourly: number[] }>();
+    for (const hit of pages?.hits || []) {
+      for (const st of hit.stats || []) {
+        const d = byDay.get(st.day) || { day: st.day, daily: 0, hourly: Array(24).fill(0) };
+        d.daily += st.daily || 0;
+        (st.hourly || []).forEach((n, i) => { d.hourly[i] += n || 0; });
+        byDay.set(st.day, d);
+      }
     }
-    return reply(200, out);
-  } catch (e) {
-    console.error('visitor-stats', String((e as Error).message || e));
-    return reply(502, { error: String((e as Error).message || e) });
+    const stats = [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day));
+    return { total: pages?.total ?? stats.reduce((n, d) => n + d.daily, 0), stats, from_pages: true };
+  };
+
+  // Each section is fetched on its own, so one failing GoatCounter call no
+  // longer hides all the others. GoatCounter allows 4 requests a second.
+  const out: Record<string, unknown> = { days, start: start.toISOString(), end: end.toISOString() };
+  const errors: Record<string, string> = {};
+  const calls: [string, string][] = [
+    ['pages', '/stats/hits?limit=100'],
+    ['total', '/stats/total'],
+    ['locations', '/stats/locations?limit=25'],
+    ['referrers', '/stats/toprefs?limit=15'],
+    ['browsers', '/stats/browsers?limit=10'],
+    ['systems', '/stats/systems?limit=10'],
+    ['sizes', '/stats/sizes?limit=10'],
+  ];
+  for (const [key, path] of calls) {
+    try {
+      out[key] = await get(path);
+    } catch (e) {
+      errors[key] = String((e as Error).message || e);
+    }
+    await sleep(280);
   }
+  if (!out.total && out.pages) out.total = totalFromHits(out.pages as Parameters<typeof totalFromHits>[0]);
+
+  if (Object.keys(errors).length) {
+    // Log what the token can see, to tell a token problem from a site problem.
+    let me = '';
+    try { await get('/me', false); me = 'token works'; } catch (e) { me = String((e as Error).message || e); }
+    console.error('visitor-stats', JSON.stringify(errors), 'me:', me);
+    out.errors = errors;
+  }
+  if (Object.keys(errors).length === calls.length) return reply(502, { error: Object.values(errors)[0] });
+  return reply(200, out);
 });
