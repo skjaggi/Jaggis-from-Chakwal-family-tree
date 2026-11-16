@@ -14,7 +14,7 @@ import { buildFamily, fullName, birthYear } from '../site/js/model.js';
 
 const SITE = 'https://familytree.sjaggi.com/';
 const OUT = new URL('../site/', import.meta.url);
-const TITLE = 'Jaggi family of Chakwal';
+const TITLE = 'Jaggis of Chakwal';
 
 async function loadLive() {
   const cfg = await readFile(new URL('../site/js/config.js', import.meta.url), 'utf8');
