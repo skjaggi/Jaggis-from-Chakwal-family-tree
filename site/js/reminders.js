@@ -24,10 +24,13 @@ export function reminderSection(invites, profiles) {
   for (const p of profiles) {
     if (!p.email) continue;
     const e = p.email.toLowerCase();
+    // Sending an invitation already creates the login and its profile, so a
+    // profile alone doesn't mean they signed in: the invite's accepted_at
+    // (set on their first real sign-in) decides. No invite = signed in.
     const cur = people.get(e) || { email: e, name: '', signedIn: true, claimed: false };
     cur.name = p.display_name || cur.name;
-    cur.signedIn = true;
     cur.claimed = !!p.claimed_person_id;
+    if (cur.claimed) cur.signedIn = true;
     cur.self = p.id === store.session.user.id;
     people.set(e, cur);
   }
