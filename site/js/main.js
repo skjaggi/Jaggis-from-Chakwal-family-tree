@@ -8,6 +8,7 @@ import { TreeView } from './tree.js';
 import { renderOutline } from './outline.js';
 import { renderPanel } from './panel.js';
 import { openPersonForm } from './forms.js';
+import { welcomeToLinkedBox } from './claim-gate.js';
 import { renderReview, renderMine, renderAdmin } from './admin.js';
 import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
@@ -386,6 +387,8 @@ async function start() {
   await renderHeader();
   if (!location.hash || /^#(access_token|error)/.test(location.hash)) go({ view: 'tree', root: store.fam.defaultRootId, selected: null }, true);
   else route();
+  // Invitees whose invitation names their box land on it, ready to claim it.
+  welcomeToLinkedBox((id) => go({ view: 'tree', root: store.fam.primaryParentLink(id)?.parent_id || id, selected: id }));
 }
 
 start();

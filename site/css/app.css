@@ -710,3 +710,12 @@ table.rules.mult { margin-top: 12px; }
 .founder-ribbon div { display: grid; gap: 2px; line-height: 1.35; }
 .founder-ribbon small { color: var(--muted); font-size: 0.82rem; }
 svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3)); pointer-events: none; }
+
+/* "First, claim your own box" before making changes */
+.claim-gate { display: grid; gap: 12px; }
+.claim-gate p { margin: 0; }
+.claim-linked, .claim-pick { display: grid; gap: 10px; padding: 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--gold, #c49a3a); }
+.claim-pick[hidden], .claim-gate-none[hidden], .claim-gate-foot button[hidden] { display: none; }
+.claim-linked .btn, .claim-pick .btn { justify-self: start; }
+.claim-gate-foot { border-top: 1px solid var(--line, #ddd); padding-top: 10px; }
+.claim-gate-none { display: grid; gap: 10px; }
