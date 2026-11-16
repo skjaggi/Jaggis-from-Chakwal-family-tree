@@ -20,3 +20,4 @@ if [ "${1:-}" = shots ]; then node help-shots.cjs; exit; fi  # retake the help p
 node smoke.cjs
 node signedin.cjs
 node owner.cjs
+node claimgate.cjs

@@ -20,6 +20,7 @@ async function context(b, role) {
   await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
   await ctx.route('**/js/config.js', (r) => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k', siteTitle: 'Jaggis of Chakwal', adminName: 'Sunil' };" }));
   await ctx.addInitScript(([r, n]) => { window.__FAKE_ROLE__ = r; window.__FAKE_NAME__ = n; }, [role, 'Asha']);
+  await ctx.addInitScript(() => { sessionStorage.setItem('claim-welcome', '1'); sessionStorage.setItem('claim-not-in-tree', '1'); });
   return ctx;
 }
 const shot = (pg, name) => pg.screenshot({ path: path.join(OUT, name + '.jpg'), type: 'jpeg', quality: 78 });

@@ -5,6 +5,7 @@ import { fullName, shortName, searchPeople, relationHint, birthYear } from './mo
 import { h, clear, modal, toast, field, select, confirmDialog } from './ui.js';
 import { photoEditor } from './photo-editor.js';
 import { thankYou, forgetBlessings } from './blessings.js';
+import { claimGate } from './claim-gate.js';
 
 // "Added and updated by": who added this person and who changed them since,
 // filled in from approved changes (not editable). Calls onShown when there is
@@ -79,7 +80,8 @@ function textArea(name, value, rows = 3) {
 }
 
 // mode 'add' needs relation {as: 'child'|'spouse'|'parent', of: personId}
-export function openPersonForm({ mode, person = null, relation = null }) {
+export async function openPersonForm({ mode, person = null, relation = null }) {
+  if (!(await claimGate())) return;
   const fam = store.fam;
   const d = person ? fam.details.get(person.id) || {} : {};
   const p = person || {};
@@ -200,7 +202,8 @@ export function openPersonForm({ mode, person = null, relation = null }) {
 }
 
 // Add, change or re-center a person's profile photo.
-export function openPhotoForm(person) {
+export async function openPhotoForm(person) {
+  if (!(await claimGate())) return;
   const current = store.photoUrls.get(person.id);
   const input = h('input', { type: 'file', accept: 'image/*', name: 'photo' });
   const editor = photoEditor();
@@ -252,6 +255,7 @@ export function openPhotoForm(person) {
 }
 
 export async function removePhoto(person) {
+  if (!(await claimGate())) return;
   if (!(await confirmDialog(`Remove the photo of ${shortName(person)}?${canManage(person.id) ? '' : ' This will be checked before it happens.'}`, 'Remove photo'))) return;
   await send('remove_photo', { person_id: person.id }, { target: person.id, summary: `Remove photo of ${shortName(person)}` }, () => {});
 }
@@ -272,7 +276,8 @@ export function personPicker(onPick, { placeholder = 'Search for a person', excl
   return wrap;
 }
 
-export function openLinkForm(person) {
+export async function openLinkForm(person) {
+  if (!(await claimGate())) return;
   let other = null;
   const type = select('rel', [['parent', `…is a parent of ${shortName(person)}`], ['child', `…is a child of ${shortName(person)}`], ['spouse', `…is a spouse of ${shortName(person)}`]], 'parent');
   const chosen = h('p.form-note', 'Nobody chosen yet.');
@@ -315,6 +320,7 @@ export function openLinkForm(person) {
 }
 
 export async function requestRemoveLink(person, kind, link, otherName) {
+  if (!(await claimGate())) return;
   const msg = kind === 'union'
     ? `Remove the marriage between ${shortName(person)} and ${otherName}? Both people stay in the tree.`
     : `Remove the parent link between ${shortName(person)} and ${otherName}? Both people stay in the tree.`;
@@ -323,6 +329,7 @@ export async function requestRemoveLink(person, kind, link, otherName) {
 }
 
 export async function requestDelete(person) {
+  if (!(await claimGate())) return;
   const kids = store.fam.childLinks(person.id).length;
   const msg = `Remove ${fullName(person)} from the tree?${kids ? ` Their ${kids} children stay in the tree but will no longer be connected through them.` : ''}`;
   if (!(await confirmDialog(msg, store.isAdmin ? 'Remove person' : 'Ask to remove'))) return;

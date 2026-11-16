@@ -18,6 +18,8 @@ const SUNIL = idOf('Sunil Kumar'); const HARBANS = idOf('Harbans Lal');
     await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
     await ctx.route('**/js/config.js*', r => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k', siteTitle: 'Jaggis of Chakwal' };" }));
     await ctx.addInitScript(r => { window.__FAKE_ROLE__ = r; }, role);
+    // These tests are not about claiming: skip the "claim your box" prompts (tests/browser/claimgate.cjs covers them).
+    await ctx.addInitScript(() => { sessionStorage.setItem('claim-welcome', '1'); sessionStorage.setItem('claim-not-in-tree', '1'); });
     const pg = await ctx.newPage();
     pg.on('pageerror', e => errors.push(role + ': ' + e.message));
     const open = async (id) => { await pg.goto(`http://localhost:8765/#/tree/${HARBANS}?p=${id}`); await pg.waitForSelector('#panel .panel-top'); await pg.waitForTimeout(400); };
