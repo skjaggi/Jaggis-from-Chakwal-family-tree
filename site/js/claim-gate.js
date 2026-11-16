@@ -80,7 +80,7 @@ function askToClaim(linked, { welcome = false } = {}) {
 
     const content = h('div.claim-gate',
       welcome
-        ? h('p', 'Welcome! Here is your box in the family tree. Please confirm it is you, so your changes to your own family appear right away and the tree shows how everyone is related to you.')
+        ? h('p', h('strong', 'Welcome dear member of Jaggi Family!'), ' Here is your box in the family tree. Please confirm it is you, so your changes to your own family appear right away and the tree shows how everyone is related to you.')
         : h('p', 'Before you make changes, please claim your own box in the tree. It takes a moment, and then your changes to your own family appear right away and the tree shows how everyone is related to you.'),
       linked ? h('div.claim-linked',
         h('p', 'Your invitation is linked to ', h('strong', fullName(linked)), h('span.muted', ' ' + relationHint(store.fam, linked.id)), '.'),
