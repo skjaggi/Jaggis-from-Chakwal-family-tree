@@ -365,7 +365,7 @@ li > .outline-row { margin-left: 18px; width: calc(100% - 18px); }
 .hint { text-align: center; margin-top: 14px; }
 
 /* pages */
-.page { max-width: 820px; margin: 0 auto; padding: 16px 16px 60px; }
+.page { max-width: 820px; width: 100%; min-width: 0; margin: 0 auto; padding: 16px 16px 60px; }
 .req-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 12px; display: grid; gap: 8px; box-shadow: var(--shadow); }
 .req-card h3 { margin: 0; text-transform: none; letter-spacing: 0; color: var(--ink); font-size: 1rem; }
 .review-photo { max-width: 220px; border-radius: 8px; }
@@ -714,6 +714,22 @@ table.rules.mult { margin-top: 12px; }
 .rem-preview { margin-top: 12px; }
 .rem-preview iframe { width: 100%; height: 460px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
 @media (max-width: 560px) { .rem-tag { display: none; } }
+/* ---------- missing details (Members page, admin) */
+.cmp-list { list-style: none; margin: 8px 0 12px; padding: 0; display: grid; gap: 8px; }
+.cmp-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 10px 12px; }
+.cmp-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; cursor: pointer; }
+.cmp-who { min-width: 0; overflow-wrap: anywhere; }
+.cmp-bar { height: 6px; border-radius: 999px; background: var(--surface-2); margin: 8px 0 4px; overflow: hidden; }
+.cmp-bar span { display: block; height: 100%; background: var(--leaf); border-radius: 999px; }
+.cmp-gaps summary { cursor: pointer; font-size: 0.9rem; color: var(--muted); padding: 4px 0; }
+.cmp-gaps ul { margin: 4px 0 0; padding-left: 20px; font-size: 0.92rem; }
+.cmp-gaps li { margin: 2px 0; }
+.cmp-drafts { margin-top: 16px; }
+.cmp-draft-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.cmp-draft { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 12px; }
+.cmp-draft-head { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.cmp-draft input[type=text], .cmp-draft textarea { width: 100%; }
+
 
 /* Family Historian congratulations. */
 .historian-pop { display: grid; justify-items: center; text-align: center; gap: 10px; max-width: 420px; }
@@ -794,3 +810,4 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
 .lib-k { width: 1.3em; text-align: center; flex: none; }
 .lib-person .btn { margin-top: 4px; }
 @media (max-width: 560px) { .lib-grid { grid-template-columns: 1fr; } .lib-head > .btn { margin-top: 0; } }
+.dash-table.branch-admins { display: block; max-width: 100%; overflow-x: auto; }

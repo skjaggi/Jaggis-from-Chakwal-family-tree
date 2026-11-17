@@ -12,6 +12,7 @@ import { LABELS, personPicker } from './forms.js';
 import { downloadGedcom } from './gedcom.js';
 import { sendButtons } from './invite.js';
 import { reminderSection } from './reminders.js';
+import { completenessSection } from './completeness.js';
 import { libraryReviewSection } from './library.js';
 
 const KIND_TITLE = {
@@ -287,6 +288,7 @@ export async function renderAdmin(container) {
   clear(container,
     h('h1', 'Family members and invites'),
     branchAdmins,
+    completenessSection(invites, profiles, removed || []),
     h('section', h('h2', 'Invite someone'),
       h('p.muted', 'Only invited emails can sign in. After you add them here, the site emails them an invitation; the WhatsApp and Copy buttons are there if you would rather send it yourself. Family members can also invite relatives from Invite in the menu; you will see who invited whom below. Removing someone also stops them from signing in, and can be undone.'),
       form),
