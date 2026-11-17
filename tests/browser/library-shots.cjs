@@ -45,6 +45,16 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       await pg.waitForSelector('dialog #toast.show');
       ok((await pg.textContent('dialog #toast')).includes('already in the Library as'), 'duplicate link: message shows inside the open form');
       await pg.click('dialog .modal-head button'); await pg.click('dialog button:has-text("Discard")');
+      // Topic suggested from the title; a new topic becomes a new button.
+      await pg.click('button:has-text("Add a link")');
+      await pg.fill('dialog input[name=url]', 'https://example.com/refugees');
+      await pg.fill('dialog input[name=title]', 'Refugee trains of 1947');
+      ok(await pg.inputValue('dialog select[name=topic]') === 'Partition 1947', 'topic suggested from the title');
+      await pg.selectOption('dialog select[name=topic]', '__new');
+      await pg.fill('dialog input[name=new_topic]', 'moti Mahal and butter chicken');
+      await pg.click('dialog button[type=submit]'); await pg.waitForSelector('dialog', { state: 'detached' });
+      await pg.waitForSelector('.lib-topics button:has-text("Moti Mahal and butter chicken")');
+      ok(true, 'new topic becomes a button');
       await pg.locator('.lib-play').first().click();
       ok(await pg.locator('.lib-media iframe[src*="youtube-nocookie.com/embed/SAMPLEvid01"]').count() === 1, 'video plays on the page');
       // Review page: the suggested link
