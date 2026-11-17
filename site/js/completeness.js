@@ -48,6 +48,8 @@ export function missingFor(fam, id) {
   return CHECKS.filter((c) => c.test(p, d)).map((c) => c.label);
 }
 
+const keyOf = Object.fromEntries(CHECKS.map((c) => [c.label, c.key]));
+
 // One report per branch admin: who they are, how many boxes they look after,
 // and the people with gaps (their own box first, then generation by generation).
 export function completenessReport(fam, keepers) {
@@ -61,23 +63,39 @@ export function completenessReport(fam, keepers) {
       if (missing.length) gaps.push({ id, name: fullName(p, { title: false }), you: id === u.claimed_person_id, gen: p.generation ?? 99, order: p._order ?? 0, missing });
     }
     gaps.sort((a, b) => b.you - a.you || a.gen - b.gen || a.order - b.order || a.name.localeCompare(b.name));
-    return { user: u, total: ids.length, complete: ids.length - gaps.length, gaps };
+    return { user: u, rootName: fullName(fam.byId.get(u.claimed_person_id), { title: false }), total: ids.length, complete: ids.length - gaps.length, gaps };
   });
 }
 
 const joinWords = (w) => (w.length < 2 ? w.join('') : `${w.slice(0, -1).join(', ')} and ${w[w.length - 1]}`);
 
 export function draftMessage(r) {
-  const lines = r.gaps.slice(0, MAX_LINES).map((g) => `• ${g.name}${g.you ? ' (you)' : ''}: ${joinWords(g.missing)}`);
+  const shown = r.gaps.slice(0, MAX_LINES);
+  const keys = new Set(shown.flatMap((g) => g.missing.map((m) => keyOf[m])));
+  const onlyPhotos = keys.size === 1 && keys.has('photo');
+  const lines = shown.map((g) => `• ${g.name}${g.you ? ' (you)' : ''}${onlyPhotos ? '' : `: ${joinWords(g.missing)}`}`);
   const more = r.gaps.length - MAX_LINES;
   if (more > 0) lines.push(`• …and ${more} more ${more === 1 ? 'person' : 'people'} in your family`);
-  const thanks = r.complete > 0
-    ? `Thank you for looking after your family's part of our tree. ${r.complete} of the ${r.total} people in your branch already have all their key details, which is wonderful.`
-    : "Thank you for looking after your family's part of our tree. Every detail you add helps keep the story of the Jaggis of Chakwal alive for the generations after us.";
+  const branch = r.rootName && !PLACEHOLDER.test(r.rootName) ? `the ${r.rootName} family branch` : 'your family branch';
+  const thanks = `Thank you for being the branch admin for ${branch} of our tree. ` + (r.complete > 0
+    ? `${r.complete} of the ${r.total} people in your branch already ${r.complete === 1 ? 'has' : 'have'} all their key details, which is wonderful.`
+    : 'Every detail you add helps keep the story of the Jaggis of Chakwal alive for the generations after us.');
+  const ask = onlyPhotos
+    ? `The only thing missing now is a photo for ${r.gaps.length === 1 ? 'one person' : `${r.gaps.length} people`}. If you have ${r.gaps.length === 1 ? 'one' : 'any'}, could you please add ${r.gaps.length === 1 ? 'it' : 'them'} when you have a few minutes?`
+    : 'A few details are still missing. If you know any of them, could you please add them when you have a few minutes?';
+
+  // How-to tips only for the kinds of details this person is missing.
+  const tips = [];
+  if (keys.has('photo')) tips.push(`To add a photo, sign in, tap the person's box and then tap their photo circle. A clear picture of the face works best${keys.size === 1 ? ', and an old family photo is lovely too' : ''}.`);
+  const facts = CHECKS.filter((c) => c.key !== 'photo' && keys.has(c.key)).map((c) => (c.key === 'living' ? 'whether they are living' : c.label));
+  if (facts.length) tips.push(`To add ${joinWords(facts.map((f) => (f.startsWith('whether') ? f : `the ${f}`)))}, sign in, tap the person's box and press Edit.`);
+  if (keys.has('birth') || keys.has('death')) tips.push('If you are not sure of a year, an approximate one such as "c. 1950" is perfectly fine.');
+  tips.push("If you can't find something, just leave it; nothing here is urgent.");
+
   return [
     thanks,
-    `A few details are still missing. If you know any of them, could you please add them when you have a few minutes?\n${lines.join('\n')}`,
-    'To add something, sign in, tap the person\'s box and press Edit, or tap their photo circle to add a picture. If you are not sure of a year, an approximate one such as "c. 1950" is perfectly fine. If you can\'t find something out, just leave it; nothing here is urgent.',
+    `${ask}\n${lines.join('\n')}`,
+    tips.join(' '),
     'Every detail you add also earns blessings on the family leaderboard. Thank you for helping keep our family\'s story complete.',
   ].join('\n\n');
 }
