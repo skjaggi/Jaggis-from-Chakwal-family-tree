@@ -50,7 +50,7 @@ const STATUSES = [['married', 'Married'], ['divorced', 'Divorced'], ['widowed', 
 const PERSON_FIELDS = ['title', 'given_name', 'surname', 'other_names', 'gender', 'is_living'];
 const DETAIL_FIELDS = ['visibility', 'birth_date', 'birth_place', 'death_date', 'death_place', 'profession', 'notes', 'sources', 'uncertainty'];
 const LABELS = {
-  title: 'Title', given_name: 'First name(s)', surname: 'Surname', other_names: 'Other names', gender: 'Gender',
+  title: 'Title', given_name: 'First name(s)', surname: 'Last name at birth', other_names: 'Married last name / other names', gender: 'Gender',
   is_living: 'Living', visibility: 'Who can see details', birth_date: 'Birth year', birth_place: 'Birth place',
   death_date: 'Death year', death_place: 'Death place', profession: 'Profession', notes: 'Notes / Story', sources: 'Sources',
   uncertainty: "What's uncertain",
@@ -108,8 +108,10 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
     h('fieldset', h('legend', 'Name'),
       h('div.row2', field('Title', textInput('title', p.title, { placeholder: 'e.g. Bakhshi' })), field('Gender *', select('gender', GENDERS, p.gender && p.gender !== 'unknown' ? p.gender : ''))),
       field('First name(s) *', textInput('given_name', p.given_name, { required: true })),
-      field('Surname', textInput('surname', p.surname ?? (relation?.as === 'child' ? of.surname : ''))),
-      field('Other names', textInput('other_names', p.other_names), 'Married name, nickname, other spellings')),
+      field('Last name at birth', textInput('surname', p.surname ?? (relation?.as === 'child' ? of.surname : '')),
+        'For a married woman, her maiden name: the family name she was born with.'),
+      field('Married last name / other names', textInput('other_names', p.other_names),
+        'Last name after marriage, only if it changed (usually for married women). Nicknames or other spellings can go here too.')),
     relBox.length ? h('fieldset', h('legend', 'Relationship'), relBox) : null,
     h('fieldset', h('legend', 'Life'),
       field('Living? *', select('is_living', LIVING, livingVal)),

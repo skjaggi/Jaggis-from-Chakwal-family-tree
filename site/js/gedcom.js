@@ -68,7 +68,7 @@ export function buildGedcom() {
     if (p.title) L(2, 'NPFX', p.title);
     L(2, 'GIVN', p.given_name);
     if (p.surname) L(2, 'SURN', p.surname);
-    if (p.other_names) note(1, 'NOTE', `Other names: ${p.other_names}`);
+    if (p.other_names) note(1, 'NOTE', `Married last name / other names: ${p.other_names}`);
     L(1, 'SEX', p.gender === 'male' ? 'M' : p.gender === 'female' ? 'F' : 'U');
     const by = birthYear(d?.birth_date).replace(/^c\. /, 'ABT ').replace(/s$/, '');
     if (by || d?.birth_place) {

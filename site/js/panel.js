@@ -112,7 +112,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
         p.photo_path ? h('button.btn.small.ghost', { type: 'button', onclick: () => removePhoto(p) }, 'Remove photo') : null) : null,
       !photo && p.photo_path && p.photo_visibility === 'branch' ? h('p.muted.small', 'Photo visible to this branch only.') : null),
     h('h2.panel-name', fullName(p)),
-    p.other_names ? h('p.muted', p.other_names) : null,
+    p.other_names ? h('p.muted', `Also known as ${p.other_names}`) : null,
     ...specialOfPerson(p.id).map((b) => h('div.founder-ribbon', medal(b), h('div', h('b', b.name), h('small', b.card)))),
     claimBox,
     h('p.tags',
