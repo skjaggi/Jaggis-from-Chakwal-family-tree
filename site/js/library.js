@@ -10,6 +10,28 @@ import { forgetBlessings } from './blessings.js';
 
 export const TOPICS = ['Chakwal history', 'Partition 1947', 'Arya High School', 'Family members', 'Places today', 'Other'];
 export const LIBRARY_BLESSINGS = 3;
+const NEW_TOPIC = '__new';
+
+// The standard topics, then any the family has added, with "Other" last.
+export function allTopics() {
+  const extra = [...new Set((cache || []).map((l) => l.topic).filter((t) => t && !TOPICS.includes(t)))].sort();
+  return [...TOPICS.filter((t) => t !== 'Other'), ...extra, 'Other'];
+}
+
+// A best guess at the topic from the title, note and source (the article itself
+// can't be read from the browser). The person adding the link can change it.
+export function guessTopic(text, { tagged = false } = {}) {
+  const t = ` ${String(text || '').toLowerCase()} `;
+  const custom = allTopics().filter((x) => !TOPICS.includes(x));
+  const hit = custom.find((x) => x.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3).some((w) => t.includes(w)));
+  if (hit) return hit;
+  if (/partition|1947|refugee|riot|migrat|set (them|it) on fire/.test(t)) return 'Partition 1947';
+  if (/arya|school|plaque|college|student|teacher/.test(t)) return 'Arya High School';
+  if (tagged || /jaggi|bakhshi|our family|grandfather|grandmother|dada|nana/.test(t)) return 'Family members';
+  if (/village|today|visit|travel|tour|walk|drone|vahali|bhoun|dhudial|salt range/.test(t)) return 'Places today';
+  if (/chakwal|history|gurdwara|temple|mandir|haveli|punjab|heritage|british|colonial|gazetteer/.test(t)) return 'Chakwal history';
+  return null;
+}
 
 // ---------------------------------------------------------------- links
 
@@ -137,9 +159,32 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   const url = h('input', { name: 'url', type: 'url', required: true, inputmode: 'url', placeholder: 'https://www.youtube.com/watch?v=…', value: v.url || '' });
   const title = h('input', { name: 'title', type: 'text', required: true, maxlength: 200, placeholder: 'e.g. Chakwal before Partition', value: v.title || '' });
   const source = h('input', { name: 'source', type: 'text', maxlength: 120, placeholder: 'e.g. YouTube, Dawn newspaper, a family member', value: v.source || '' });
-  const topic = select('topic', TOPICS.map((t) => [t, t]), v.topic || 'Chakwal history');
+  const topics = allTopics();
+  if (v.topic && !topics.includes(v.topic)) topics.splice(-1, 0, v.topic);
+  const topic = select('topic', [...topics.map((t) => [t, t]), [NEW_TOPIC, '+ New topic…']], v.topic || 'Chakwal history');
+  const newTopic = h('input', { name: 'new_topic', type: 'text', maxlength: 60, placeholder: 'e.g. Moti Mahal and butter chicken' });
+  const newTopicBox = h('div', { hidden: true }, field('Name of the new topic', newTopic, 'It becomes a new button on the Library page.'));
+  const topicHint = h('span.field-hint', { hidden: true }, 'Suggested from the title. Change it if it fits better elsewhere.');
+  // Suggest a topic as the title and note are typed, until someone picks one.
+  let topicPicked = !!link;
+  topic.addEventListener('change', () => {
+    topicPicked = true;
+    topicHint.hidden = true;
+    newTopicBox.hidden = topic.value !== NEW_TOPIC;
+    if (!newTopicBox.hidden) newTopic.focus();
+  });
+  const suggest = () => {
+    if (topicPicked) return;
+    const g = guessTopic(`${title.value} ${note.value} ${source.value}`, { tagged: people.length > 0 });
+    if (g && g !== topic.value) {
+      if (![...topic.options].some((o) => o.value === g)) topic.add(new Option(g, g), topic.options.length - 1);
+      topic.value = g;
+      topicHint.hidden = false;
+    }
+  };
   const note = h('textarea', { name: 'note', rows: 3, maxlength: 2000, placeholder: 'What is it about, and why does it matter to the family?' });
   note.value = v.note || '';
+  for (const el of [title, note, source]) el.addEventListener('input', () => suggest());
   const vis = select('visibility', [['public', 'Everyone (the Library is public)'], ['family', 'Family members only (signed in)']], v.visibility || 'public');
   const image = h('input', { name: 'image_url', type: 'url', placeholder: 'https://… (optional, for articles)', value: v.image_url || '' });
 
@@ -154,6 +199,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   const picker = personPicker((p) => {
     if (!people.includes(p.id)) people.push(p.id);
     drawChips();
+    suggest();
     picker.querySelector('input').value = '';
   }, { placeholder: 'Type a name to tag someone' });
 
@@ -169,13 +215,14 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
         const r = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(u)}`);
         if (r.ok) {
           const j = await r.json();
-          if (!title.value.trim() && j.title) title.value = j.title.slice(0, 200);
+          if (!title.value.trim() && j.title) { title.value = j.title.slice(0, 200); suggest(); }
           if (j.author_name && (!source.value.trim() || source.value === 'YouTube')) source.value = `YouTube: ${j.author_name}`.slice(0, 120);
         }
       } catch { /* type the title by hand */ }
     }
     preview.replaceChildren(previewThumb(u));
   };
+  if (!link && people.length) setTimeout(suggest, 0);
   url.addEventListener('change', lookUp);
   url.addEventListener('paste', () => setTimeout(lookUp, 0));
   const preview = h('div.lib-form-preview', v.url ? previewThumb(v.url) : null);
@@ -188,7 +235,8 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
     field('Link (web address) *', url, 'Copy it from the address bar, or from Share → Copy link on YouTube.'),
     preview,
     field('Title *', title),
-    h('div.row2', field('Topic', topic), field('Where it is from', source)),
+    h('div.row2', field('Topic', topic, topicHint), field('Where it is from', source)),
+    newTopicBox,
     field('A few words about it', note),
     field('People in the tree it is about', h('div', chips, picker)),
     h('details.lib-more', h('summary', 'More options'),
@@ -203,11 +251,19 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
     if (!u) return toast('That doesn\'t look like a web link. It should start with https://', 'error');
     const img = image.value.trim();
     if (img && !/^https:\/\/\S+$/i.test(img)) return toast('The picture link should start with https://', 'error');
+    let topicName = topic.value;
+    if (topicName === NEW_TOPIC) {
+      topicName = newTopic.value.trim().replace(/\s+/g, ' ');
+      if (!topicName) return toast('Please type a name for the new topic, or pick one from the list.', 'error');
+      topicName = topicName[0].toUpperCase() + topicName.slice(1);
+      const same = allTopics().find((t) => t.toLowerCase() === topicName.toLowerCase());
+      if (same) topicName = same;
+    }
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true;
     try {
       await saveLink({
-        url: u, title: title.value.trim(), source: source.value.trim() || null, topic: topic.value,
+        url: u, title: title.value.trim(), source: source.value.trim() || null, topic: topicName,
         note: note.value.trim() || null, person_ids: people, visibility: vis.value, image_url: img || null,
       }, link?.id);
       m.close();
