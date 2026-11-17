@@ -293,6 +293,7 @@ function rulesTable() {
     rule('Add a person', 5), rule('A story about someone (in "Notes / Story")', 5), rule('Add a photo', 5),
     rule('Birth or death year, birth or death place, profession, source', '2 each'),
     rule('Other details, like names or gender', '1 each'), rule('Connect two people already in the tree', 3),
+    rule('A link for the family Library (once approved)', 3),
     rule('Claim your own box ("This is me")', 5), rule('Invite a relative who then signs in', 10)));
 }
 function multTable() {

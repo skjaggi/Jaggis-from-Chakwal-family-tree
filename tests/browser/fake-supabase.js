@@ -8,8 +8,23 @@ if (!window.__FAKE_INTRO__) try { localStorage.setItem('blessings-intro-seen:' +
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: window.__FAKE_UNLINKED__ ? null : SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' || window.__FAKE_CLAIMED__ ? SUNIL : null, created_at: new Date().toISOString() }],
-  invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [],
+  invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [],
 };
+// Sample Library links (window.__FAKE_LIBRARY__): approved ones, plus one suggestion waiting.
+if (window.__FAKE_LIBRARY__) {
+  const pid = (n) => seed.people.find((p) => p.given_name === n)?.id;
+  const at = (d) => new Date(Date.now() - d * 864e5).toISOString();
+  const L = (o) => ({ id: crypto.randomUUID(), status: 'approved', visibility: 'public', person_ids: [], submitted_by: uid, source: null, note: null, image_url: null, ...o });
+  db.library_links.push(
+    L({ url: 'https://www.youtube.com/watch?v=SAMPLEvid01', title: 'A walk through Chakwal bazaar today (sample video)', source: 'YouTube', topic: 'Places today', note: 'The old bazaar and the streets near the family haveli, filmed recently.', submitted_at: at(1) }),
+    L({ url: 'https://www.dawn.com/news/1353858', title: "'They set them all on fire': Chakwal recalls horrors of Partition", source: 'Dawn newspaper', topic: 'Partition 1947', note: 'What happened in Chakwal in March 1947, from people who lived through it.', submitted_at: at(2) }),
+    L({ url: 'https://dawn.com/news/1200706/chakwals-oldest-village-losing-its-historic-sites', title: "Chakwal's oldest village losing its historic sites", source: 'Dawn newspaper', topic: 'Chakwal history', submitted_at: at(3) }),
+    L({ url: 'https://example.com/arya-high-school-chakwal', title: 'Arya High School, Chakwal: the 1933 plaque', source: 'Family photo', topic: 'Arya High School', image_url: 'img/arya-school-plaque-1933.jpg', visibility: 'family', note: 'The foundation plaque with the family name on it.', person_ids: [pid('Bhanna Mal')].filter(Boolean), submitted_at: at(4) }),
+    L({ url: 'https://dawn.com/news/1176843/vahali-state-a-gem-in-the-salt-range', title: 'Vahali State: a gem in the Salt Range', source: 'Dawn newspaper', topic: 'Places today', submitted_at: at(5) }),
+    L({ url: 'https://www.youtube.com/watch?v=SAMPLEvid02', title: 'Memories of Chakwal: an interview (sample video)', source: 'YouTube', topic: 'Family members', person_ids: [pid('Sunil Kumar')].filter(Boolean), submitted_at: at(6) }),
+  );
+  db.library_links.push(L({ url: 'https://www.youtube.com/watch?v=SAMPLEvid03', title: 'Chakwal in the 1940s, old photographs (sample video)', source: 'YouTube', topic: 'Chakwal history', status: 'pending', submitted_by: ADMIN ? 'u-2' : uid, note: 'Old photos of the town. Grandfather mentioned some of these places.', submitted_at: at(0) }));
+}
 // A second member with some visits, for the admin's Visits report.
 if (ADMIN) {
   db.profiles.push({ id: 'u-2', email: 'cousin@example.com', display_name: 'Cousin', role: 'member', person_id: null, claimed_person_id: null, created_at: new Date().toISOString() });

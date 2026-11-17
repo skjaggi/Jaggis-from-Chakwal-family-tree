@@ -221,6 +221,51 @@ set local role anon;
 select pg_temp.expect((select count(*) from public.not_duplicates) = 0, 'visitors cannot read not-duplicate marks');
 rollback;
 
+-- Library: members suggest links, the admin approves; visitors see approved public ones
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+insert into public.library_links (url, title, topic, person_ids)
+  values ('https://www.youtube.com/watch?v=abc', 'Chakwal before 1947', 'Chakwal history', array[pg_temp.pid('Sunil Kumar')]);
+select pg_temp.expect((select count(*) from public.library_links) = 1, 'member sees their own suggestion');
+select pg_temp.expect((select submitted_by from public.library_links) = '00000000-0000-0000-0000-00000000000b', 'suggestion records who sent it');
+do $$ begin
+  begin
+    insert into public.library_links (url, title, status) values ('https://example.com/a', 'Sneaky', 'approved');
+    raise exception 'FAILED: member added an approved link';
+  exception when insufficient_privilege then raise notice 'ok: member suggestions must wait for approval';
+  end;
+  begin
+    insert into public.library_links (url, title) values ('https://WWW.youtube.com/watch?v=abc', 'Again');
+    raise exception 'FAILED: same link suggested twice';
+  exception when unique_violation then raise notice 'ok: the same link cannot be added twice';
+  end;
+  begin
+    insert into public.library_links (url, title) values ('javascript:alert(1)', 'Bad');
+    raise exception 'FAILED: non-web link accepted';
+  exception when check_violation then raise notice 'ok: only web links are accepted';
+  end;
+end $$;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.expect((select count(*) from public.library_links) = 0, 'other members do not see suggestions waiting for approval');
+update public.library_links set status = 'approved';
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+select pg_temp.expect((select status from public.library_links) = 'pending', 'members cannot approve links');
+update public.library_links set status = 'approved';
+select pg_temp.expect((select reviewed_by from public.library_links) = '00000000-0000-0000-0000-00000000000a', 'approval records the admin');
+insert into public.library_links (url, title, visibility) values ('https://example.com/family', 'Family only', 'family');
+select pg_temp.expect((select status from public.library_links where visibility = 'family') = 'approved', 'admin links go live at once');
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.expect((select count(*) from public.library_links) = 2, 'members see approved links, family-only too');
+delete from public.library_links;
+select pg_temp.expect((select count(*) from public.library_links) = 2, 'members cannot remove approved links');
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect((select count(*) from public.blessings_ledger() where kind = 'library' and user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'approved suggestion earns blessings');
+select pg_temp.expect((select points from public.blessings_ledger() where kind = 'library' and user_id = '00000000-0000-0000-0000-00000000000b') = 3, 'a library link is worth 3 blessings');
+set local role anon;
+select pg_temp.expect((select count(*) from public.library_links) = 1, 'visitors see approved public links only');
+rollback;
+
 -- Storage: branch photo readable only by branch
 insert into storage.objects (bucket_id, name) values ('photos-branch', pg_temp.pid('Sunil Kumar')::text || '/a.jpg');
 alter table storage.objects enable row level security;

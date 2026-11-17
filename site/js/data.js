@@ -299,7 +299,13 @@ export async function pendingCount() {
   // Owners review other people's suggestions, not their own.
   if (!store.isAdmin) q = q.neq('submitted_by', store.session.user.id);
   const { count } = await q;
-  return count || 0;
+  // The admin also approves links suggested for the family Library.
+  let links = 0;
+  if (store.isAdmin) {
+    const r = await store.sb.from('library_links').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+    links = r.error ? 0 : r.count || 0;
+  }
+  return (count || 0) + links;
 }
 
 // "This is me": ask the admin to confirm that this box is the signed-in person.

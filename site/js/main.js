@@ -16,6 +16,7 @@ import { renderBlessings, renderCorner, maybeShowBlessingsIntro, maybeShowHistor
 import { renderExport } from './export.js';
 import { downloadGedcom } from './gedcom.js';
 import { countView } from './count.js';
+import { renderLibrary } from './library.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { view: 'tree', root: null, selected: null };
@@ -27,9 +28,11 @@ function parseHash() {
   if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
-  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings'].includes(view) ? view : 'tree';
+  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings', 'library'].includes(view) ? view : 'tree';
   state.root = root && store.fam.byId.has(root) ? root : store.fam.defaultRootId;
-  const p = new URLSearchParams(query).get('p');
+  const params = new URLSearchParams(query);
+  state.query = params;
+  const p = params.get('p');
   state.selected = p && store.fam.byId.has(p) ? p : null;
 }
 
@@ -77,6 +80,7 @@ async function route() {
     const page = $('page');
     if (state.view === 'dashboard') return renderDashboard(page);
     if (state.view === 'export') return renderExport(page);
+    if (state.view === 'library') return renderLibrary(page, { person: state.query.get('person'), onSignIn: openSignIn });
     if (!store.signedIn) {
       clear(page, h('h1', 'Please sign in'), h('p', 'This page is for family members.'), h('button.btn.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
       return;
@@ -273,6 +277,7 @@ async function renderHeader() {
     store.isAdmin || store.claimedId || count ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
     h('a', { href: 'people/', title: 'Family members who have passed away, one page each' }, 'Ancestors'),
+    h('a', { href: '#/library', 'data-nav': 'library', title: 'Videos and articles about the family and Chakwal' }, 'Library'),
     h('a', { href: 'help.html' }, 'Help'),
     h('a', { href: '#/export', 'data-nav': 'export', title: 'Download the tree as a PDF or a GEDCOM file' }, 'Export'),
     themeButton(),

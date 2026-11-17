@@ -21,3 +21,4 @@ node smoke.cjs
 node signedin.cjs
 node owner.cjs
 node claimgate.cjs
+node library-shots.cjs
