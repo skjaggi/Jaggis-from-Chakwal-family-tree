@@ -36,8 +36,14 @@ export function clear(el, ...children) {
 }
 
 let toastTimer;
+let toastEl = null;
 export function toast(message, kind = 'info') {
-  const el = document.getElementById('toast');
+  // Kept by reference: it may have been inside a dialog that has since closed.
+  const el = (toastEl ||= document.getElementById('toast'));
+  // An open dialog sits above the page, so show the message inside it, or it is hidden behind.
+  const top = [...document.querySelectorAll('dialog[open]')].pop();
+  const home = top || document.body;
+  if (el.parentNode !== home) home.append(el);
   el.textContent = message;
   el.className = `toast show ${kind}`;
   clearTimeout(toastTimer);

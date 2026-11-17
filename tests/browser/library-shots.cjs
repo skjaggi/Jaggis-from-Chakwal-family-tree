@@ -37,6 +37,14 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       await pg.fill('.lib-search', 'vahali');
       ok(await pg.locator('.lib-grid .lib-card').count() === 1, 'search');
       await pg.fill('.lib-search', '');
+      // Adding a link that is already there: the message shows above the form, naming the card.
+      await pg.click('button:has-text("Add a link")');
+      await pg.fill('dialog input[name=url]', 'https://www.dawn.com/news/1353858');
+      await pg.fill('dialog input[name=title]', 'Again');
+      await pg.click('dialog button[type=submit]');
+      await pg.waitForSelector('dialog #toast.show');
+      ok((await pg.textContent('dialog #toast')).includes('already in the Library as'), 'duplicate link: message shows inside the open form');
+      await pg.click('dialog .modal-head button'); await pg.click('dialog button:has-text("Discard")');
       await pg.locator('.lib-play').first().click();
       ok(await pg.locator('.lib-media iframe[src*="youtube-nocookie.com/embed/SAMPLEvid01"]').count() === 1, 'video plays on the page');
       // Review page: the suggested link
