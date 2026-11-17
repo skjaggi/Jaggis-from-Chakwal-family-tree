@@ -90,7 +90,6 @@ export function draftMessage(r) {
   const facts = CHECKS.filter((c) => c.key !== 'photo' && keys.has(c.key)).map((c) => (c.key === 'living' ? 'whether they are living' : c.label));
   if (facts.length) tips.push(`To add ${joinWords(facts.map((f) => (f.startsWith('whether') ? f : `the ${f}`)))}, sign in, tap the person's box and press Edit.`);
   if (keys.has('birth') || keys.has('death')) tips.push('If you are not sure of a year, an approximate one such as "c. 1950" is perfectly fine.');
-  tips.push("If you can't find something, just leave it; nothing here is urgent.");
 
   return [
     thanks,
