@@ -52,14 +52,15 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
     }
     if (name === 'phone') {
       ok(await pg.locator('.lib-mine .lib-card').count() === 1, 'member sees own waiting suggestion');
-      await pg.click('button:has-text("Suggest a link")');
+      // Suggest from a person's card, so that person is tagged already.
+      await pg.goto(SITE + `#/tree/${idOf('Bhanna Mal')}?p=${idOf('Kesar Mal')}`); await pg.waitForSelector('.lib-person:not([hidden])');
+      await pg.click('.lib-person button:has-text("Add a link about")');
+      await pg.waitForSelector('dialog .lib-chip');
       await pg.fill('dialog input[name=url]', 'https://youtu.be/SAMPLEvid09?si=abc');
       await pg.locator('dialog input[name=url]').dispatchEvent('change'); await pg.waitForTimeout(500);
       ok((await pg.inputValue('dialog input[name=title]')).includes('sample video'), 'YouTube title filled in');
       await pg.selectOption('dialog select[name=topic]', 'Chakwal history');
       await pg.fill('dialog textarea[name=note]', 'Dadaji spoke about this street.');
-      await pg.fill('dialog .picker input', 'Kesar'); await pg.locator('dialog .pick-list button').first().evaluate((b) => b.click());
-      await pg.waitForSelector('dialog .lib-chip', { timeout: 5000 }).catch(async () => console.log('picker state:', await pg.evaluate(() => [...document.querySelectorAll('dialog')].map((d) => d.querySelector('.lib-chips')?.outerHTML + ' | ' + d.querySelector('.pick-list')?.outerHTML.slice(0, 300)).join(' || '))));
       await pg.waitForTimeout(300);
       await pg.screenshot({ path: OUT + 'library-suggest-phone.png' });
       if (process.env.HELP_SHOT) {
