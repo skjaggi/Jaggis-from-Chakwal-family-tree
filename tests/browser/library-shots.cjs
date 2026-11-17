@@ -26,7 +26,7 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
   const b = await chromium.launch();
   const errors = [];
   for (const [name, opts] of [['desktop', {}], ['desktop-dark', { theme: 'dark' }], ['phone', { phone: true, role: 'member' }]]) {
-    const ctx = await context(b, opts); const pg = await ctx.newPage(); pg.on('pageerror', (e) => errors.push(e.message));
+    const ctx = await context(b, opts); const pg = await ctx.newPage(); pg.on('pageerror', (e) => errors.push(e.message)); pg.on('console', (m) => m.type() === 'error' && console.log('console:', m.text()));
     await pg.goto(SITE + '#/library'); await pg.waitForSelector('.lib-card'); await pg.waitForTimeout(600);
     await pg.screenshot({ path: OUT + `library-${name}.png`, fullPage: name !== 'phone' });
     if (name === 'desktop') {
@@ -58,7 +58,8 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       ok((await pg.inputValue('dialog input[name=title]')).includes('sample video'), 'YouTube title filled in');
       await pg.selectOption('dialog select[name=topic]', 'Chakwal history');
       await pg.fill('dialog textarea[name=note]', 'Dadaji spoke about this street.');
-      await pg.fill('dialog .picker input', 'Kesar'); await pg.locator('dialog .pick-list button').first().evaluate((b) => b.click()); await pg.waitForSelector('dialog .lib-chip', { timeout: 5000 });
+      await pg.fill('dialog .picker input', 'Kesar'); await pg.locator('dialog .pick-list button').first().evaluate((b) => b.click());
+      await pg.waitForSelector('dialog .lib-chip', { timeout: 5000 }).catch(async () => console.log('picker state:', await pg.evaluate(() => [...document.querySelectorAll('dialog')].map((d) => d.querySelector('.lib-chips')?.outerHTML + ' | ' + d.querySelector('.pick-list')?.outerHTML.slice(0, 300)).join(' || '))));
       await pg.waitForTimeout(300);
       await pg.screenshot({ path: OUT + 'library-suggest-phone.png' });
       if (process.env.HELP_SHOT) {
