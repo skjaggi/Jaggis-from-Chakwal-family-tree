@@ -14,13 +14,14 @@ const SITE = 'http://localhost:8765/';
 const seed = JSON.parse(fs.readFileSync(path.join(__dirname, '../../site/data/seed.json'), 'utf8'));
 const idOf = (given) => seed.people.find((p) => p.given_name === given).id;
 
-async function context(b, role) {
+async function context(b, role, extra = {}) {
   const ctx = await b.newContext({ viewport: { width: 390, height: 760 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   await ctx.route('https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/.vendor/d3.esm.js') }));
   await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
   await ctx.route('**/js/config.js', (r) => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k', siteTitle: 'Jaggis of Chakwal', adminName: 'Sunil' };" }));
   await ctx.addInitScript(([r, n]) => { window.__FAKE_ROLE__ = r; window.__FAKE_NAME__ = n; }, [role, 'Asha']);
-  await ctx.addInitScript(() => { sessionStorage.setItem('claim-welcome', '1'); sessionStorage.setItem('claim-not-in-tree', '1'); });
+  await ctx.addInitScript((x) => Object.assign(window, x), extra);
+  if (!extra.__WELCOME__) await ctx.addInitScript(() => { sessionStorage.setItem('claim-welcome', '1'); sessionStorage.setItem('claim-not-in-tree', '1'); });
   return ctx;
 }
 const shot = (pg, name) => pg.screenshot({ path: path.join(OUT, name + '.jpg'), type: 'jpeg', quality: 78 });
@@ -101,6 +102,24 @@ const quiet = (pg) => pg.evaluate(() => { const t = document.getElementById('toa
 
   await pg.goto(`${SITE}#/outline/${root}`); await pg.waitForTimeout(600);
   await shot(pg, 'list');
+  await ctx.close();
+
+  // Just signed in, invitation linked to a box: "Is this you?"
+  ctx = await context(b, 'member', { __WELCOME__: 1 });
+  pg = await ctx.newPage();
+  pg.on('pageerror', (e) => errors.push(e.message));
+  await pg.goto(SITE); await pg.waitForSelector('dialog .claim-gate'); await pg.waitForTimeout(600);
+  await shot(pg, 'claim-welcome');
+  await ctx.close();
+
+  // A member with a claimed box and some badges: the Blessings page
+  ctx = await context(b, 'owner', { __FAKE_BADGES__: 1, __FAKE_BONUS__: 25 });
+  pg = await ctx.newPage();
+  pg.on('pageerror', (e) => errors.push(e.message));
+  await pg.goto(`${SITE}#/blessings`); await pg.waitForSelector('.board li'); await pg.waitForTimeout(800);
+  // Close the once-a-month "Family Historian" congratulations so the page shows.
+  if (await pg.locator('dialog[open]').count()) { await pg.locator('dialog[open] .modal-head button').click(); await pg.waitForTimeout(300); }
+  await shot(pg, 'blessings');
   await ctx.close();
   await b.close();
   console.log('help shots:', fs.readdirSync(OUT).join(', '), '| ERRORS:', errors.length ? errors.join('; ') : 'none');

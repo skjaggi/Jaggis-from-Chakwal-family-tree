@@ -30,6 +30,9 @@
     .help .shot figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 6px; line-height: 1.4; }
     .help .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; }
     .help .shots .shot { margin: 16px auto; }
+    .help-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.97rem; }
+    .help-table th, .help-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .help-table td:last-child, .help-table th:last-child { text-align: right; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -55,7 +58,7 @@
 
   <main class="help">
     <h1>How to use the family tree</h1>
-    <p>This website is the family tree of the Jaggis of Chakwal, starting from Bakhshi Bhanna Mal Jaggi. Anyone with the link can look at it. Family members who were invited can also add and correct information. <strong>Changes are not visible right away:</strong> the admin checks each one first, and it appears once approved.</p>
+    <p>This website is the family tree of the Jaggis of Chakwal, starting from Bakhshi Bhanna Mal Jaggi. Anyone with the link can look at it. Family members who were invited can also add and correct information, and earn <a href="#blessings">blessings</a> for it. Once you have claimed your own box, changes to your own family appear straight away. Other changes are checked first, by the admin or by the branch admin for that part of the tree, and appear once approved.</p>
     <div class="tip important"><strong>Most important step after you sign in: claim your own box.</strong> Find yourself in the tree and tap <span class="ui">This is me</span>. <a href="#this-is-me">See how</a>.</div>
 
     <div class="toc">
@@ -66,10 +69,12 @@
       <a href="#edit">5. Adding or correcting information</a>
       <a href="#photo">6. Adding a photo</a>
       <a href="#invite">7. Inviting a relative</a>
-      <a href="#dashboard">8. The family dashboard</a>
-      <a href="#library">9. The family Library: videos and articles</a>
-      <a href="#privacy">10. Who can see what</a>
-      <a href="#trouble">11. If something isn't working</a>
+      <a href="#blessings">8. Blessings and badges</a>
+      <a href="#dashboard">9. The family dashboard, PDF and GEDCOM</a>
+      <a href="#library">10. The family Library: videos and articles</a>
+      <a href="#admin">11. For the admin</a>
+      <a href="#privacy">12. Who can see what</a>
+      <a href="#trouble">13. If something isn't working</a>
     </div>
 
     <h2 id="sign-in">1. Signing in</h2>
@@ -85,11 +90,15 @@
 
     <h2 id="this-is-me">2. Claim your box: "This is me" (important)</h2>
     <div class="tip important"><strong>Please do this first, right after you sign in.</strong> Claiming your own box tells the site who you are. It lets your changes to your own family appear straight away, shows how each person is related to you, and makes you the branch admin for your family. Until you do, a yellow reminder stays at the top of the page.</div>
+    <p><strong>Right after you first sign in,</strong> the site usually does this for you. If your invitation names your box, the tree moves to it and a box opens saying <em>Welcome dear member of Jaggi Family!</em> and asking <span class="ui">Is this you?</span>. Tap <span class="ui">Yes, I am …</span> and you are done. If it isn't you, type your name under <span class="ui">Not you? Search for your name</span>, pick yourself and tap <span class="ui">Yes, this is me</span>.</p>
+    <figure class="shot"><img src="img/help/claim-welcome.jpg" width="390" height="760" loading="lazy" alt="After signing in: the tree goes to your box and asks Is this you?"><figcaption>After signing in, the tree goes to your box and asks "Is this you?".</figcaption></figure>
+    <p>If you closed that box, you can claim later:</p>
     <ol>
       <li>Tap <span class="ui">Go to my box</span> on the yellow reminder, or type your name in <span class="ui">Search the family</span> and pick yourself.</li>
       <li>On your card, tap <span class="ui">This is me</span> and confirm.</li>
       <li><strong>Not in the tree yet?</strong> Open your father's or mother's card, tap <span class="ui">Add: Child</span>, add yourself, and once you appear, claim that box.</li>
     </ol>
+    <p><strong>Claim before you change anything.</strong> Until you have claimed a box, tapping any add, edit, photo or link button first opens <span class="ui">First, claim your own box</span>. Claim there and your change carries on. If you are not in the tree yet, tap <span class="ui">My box isn't in the tree yet</span>, then <span class="ui">Continue</span>: you can then add yourself under your father or mother, and you won't be asked again during that visit.</p>
     <p>Once you are signed in, open your own box in the tree and tap <span class="ui">This is me</span>. You become the <strong>branch admin</strong> for your own family below that box. If your invitation was linked to that box, this happens straight away. Otherwise the person who invited you, or the admin, confirms it first. Each account can claim only one box, and each box belongs to only one person.</p>
     <p>As a branch admin:</p>
     <ul>
@@ -130,6 +139,9 @@
       <li><strong>Find someone:</strong> type a name in <span class="ui">Search the family</span>. Different spellings, like Parkash and Prakash, still find them.</li>
       <li><strong>Start the tree from one person:</strong> open their details and tap <span class="ui">Show tree from here</span>. The line at the top shows their ancestors; tap any name there to go back up, or <span class="ui">Whole tree</span>.</li>
       <li><strong>List view:</strong> tap <span class="ui">List</span> at the top for a simple indented list, which is easier to read on a small phone.</li>
+      <li><strong>Light or dark:</strong> tap <span class="ui">☾ Dark</span> or <span class="ui">☀ Light</span> in the menu to switch colours. Your choice is remembered on that phone or computer; until you choose, the site follows your device's own setting.</li>
+      <li><strong>The family logo:</strong> rest the mouse on the logo at the top left, or tap it on a phone, to see it large.</li>
+      <li><strong>You, at the top:</strong> once you are signed in and have claimed your box, your photo, name, <a href="#blessings">blessings</a> and badges sit in the header (on a phone, beside the logo). Tap them to open the Blessings page; tap <span class="ui">?</span> for how blessings work.</li>
     </ul>
     <div class="shots">
       <figure class="shot"><img src="img/help/tree.jpg" width="390" height="760" loading="lazy" alt="The tree. Drag to move around; tap the round button under a card to open a family."><figcaption>The tree. Drag to move around; tap the round button under a card to open a family.</figcaption></figure>
@@ -145,11 +157,14 @@
       <li><span class="ui">Add: Child / Spouse / Parent</span>: add someone who is missing.</li>
       <li><span class="ui">Link to someone already in the tree</span>: connect two people who are both already there.</li>
     </ul>
+    <p><strong>Gender</strong> and <strong>Living?</strong> must be filled in when you add or edit someone: they show <em>Choose...</em> until you pick one. If you really don't know whether someone is living, ask a relative or add an <a href="#dashboard">open question</a>.</p>
+    <p>The <span class="ui">Save</span> (or <span class="ui">Send for approval</span>) button stays at the bottom of the form while you scroll. If you close a form with ✕ after changing something, the site asks <span class="ui">Save your changes?</span> with <span class="ui">Keep editing</span>, <span class="ui">Discard changes</span> or <span class="ui">Save</span>, so nothing is lost by accident. If something can't be saved, the message appears inside the form, so you can fix it and try again.</p>
     <div class="shots">
       <figure class="shot"><img src="img/help/card-actions.jpg" width="390" height="760" loading="lazy" alt="The buttons near the top of a person's card."><figcaption>The buttons near the top of a person's card.</figcaption></figure>
       <figure class="shot"><img src="img/help/suggest-edit.jpg" width="390" height="760" loading="lazy" alt="Suggesting an edit. Nothing changes until the admin approves it."><figcaption>Suggesting an edit. Nothing changes until the admin approves it.</figcaption></figure>
     </div>
     <p>For births and deaths, only the <strong>year</strong> is recorded, never the full date. Years can be approximate, for example <em>c. 1925</em> or <em>1930s</em>. Use <strong>Sources</strong> to say where the information came from (for example "Dadi's memory" or "school records"), and <strong>What's uncertain</strong> for anything you're not sure about.</p>
+    <p><strong>Your own family:</strong> once you have claimed your box, changes to yourself, your husband or wife and your descendants are saved straight away (the button says <span class="ui">Save</span>). Everything else is a suggestion.</p>
     <p>After you tap <span class="ui">Send for approval</span>, your change waits for the admin. <strong>It won't show in the tree until it is approved.</strong> While it waits, you can see it on that person's card in a yellow <strong>Waiting for admin approval</strong> box (only you see this), and under <span class="ui">My changes</span>, where you can also withdraw it. Don't worry about making a mistake; nothing changes until it's approved.</p>
     <div class="shots">
       <figure class="shot"><img src="img/help/pending-card.jpg" width="390" height="760" loading="lazy" alt="Your change, waiting for approval, on the person's card. Only you see it."><figcaption>Your change, waiting for approval, on the person's card. Only you see it.</figcaption></figure>
@@ -181,7 +196,36 @@
     </div>
     <p>The people you invited are listed on the same page, with <span class="ui">Resend invitation email</span> in case it got lost.</p>
 
-    <h2 id="dashboard">8. The family dashboard</h2>
+    <h2 id="blessings">8. Blessings and badges</h2>
+    <p>Every time you add to the family tree, you earn <strong>blessings</strong> ✦. They show how much each of us has given to keeping our family story alive. Blessings count once a change is approved (changes to your own family count straight away). Tap <span class="ui">Blessings</span> in the menu, or your blessings at the top, to see the leaderboard.</p>
+    <table class="help-table">
+      <thead><tr><th>You earn</th><th>Blessings</th></tr></thead>
+      <tbody>
+        <tr><td>Claim your own box ("This is me")</td><td>5</td></tr>
+        <tr><td>Add a person</td><td>5</td></tr>
+        <tr><td>A story about someone (in <span class="ui">Notes / Story</span>)</td><td>5</td></tr>
+        <tr><td>Add a photo</td><td>5</td></tr>
+        <tr><td>Birth or death year, birth or death place, profession, source</td><td>2 each</td></tr>
+        <tr><td>Other details, like names or gender</td><td>1 each</td></tr>
+        <tr><td>Connect two people already in the tree</td><td>3</td></tr>
+        <tr><td>A link for the family Library (once approved)</td><td>3</td></tr>
+        <tr><td>Invite a relative who then signs in</td><td>10</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Our elders count most.</strong> Details about the earliest generations are the rarest, so they are multiplied: <strong>5×</strong> for Generation 1 (Bakhshi Bhanna Mal Jaggi), <strong>4×</strong> for Generation 2, <strong>3×</strong> for Generation 3 and <strong>2×</strong> for Generation 4. After you save, a message tells you how many blessings you earned or will earn.</p>
+    <p><strong>Badges.</strong> Reach a goal and you keep the badge for good:</p>
+    <ul>
+      <li><strong>Root Keeper:</strong> add 10 people to the tree.</li>
+      <li><strong>Storyteller:</strong> add 5 stories.</li>
+      <li><strong>Photo Finder:</strong> add 10 photos.</li>
+      <li><strong>Connector:</strong> 3 relatives you invited sign in.</li>
+      <li><strong>Family Historian:</strong> the most blessings this month. This one moves to whoever leads each month, and the leader gets a short congratulations message.</li>
+    </ul>
+    <p>Two special badges are given by hand: <strong>Founder of the Jaggi Family Tree</strong> for Suraj Parkash Jaggi, who had the idea and made the first two family trees this one grew from, and <strong>Creator of the Jaggi Family Tree</strong> for Sunil Kumar Jaggi, who built the site. They show on their boxes in the tree too.</p>
+    <p>The Blessings page shows the leaderboard for this month or all time, your badges and how close you are to each, the totals for each branch of the family, and a list of your own blessings. The first time you sign in, a short <em>Welcome to Family Blessings</em> message explains all this; to see it again, tap <span class="ui">How it works</span> on the Blessings page, or the <span class="ui">?</span> next to your name at the top.</p>
+    <figure class="shot"><img src="img/help/blessings.jpg" width="390" height="760" loading="lazy" alt="The Blessings page: the leaderboard, your badges and branch totals."><figcaption>The Blessings page: the leaderboard, your badges and branch totals.</figcaption></figure>
+
+    <h2 id="dashboard">9. The family dashboard</h2>
     <p>Tap <span class="ui">Dashboard</span> at the top to see the whole tree at a glance:</p>
     <ul>
       <li><strong>Numbers:</strong> how many people, generations, marriages, branches, photos and sources.</li>
@@ -190,16 +234,21 @@
       <li><strong>Born by period, birthplaces, earliest ancestors and common first names.</strong></li>
       <li><strong>Open questions:</strong> things the family is still trying to find out. Anyone signed in can add one.</li>
     </ul>
+    <p>A few rows in <strong>Needs attention</strong> are worth knowing about:</p>
+    <ul>
+      <li><strong>Not known if living</strong> and <strong>Gender not recorded:</strong> tapping a name here opens that person's edit form straight away, so you can pick the answer and save.</li>
+      <li><strong>Possible duplicates (similar names):</strong> pairs of people whose names are spelled alike, with their parents, so you can tell whether they are really the same person. Only people of the same gender are paired, and placeholder names like <em>Unknown</em> are skipped. If two people really are different, an admin taps <span class="ui">Not a duplicate</span> and the pair is no longer listed. If they are the same person, tell the admin.</li>
+    </ul>
     <div class="shots">
       <figure class="shot"><img src="img/help/dashboard.jpg" width="390" height="760" loading="lazy" alt="The dashboard: the tree in numbers."><figcaption>The dashboard: the tree in numbers.</figcaption></figure>
       <figure class="shot"><img src="img/help/dashboard-attention.jpg" width="390" height="760" loading="lazy" alt="Needs attention: tap a row to see who is missing what."><figcaption>Needs attention: tap a row to see who is missing what.</figcaption></figure>
     </div>
 
     <h3>Printing the tree or saving it as a PDF</h3>
-    <p>Tap <span class="ui">Export</span> at the top, then <span class="ui">Make the PDF</span>. You get a family book: a cover page, the whole tree as an indented chart, and a page for everyone with their years, places and photo. When the print window opens, choose <span class="ui">Save as PDF</span> as the printer. On an iPhone, tap Share, then Print, pinch outwards on the preview, then Share and Save to Files.</p>
+    <p>Tap <span class="ui">Export</span> at the top, then <span class="ui">Make the PDF</span>. You get a family book: a cover page with the Jaggis of Chakwal logo, the whole tree as an indented chart, and a page for everyone with their years, places and photo. Every page has the small family logo at the top and the copyright line at the bottom. When the print window opens, choose <span class="ui">Save as PDF</span> as the printer. On an iPhone, tap Share, then Print, pinch outwards on the preview, then Share and Save to Files.</p>
     <p>The <span class="ui">.ged</span> file on the same page is for genealogy programs and sites such as Ancestry, FamilySearch or MyHeritage. It is not meant to be opened on its own. Both include only what you are allowed to see.</p>
 
-    <h2 id="library">9. The family Library: videos and articles</h2>
+    <h2 id="library">10. The family Library: videos and articles</h2>
     <p>Tap <span class="ui">Library</span> at the top. It keeps the videos, articles and other writing about the Jaggis of Chakwal in one place: Chakwal's history, Partition, Arya High School, family members and more. Anyone can look. YouTube videos play right on the page; tap <span class="ui">Open</span> on anything else to read it on its own site. Use the search box or the topic buttons to find something.</p>
     <h3>Adding a link (family members)</h3>
     <ol>
@@ -222,7 +271,29 @@
       <li><strong>Family only:</strong> under <span class="ui">More options</span>, a link can be made visible to signed-in family members only. Everything else in the Library is public.</li>
     </ul>
 
-    <h2 id="privacy">10. Who can see what</h2>
+    <h2 id="admin">11. For the admin</h2>
+    <p>The admin sees two more items in the menu, <span class="ui">Review</span> and <span class="ui">Members</span>. Branch admins (anyone who has claimed a box) also see <span class="ui">Review</span> for suggestions about their part of the tree.</p>
+    <h3>Review</h3>
+    <ul>
+      <li>Every change waiting for approval, with exactly what would change. Tap <span class="ui">Approve</span> or <span class="ui">Decline</span>, with an optional note to the member. The number on <span class="ui">Review</span> is how many are waiting, including Library links.</li>
+      <li><strong>Recent decisions</strong> lists what was approved lately, with <span class="ui">Undo</span>: an added person is removed again, edited details go back to how they were, and a "This is me" claim is taken back.</li>
+    </ul>
+    <h3>Members</h3>
+    <ul>
+      <li><strong>Branch admins:</strong> who has claimed which box, how many people are in their branch, and who invited them, with <span class="ui">Remove as branch admin</span>.</li>
+      <li><strong>Invite someone:</strong> add an email, a name, who they are in the tree and their role (Member or Admin). The site emails the invitation; WhatsApp and Copy are there too.</li>
+      <li><strong>Send a reminder email:</strong> pick who gets it (<span class="ui">Everyone</span>, <span class="ui">Not signed in yet</span>, <span class="ui">No box claimed</span>, or tick people one by one), write a subject and message, tap <span class="ui">Preview the email</span>, then <span class="ui">Send</span>. Each email starts "Dear &lt;first name&gt;," and ends with a button to open the tree. Replies come to the admin's own email.</li>
+      <li><strong>Invites:</strong> everyone invited, whether they have signed in, and who invited them. <span class="ui">Remove</span> stops that person signing in (they are signed out within the hour); what they already added stays in the tree. Removed people are listed under <strong>Removed</strong> with <span class="ui">Restore</span>, which gives back their invite, login and, if nobody else claimed it meanwhile, their box.</li>
+      <li><strong>Members who have signed in,</strong> with their role and box, which the admin can change.</li>
+    </ul>
+    <h3>Elsewhere</h3>
+    <ul>
+      <li><strong>Blessings page:</strong> <span class="ui">Give or take back blessings</span> adds a bonus (for example for answering an open question) or takes some back, with a reason the member sees. Admins appear on the leaderboard but can't hold Family Historian.</li>
+      <li><strong>Dashboard:</strong> <span class="ui">Not a duplicate</span> under Possible duplicates; <strong>Visits by family members</strong> (signed-in visits, only the admin sees it) and the anonymous count of public visitors.</li>
+      <li><strong>Removing:</strong> only the admin can remove a person from the tree or undo a parent or marriage link.</li>
+    </ul>
+
+    <h2 id="privacy">12. Who can see what</h2>
     <ul>
       <li><strong>Names and who is related to whom</strong> can be seen by anyone with the link.</li>
       <li><strong>Birth years, places, notes and stories, and photos</strong> can be marked <em>Public</em> (anyone) or <em>Branch only</em> (only signed-in family in that branch). Details of living people are <em>Branch only</em> unless you choose otherwise.</li>
@@ -231,11 +302,13 @@
       <li><strong>Search engines such as Google</strong> can find a simple page for each family member who has passed away, with their <em>Public</em> details only (see the <a href="people/">list of ancestors</a>). Living people, and anyone not yet marked as passed away, never get a page and are not named there.</li>
     </ul>
 
-    <h2 id="trouble">11. If something isn't working</h2>
+    <h2 id="trouble">13. If something isn't working</h2>
     <ul>
       <li><strong>"This email hasn't been invited yet":</strong> ask the admin, or the relative who invited you, to invite that exact email address.</li>
       <li><strong>No email arrived:</strong> check Spam, wait a minute, and make sure the address is spelled correctly.</li>
       <li><strong>"Link has expired or was already used":</strong> ask for a new email and use the code from the newest one.</li>
+      <li><strong>A box pops up asking you to claim your box:</strong> see <a href="#this-is-me">Claim your box</a>. If you are not in the tree yet, tap <span class="ui">My box isn't in the tree yet</span>.</li>
+      <li><strong>"Please choose Gender and Living?":</strong> both are required; pick an answer in each and save again.</li>
       <li><strong>Signed in but can't see someone's dates:</strong> those details are marked <em>Branch only</em> for another branch of the family.</li>
     </ul>
     <p>For anything else, contact the admin (Sunil Jaggi).</p>
