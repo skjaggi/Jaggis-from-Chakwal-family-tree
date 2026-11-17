@@ -58,7 +58,7 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       ok((await pg.inputValue('dialog input[name=title]')).includes('sample video'), 'YouTube title filled in');
       await pg.selectOption('dialog select[name=topic]', 'Chakwal history');
       await pg.fill('dialog textarea[name=note]', 'Dadaji spoke about this street.');
-      await pg.fill('dialog .picker input', 'Kesar'); await pg.click('dialog .pick-list button >> nth=0'); await pg.waitForSelector('dialog .lib-chip');
+      await pg.fill('dialog .picker input', 'Kesar'); await pg.locator('dialog .pick-list button').first().evaluate((b) => b.click()); await pg.waitForSelector('dialog .lib-chip', { timeout: 5000 });
       await pg.waitForTimeout(300);
       await pg.screenshot({ path: OUT + 'library-suggest-phone.png' });
       if (process.env.HELP_SHOT) {
