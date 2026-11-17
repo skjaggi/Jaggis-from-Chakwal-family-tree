@@ -58,7 +58,7 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       ok((await pg.inputValue('dialog input[name=title]')).includes('sample video'), 'YouTube title filled in');
       await pg.selectOption('dialog select[name=topic]', 'Chakwal history');
       await pg.fill('dialog textarea[name=note]', 'Dadaji spoke about this street.');
-      await pg.fill('dialog .picker input', 'Kesar'); await pg.waitForTimeout(200); await pg.click('dialog .pick-list button >> nth=0');
+      await pg.fill('dialog .picker input', 'Kesar'); await pg.click('dialog .pick-list button >> nth=0'); await pg.waitForSelector('dialog .lib-chip');
       await pg.waitForTimeout(300);
       await pg.screenshot({ path: OUT + 'library-suggest-phone.png' });
       if (process.env.HELP_SHOT) {
@@ -67,8 +67,10 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       await pg.evaluate(() => { for (const el of document.querySelectorAll('dialog, dialog *')) if (el.scrollTop) el.scrollTop = 0; }); await pg.waitForTimeout(200);
       await pg.screenshot({ path: path.join(HELP, 'library-suggest.jpg'), type: 'jpeg', quality: 78 });
       }
-      await pg.click('dialog button[type=submit]'); await pg.waitForTimeout(400);
-      const row = await pg.evaluate(() => window.__db.library_links.at(-1));
+      await pg.click('dialog button[type=submit]');
+      await pg.waitForFunction(() => window.__db.library_links.some((l) => l.url.includes('SAMPLEvid09')), null, { timeout: 5000 }).catch(() => {});
+      const row = await pg.evaluate(() => window.__db.library_links.find((l) => l.url.includes('SAMPLEvid09')) || {});
+      if (!row.url) console.log('saved rows:', JSON.stringify(await pg.evaluate(() => window.__db.library_links.map((l) => l.url))));
       ok(row.url === 'https://www.youtube.com/watch?v=SAMPLEvid09' && row.status === 'pending' && row.person_ids.length === 1, 'member suggestion saved, waiting, tidy link, person tagged');
     }
     await ctx.close();
