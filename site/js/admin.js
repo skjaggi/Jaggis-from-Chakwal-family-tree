@@ -12,6 +12,7 @@ import { LABELS, personPicker } from './forms.js';
 import { downloadGedcom } from './gedcom.js';
 import { sendButtons } from './invite.js';
 import { reminderSection } from './reminders.js';
+import { libraryReviewSection } from './library.js';
 
 const KIND_TITLE = {
   add_person: 'Add a person', edit_person: 'Edit details', add_link: 'Add a relationship',
@@ -91,6 +92,7 @@ export async function renderReview(container) {
     return clear(container, h('h1', title), h('p.notice', e.message));
   }
   const emailOf = (id) => emails.get(id) || 'Unknown member';
+  const library = await libraryReviewSection(() => renderReview(container), emailOf).catch(() => null);
 
   const card = (req) => {
     const note = h('input', { type: 'text', placeholder: 'Note to the member (optional)' });
@@ -139,7 +141,8 @@ export async function renderReview(container) {
   clear(container,
     h('h1', title),
     admin ? null : h('p.muted', 'You look after this part of the tree, so you can approve or decline what other family members suggest for it. Anything you decline can still be suggested again.'),
-    pending.length ? pending.map(card) : h('p.empty', 'Nothing waiting. 🎉'),
+    pending.length ? pending.map(card) : h('p.empty', library ? 'No changes to the tree waiting.' : 'Nothing waiting. 🎉'),
+    library,
     admin ? [h('h2', 'Recent decisions'),
       recent.length ? h('ul.history', recent.slice(0, 40).map((r) =>
         h('li', h('span.tag' + (r.status === 'approved' ? '.ok' : '.warn'), r.status), ' ', r.summary || KIND_TITLE[r.kind],

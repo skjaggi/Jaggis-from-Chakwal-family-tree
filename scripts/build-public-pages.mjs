@@ -91,6 +91,7 @@ function navHtml(up) {
     a('#/tree', 'Tree'), a('#/outline', 'List'), a('#/dashboard', 'Dashboard'),
     a('#/mine', 'My changes', ' data-signed hidden'), a('#/invite', 'Invite', ' data-signed hidden'), a('#/blessings', 'Blessings', ' data-signed hidden'),
     a('people/', 'Ancestors', ' class="active" title="Family members who have passed away, one page each"'),
+    a('#/library', 'Library', ' title="Videos and articles about the family and Chakwal"'),
     a('help.html', 'Help'), a('#/export', 'Export', ' title="Download the tree as a PDF or a GEDCOM file"'),
   ].join('')}</nav><script>try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) for (const x of document.querySelectorAll('[data-signed]')) x.hidden = false; } catch {}</script>`;
 }
