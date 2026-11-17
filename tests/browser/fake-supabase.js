@@ -55,6 +55,9 @@ class Q {
     const T = db[this.t];
     const match = r => this.f.every(f => f(r));
     let data = null;
+    if (this.op === 'insert' && this.t === 'library_links' && T.some((l) => l.status !== 'declined' && l.url.toLowerCase() === String(this.row.url).toLowerCase())) {
+      return { data: null, error: { message: 'duplicate key value violates unique constraint "library_links_url_once"' } };
+    }
     if (this.op === 'insert' || this.op === 'upsert') {
       const r = { id: crypto.randomUUID(), status: this.t === 'research_questions' ? 'open' : 'pending', submitted_at: new Date().toISOString(), created_at: new Date().toISOString(), ...this.row };
       if (this.op === 'upsert') { const i = T.findIndex(x => x.email === r.email); if (i >= 0) T.splice(i, 1); }

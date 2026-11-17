@@ -40,6 +40,8 @@ export function normalizeUrl(raw) {
       const t = u.searchParams.get('t');
       return `https://www.youtube.com/watch?v=${yt}${t ? `&t=${encodeURIComponent(t)}` : ''}`;
     }
+    // Posts on X (Twitter): one address, without the sharing extras (?s=20 and the like).
+    if (/^(www\.|mobile\.)?(x|twitter)\.com$/i.test(u.hostname)) return `https://x.com${u.pathname.replace(/\/$/, '')}`;
     return u.href;
   } catch {
     return '';
@@ -102,7 +104,12 @@ async function saveLink(fields, id = null) {
     : store.sb.from('library_links').insert({ ...fields, status: store.isAdmin ? 'approved' : 'pending', submitted_by: store.session.user.id });
   const { error } = await q;
   if (error) {
-    if (/library_links_url_once|duplicate/i.test(error.message)) throw new Error('This link is already in the Library, or waiting for approval.');
+    if (/library_links_url_once|duplicate/i.test(error.message)) {
+      const same = (cache || []).find((l) => l.url.toLowerCase() === String(fields.url).toLowerCase());
+      throw new Error(same
+        ? `This link is already in the Library as "${same.title}". ${store.isAdmin ? 'Close this and use Edit on that card to change its title or note.' : 'It may still be waiting for approval.'}`
+        : 'This link is already in the Library, or waiting for approval.');
+    }
     throw error;
   }
   forgetLibrary();
