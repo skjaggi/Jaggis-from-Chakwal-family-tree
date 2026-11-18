@@ -100,11 +100,13 @@ From a person's card (or the pencil on any tree box): **Suggest an edit**, **Add
 ## 6. Privacy and visibility
 
 - Names and who is related to whom are public.
-- Birth and death years, places, profession, notes and stories, and photos are each marked **Public** (anyone) or **Branch only** (signed-in members of that branch). The admin sees everything.
-- **Default:** details about a living person start as Branch only; details about a deceased person start as Public. The person adding them can change it.
+- Birth and death years, places, profession, notes and stories, and photos are each marked **Public** (anyone) or **Family branch only** (signed-in members of that branch). The admin sees everything.
+- **Default:** new details and photos start as Family branch only for everyone, living or deceased. The person adding them can choose Public. Choosing Public for a living person (or someone not yet marked as passed away) shows a yellow warning that people outside the family will see it.
+- **Marriage dates** (start and end dates, and notes about a marriage) are shown to everyone only when both spouses have passed away. Otherwise only the admin and members whose branch includes either spouse see them. Who is married to whom stays public.
+- **Adopted, step and foster labels** are hidden from signed-out visitors for living children, who appear as ordinary children of their parents. Signed-in family see the label.
 - A member's **branch** is their own line plus their spouse's line, set by who they are in the tree. Branches start at Generation 4 (for example everyone descended from Tapashi Ram Jaggi).
 - Branch-only items are enforced by the database (row level security), not just hidden on screen.
-- Search engine pages exist only for people marked as passed away, with Public details only (see 8.9). Living people are never named there.
+- Search engine pages exist only for people marked as passed away, with Public details only (see 8.9). Because details start as Family branch only, an ancestor shows on these pages only with details someone chose to make Public. Living people are never named there.
 - **Visits:** signed-in members' page views are recorded and shown only to the admin. Visitors who are not signed in are counted anonymously by GoatCounter (no cookies, no names).
 
 ## 7. Data
@@ -126,7 +128,7 @@ From a person's card (or the pencil on any tree box): **Suggest an edit**, **Add
 | Sources | No | Where the information came from (e.g. "Dadi's memory", "school records") |
 | What's uncertain | No | Anything not confirmed |
 | Profile photo | No | One per person; square, centred by the member with drag and zoom, saved as a 640×640 JPEG |
-| Visibility | Yes | Public or Branch only, per person's details and per photo |
+| Visibility | Yes | Public or Family branch only, per person's details and per photo; starts as Family branch only |
 
 ### 7.2 Relationships
 
@@ -217,7 +219,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 **Members page:**
 
 - Branch admins: who claimed which box, branch size, who invited them; Remove as branch admin.
-- **Missing details:** for each branch admin, how complete their branch is (photo, birth year, year of passing for deceased, birthplace, gender or Living? blank), with Show what's missing; names open the edit form. The admin ticks who to remind and writes a separate email per person that thanks them as branch admin of their named branch and lists only their gaps, with tips only for the kinds of details missing. Each email can be edited and previewed; nothing is sent until **Send these emails**. Replies go to the admin.
+- **Missing details:** for each branch admin, how complete their branch is (photo, birth year, year of passing for deceased, birthplace, gender or Living? blank), with Show what's missing; names open the edit form. Each branch admin's card has **Write email**, which opens a draft of their personal email right in that card; **Write emails for everyone ticked** opens a draft in each ticked card. Each email thanks them as branch admin of their named branch and lists only their gaps, with tips only for the kinds of details missing. Drafts can be edited and previewed; nothing is sent until the admin sends it (one at a time, or **Send all open drafts**), and each shows Sent once it has gone. Replies go to the admin.
 - Invite someone (with role).
 - **Send a reminder email** to Everyone, Not signed in yet, No box claimed, or chosen people; preview before sending; each starts "Dear <first name>," and has a button to the tree.
 - Invites list with signed-in status and inviter. **Remove** blocks that person's sign-in (signed out within the hour) but keeps what they added; **Restore** gives back the invite, login and, if unclaimed, their box.
@@ -264,7 +266,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 
 | Date | Decision |
 |---|---|
-| 12 Nov 2026 | Living people's details default to Branch only; deceased to Public. |
+| 12 Nov 2026 | Living people's details default to Branch only; deceased to Public. *(Replaced on 17 Nov.)* |
 | 12 Nov 2026 | GEDCOM export in version 1, import in version 2. |
 | 12 Nov 2026 | A member's branch is their own line plus their spouse's line; branches start at Generation 4. |
 | 13 Nov 2026 | Sign-in by email code or link, no passwords. |
@@ -275,6 +277,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 | 15 Nov 2026 | Blessings rules as in 8.6; no prize money or weekly emails for now. Gender and Living? required. |
 | 15 Nov 2026 | The two Sanjeev Kumar Jaggi and the two Gagan Jaggi are different people. |
 | 16 Nov 2026 | Members must claim their box before making changes. |
+| 17 Nov 2026 | Sunil: new details and photos default to Family branch only for everyone, including the deceased (replaces the 12 Nov rule). Marriage dates public only when both spouses have passed away; adoption labels hidden from visitors for living children. |
 | 17 Nov 2026 | Family Library with admin approval. Missing details reminders per branch admin (core fields as in 8.8). Help page updated in every feature pull request. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
@@ -291,6 +294,8 @@ Newest first. Each feature pull request adds a line.
 | Date | Pull request | Change |
 |---|---|---|
 | 18 Nov 2026 | this PR | Requirements brought up to date with everything shipped since 12 Nov and moved into the repository. |
+| 18 Nov 2026 | #15 | Privacy: marriage dates and adoption labels hidden from visitors; default Family branch only; warning when Public is chosen for a living person. |
+| 18 Nov 2026 | #13 | Missing details: write and send each person's email from their own card. |
 | 18 Nov 2026 | #11 | Name field labels: Last name at birth, Married last name / other names. |
 | 17 Nov 2026 | #12 | Members: Missing details review with personal reminder emails. |
 | 17 Nov 2026 | #10 | Help brought up to date. |
