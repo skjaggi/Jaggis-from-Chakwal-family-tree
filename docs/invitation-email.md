@@ -19,6 +19,8 @@ You only sign in once on each phone or computer; after that the site remembers y
 
 A short guide is here: https://familytree.sjaggi.com/help.html
 
+Your privacy: anyone with the link sees only names and how we are related. Birth years, places, work, stories, marriage dates and photos of living family are shown only to signed-in family in that branch, unless the person who adds them chooses Public; new details always start as "Family branch only". Only invited relatives can sign in, and Google lists only ancestors who have passed away. If you want anything about yourself hidden or changed, or have any other suggestions or concerns about privacy, please tell me.
+
 Please note: changes you make are not visible right away. As the administrator, I check each one first, and it appears in the tree once I approve it. So don't worry about making a mistake. Please tell me anything that's wrong or missing.
 
 With love,
