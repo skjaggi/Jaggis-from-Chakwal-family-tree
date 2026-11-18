@@ -313,7 +313,7 @@ begin
     values (
       pid,
       coalesce(public._check_choice(public._text(d, 'visibility'), array['public','branch'], 'visibility'),
-               case when living = false then 'public' else 'branch' end),
+               'branch'),  -- new details start as Family branch only
       public._text(d, 'birth_date'), public._text(d, 'birth_place'),
       public._text(d, 'death_date'), public._text(d, 'death_place'),
       public._text(d, 'profession'), public._text(d, 'notes'),
