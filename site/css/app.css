@@ -724,9 +724,12 @@ table.rules.mult { margin-top: 12px; }
 .cmp-gaps summary { cursor: pointer; font-size: 0.9rem; color: var(--muted); padding: 4px 0; }
 .cmp-gaps ul { margin: 4px 0 0; padding-left: 20px; font-size: 0.92rem; }
 .cmp-gaps li { margin: 2px 0; }
-.cmp-drafts { margin-top: 16px; }
-.cmp-draft-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
-.cmp-draft { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 12px; }
+.cmp-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; justify-content: space-between; }
+.cmp-row .cmp-gaps { flex: 1 1 240px; min-width: 0; }
+.cmp-write { flex: none; }
+.cmp-slot:not(:empty) { margin-top: 10px; }
+.cmp-draft .form-actions { flex-wrap: wrap; }
+.cmp-draft { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); padding: 12px; }
 .cmp-draft-head { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .cmp-draft input[type=text], .cmp-draft textarea { width: 100%; }
 
