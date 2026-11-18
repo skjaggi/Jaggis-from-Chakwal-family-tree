@@ -814,3 +814,7 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
 .lib-person .btn { margin-top: 4px; }
 @media (max-width: 560px) { .lib-grid { grid-template-columns: 1fr; } .lib-head > .btn { margin-top: 0; } }
 .dash-table.branch-admins { display: block; max-width: 100%; overflow-x: auto; }
+
+/* Warning under "Who can see" when a living person's details or photo are set to Public */
+.vis-warn { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--warn-bg); color: var(--warn-ink); font-size: 0.9rem; }
+.vis-warn[hidden] { display: none; }

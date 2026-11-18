@@ -23,7 +23,7 @@ const KIND_TITLE = {
 
 function valueText(k, v) {
   if (k === 'is_living') return v === true ? 'Living' : v === false ? 'Deceased' : 'Not sure';
-  if (k === 'visibility') return v === 'public' ? 'Public' : 'Branch only';
+  if (k === 'visibility') return v === 'public' ? 'Public' : 'Family branch only';
   return v === null || v === undefined || v === '' ? '(empty)' : String(v);
 }
 

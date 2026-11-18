@@ -33,6 +33,18 @@ const fillRequired = (pg) => pg.evaluate(() => {
     await pg.selectOption('dialog select[name=gender]', 'female');
     await pg.selectOption('dialog select[name=is_living]', 'true');
     await pg.fill('dialog input[name=birth_date]', '4 March 2020');
+    // Public for a living person shows a warning; Branch only or a deceased person does not.
+    await pg.selectOption('dialog select[name=visibility]', 'public');
+    const warnPublic = await pg.locator('dialog .vis-warn').isVisible();
+    await pg.locator('dialog .vis-warn').scrollIntoViewIfNeeded();
+    await pg.screenshot({ path: `${SHOTS}${role}-public-warning.png` });
+    await pg.selectOption('dialog select[name=is_living]', 'false');
+    const warnDeceased = await pg.locator('dialog .vis-warn').isVisible();
+    await pg.selectOption('dialog select[name=is_living]', 'true');
+    await pg.selectOption('dialog select[name=visibility]', 'branch');
+    const warnBranch = await pg.locator('dialog .vis-warn').isVisible();
+    console.log(role, 'public warning: living+public', warnPublic, '| deceased', warnDeceased, '| branch', warnBranch);
+    if (!warnPublic || warnDeceased || warnBranch) errors.push(role + ': public warning shown wrongly');
     await pg.click('dialog button[type=submit]');
     await pg.waitForTimeout(500);
     console.log(role, 'birth saved as', await pg.evaluate(() => window.__db.change_requests[0].payload.details.birth_date), 'toast:', await pg.locator('#toast').innerText(), '| requests:', await pg.evaluate(() => JSON.stringify(window.__db.change_requests.map(r => [r.kind, r.summary, r.status, r.payload.link]))));

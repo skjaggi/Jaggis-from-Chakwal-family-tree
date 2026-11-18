@@ -21,10 +21,10 @@ async function loadLive() {
   const url = cfg.match(/supabaseUrl:\s*'([^']+)'/)?.[1];
   const key = cfg.match(/supabaseAnonKey:\s*'([^']+)'/)?.[1];
   if (!url || !key) throw new Error('No Supabase settings in site/js/config.js');
-  const get = async (table) => {
+  const get = async ([table, columns]) => {
     const rows = [];
     for (let from = 0; ; from += 1000) {
-      const r = await fetch(`${url}/rest/v1/${table}?select=*`, {
+      const r = await fetch(`${url}/rest/v1/${table}?select=${columns}`, {
         headers: { apikey: key, Authorization: `Bearer ${key}`, Range: `${from}-${from + 999}` },
       });
       if (!r.ok) throw new Error(`${table}: HTTP ${r.status}`);
@@ -33,7 +33,11 @@ async function loadLive() {
       if (page.length < 1000) return rows;
     }
   };
-  const [people, details, parentChild, unions] = await Promise.all(['people', 'person_details', 'parent_child', 'unions'].map(get));
+  const [people, details, parentChild, unions] = await Promise.all([
+    // Visitors cannot read marriage dates or adoption labels; these pages do not need them.
+    ['people', '*'], ['person_details', '*'],
+    ['parent_child', 'id,parent_id,child_id,confidence'], ['unions', 'id,partner_a,partner_b,status,sort_order'],
+  ].map(get));
   return { people, details, parentChild, unions, photoBase: `${url}/storage/v1/object/public/photos-public/` };
 }
 
