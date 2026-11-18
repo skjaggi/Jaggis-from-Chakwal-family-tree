@@ -126,7 +126,7 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
       field('Last name at birth', textInput('surname', p.surname ?? (relation?.as === 'child' ? of.surname : '')),
         'For a married woman, her maiden name: the family name she was born with.'),
       field('Married last name / other names', textInput('other_names', p.other_names),
-        'Last name after marriage, only if it changed (usually for married women). Nicknames or other spellings can go here too.')),
+        'Last name after marriage, only if it changed (usually for married women). Nicknames or other spellings can go here too, but put the married last name last: visitors who are not signed in see only that, never her maiden name.')),
     relBox.length ? h('fieldset', h('legend', 'Relationship'), relBox) : null,
     h('fieldset', h('legend', 'Life'),
       field('Living? *', select('is_living', LIVING, livingVal)),

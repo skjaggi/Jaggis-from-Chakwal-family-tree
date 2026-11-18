@@ -116,6 +116,8 @@ async function selectAll(table, columns = '*') {
 // database hands out only the ones this viewer may see, through a function.
 // Rows it leaves out keep their public columns (who, status) and look like an
 // ordinary marriage or child line.
+const PUBLIC_PEOPLE_COLUMNS = 'id,title,given_name,gender,generation,birth_order,is_living,photo_path,photo_visibility,created_at,updated_at';
+
 async function withPrivate(table, columns, fn, defaults = {}) {
   const [rows, extra] = await Promise.all([
     selectAll(table, columns).catch(() => null),
@@ -138,7 +140,8 @@ export async function loadData() {
     unions = seed.unions;
   } else {
     [people, details, parentChild, unions] = await Promise.all([
-      selectAll('people'),
+      // Visitors get married women's married names only, never maiden names.
+      store.signedIn ? selectAll('people') : withPrivate('people', PUBLIC_PEOPLE_COLUMNS, 'public_names'),
       selectAll('person_details'),
       withPrivate('parent_child', 'id,parent_id,child_id,confidence', 'parent_link_details', { kind: 'biological' }),
       withPrivate('unions', 'id,partner_a,partner_b,status,sort_order', 'union_details'),

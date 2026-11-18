@@ -35,9 +35,19 @@ async function loadLive() {
   };
   const [people, details, parentChild, unions] = await Promise.all([
     // Visitors cannot read marriage dates or adoption labels; these pages do not need them.
-    ['people', '*'], ['person_details', '*'],
+    ['people', 'id,title,given_name,gender,generation,birth_order,is_living,photo_path,photo_visibility'], ['person_details', '*'],
     ['parent_child', 'id,parent_id,child_id,confidence'], ['unions', 'id,partner_a,partner_b,status,sort_order'],
   ].map(get));
+  // Names as visitors see them: married women by their married name, never their maiden name.
+  const r = await fetch(`${url}/rest/v1/rpc/public_names`, { method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: '{}' });
+  if (r.ok) {
+    const names = new Map((await r.json()).map((n) => [n.id, n]));
+    for (const p of people) Object.assign(p, { surname: null, other_names: null }, names.get(p.id));
+  } else {
+    // Database not updated yet (no public_names): names are still fully public there.
+    const all = new Map((await get(['people', 'id,surname,other_names'])).map((n) => [n.id, n]));
+    for (const p of people) Object.assign(p, all.get(p.id));
+  }
   return { people, details, parentChild, unions, photoBase: `${url}/storage/v1/object/public/photos-public/` };
 }
 

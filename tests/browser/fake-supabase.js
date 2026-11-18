@@ -111,6 +111,13 @@ export function createClient() {
       // Marriage dates and adoption labels: visitors only get them for people who have passed away.
       const dead = (id) => db.people.find((p) => p.id === id)?.is_living === false;
       const anon = window.__FAKE_ROLE__ === 'anon';
+      if (name === 'public_names') return { data: db.people.map((p) => {
+        const married = p.gender !== 'male' && db.unions.some((u) => u.partner_a === p.id || u.partner_b === p.id);
+        if (!married) return { id: p.id, surname: p.surname, other_names: p.other_names };
+        const c = (p.other_names || '').replace(/\([^)]*\)/g, '').trim(); const w = (c.match(/([^\s?]+)$/) || [])[1];
+        const ok = w && !/\?$/.test(c) && w.toLowerCase() !== (p.surname || '').toLowerCase() && !(p.given_name || '').toLowerCase().split(' ').includes(w.toLowerCase());
+        return { id: p.id, surname: ok ? w : null, other_names: null };
+      }), error: null };
       if (name === 'union_details') return { data: db.unions.filter((u) => !anon || (dead(u.partner_a) && dead(u.partner_b))).map(({ id, start_date, end_date, note }) => ({ id, start_date, end_date, note })), error: null };
       if (name === 'parent_link_details') return { data: db.parent_child.filter((l) => !anon || dead(l.child_id)).map(({ id, kind, note }) => ({ id, kind, note })), error: null };
       if (name === 'my_managed_people') {
