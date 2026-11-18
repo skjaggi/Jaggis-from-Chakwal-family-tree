@@ -235,7 +235,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 ### 8.10 Look and branding
 
 - Banyan theme: teal and gold, pastel branch colours; **light / dark** switch in the menu (remembered per device; follows the device until chosen).
-- Header: Jaggis of Chakwal logo (hover or tap to enlarge), full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review and Members for admins) on every page including Help and Ancestors.
+- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review and Members for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
 - Footer on every page: "© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved." with the Quantum Nexus mark.
 
 ### 8.11 Help
@@ -293,7 +293,8 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
-| 18 Nov 2026 | this PR | Requirements brought up to date with everything shipped since 12 Nov and moved into the repository. |
+| 18 Nov 2026 | #18 | Help and Ancestors pages show the same top bar as the tree (search, full role-aware menu, light/dark, Sign out, member chip). |
+| 18 Nov 2026 | #14 | Requirements brought up to date with everything shipped since 12 Nov and moved into the repository. |
 | 18 Nov 2026 | #15 | Privacy: marriage dates and adoption labels hidden from visitors; default Family branch only; warning when Public is chosen for a living person. |
 | 18 Nov 2026 | #13 | Missing details: write and send each person's email from their own card. |
 | 18 Nov 2026 | #11 | Name field labels: Last name at birth, Married last name / other names. |
