@@ -40,6 +40,7 @@ The site sends this when the admin adds an invite on the Members page, or a fami
 <p style="margin:0 0 8px"><strong>Important, please do this first: claim your box.</strong></p>
 <p style="margin:0">After you sign in, find yourself in the tree (search for your name), open your box and tap <strong>This is me</strong>. A yellow reminder at the top of the page helps you find it. If you're not in the tree yet, add yourself under your father or mother first, then claim that box. Once it's yours, your changes to your own family appear right away and the tree shows how everyone is related to you.</p>
 </div>
+<p><strong>Your privacy:</strong> anyone with the link sees only names and how we are related. Birth years, places, work, stories, marriage dates and photos of living family are shown only to signed-in family in that branch, unless the person who adds them chooses <em>Public</em>; new details always start as <em>Family branch only</em>. Only invited relatives can sign in, and Google lists only ancestors who have passed away. If you want anything about yourself hidden or changed, or have any other suggestions or concerns about privacy, please tell Sunil.</p>
 <p>Until your box is claimed, changes you make wait for the admin to check them first. So don't worry about mistakes.</p>
 <p>A short guide: <a href="https://familytree.sjaggi.com/help.html">How to use the family tree</a></p>
 ```
