@@ -41,7 +41,46 @@ set local role anon;
 select pg_temp.expect((select count(*) from public.people) = 70, 'anon sees all 70 names');
 select pg_temp.expect((select count(*) from public.person_details) = (select count(*) from public.people where generation <= 4), 'anon sees only public details (generations 1-4)');
 select pg_temp.expect(not exists (select 1 from public.person_details where person_id = pg_temp.pid('Sunil Kumar')), 'anon cannot read living person details');
+select pg_temp.expect((select count(*) from public.unions) > 0 and (select count(*) from public.parent_child) > 0, 'anon sees who is married to and child of whom');
+do $$ begin
+  begin
+    perform start_date from public.unions limit 1;
+    raise exception 'FAILED: anon read marriage dates directly';
+  exception when insufficient_privilege then raise notice 'ok: anon cannot read marriage dates directly';
+  end;
+  begin
+    perform kind from public.parent_child limit 1;
+    raise exception 'FAILED: anon read adoption labels directly';
+  exception when insufficient_privilege then raise notice 'ok: anon cannot read adoption labels directly';
+  end;
+end $$;
 rollback;
+-- Marriage dates: public only when both spouses have passed away.
+update public.unions set start_date = '1950' where partner_a = pg_temp.pid('Om Parkash') or partner_b = pg_temp.pid('Om Parkash');
+insert into public.people (id, given_name, is_living) values ('00000000-0000-0000-0000-0000000000d1', 'DeadA', false), ('00000000-0000-0000-0000-0000000000d2', 'DeadB', false), ('00000000-0000-0000-0000-0000000000d3', 'SpouseS', true);
+insert into public.unions (partner_a, partner_b, start_date) values (pg_temp.pid('Sunil Kumar'), '00000000-0000-0000-0000-0000000000d3', '1987');
+insert into public.unions (partner_a, partner_b, start_date) values ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000d2', '1901');
+insert into public.parent_child (parent_id, child_id, kind) values ('00000000-0000-0000-0000-0000000000d1', pg_temp.pid('Sunil Kumar'), 'step')
+  on conflict (parent_id, child_id) do update set kind = 'step';
+begin;
+set local role anon;
+select pg_temp.expect((select count(*) from public.union_details() where start_date = '1901') = 1, 'anon sees the marriage date of a couple who have both passed away');
+select pg_temp.expect(not exists (select 1 from public.union_details() where start_date in ('1950', '1987')), 'anon cannot see marriage dates of living couples');
+select pg_temp.expect(not exists (select 1 from public.parent_link_details() d join public.parent_child l on l.id = d.id where l.child_id = pg_temp.pid('Sunil Kumar')), 'anon cannot see a living child''s step/adoption label');
+rollback;
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect(exists (select 1 from public.union_details() where start_date = '1987'), 'member sees marriage dates in their branch');
+select pg_temp.expect((select d.kind from public.parent_link_details() d join public.parent_child l on l.id = d.id where l.child_id = pg_temp.pid('Sunil Kumar') and l.parent_id = '00000000-0000-0000-0000-0000000000d1') = 'step', 'signed-in member sees step/adoption labels');
+rollback;
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+select pg_temp.expect((select count(*) from public.union_details()) = (select count(*) from public.unions), 'admin sees every marriage date');
+rollback;
+delete from public.people where id in ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000d2', '00000000-0000-0000-0000-0000000000d3');
+update public.unions set start_date = null where start_date = '1950';
 
 -- Member invites a relative
 begin;
