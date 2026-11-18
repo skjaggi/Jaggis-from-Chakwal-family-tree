@@ -1,5 +1,5 @@
 // App start-up, routing and the header.
-import { currentTheme, toggleTheme } from './theme.js';
+import { navItems, fitHeader } from './header.js';
 import { store, init, sendLoginLink, verifyCode, signOut, pendingCount, listRequests, logView } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint } from './model.js';
@@ -267,26 +267,15 @@ async function renderHeader() {
   const signed = store.signedIn;
   let count = 0;
   if (signed) count = await pendingCount().catch(() => 0);
-  clear(nav,
-    h('a', { href: `#/tree/${state.root || store.fam.defaultRootId}`, 'data-nav': 'tree' }, 'Tree'),
-    h('a', { href: `#/outline/${state.root || store.fam.defaultRootId}`, 'data-nav': 'outline' }, 'List'),
-    h('a', { href: '#/dashboard', 'data-nav': 'dashboard' }, 'Dashboard'),
-    signed ? h('a', { href: '#/mine', 'data-nav': 'mine' }, 'My changes') : null,
-    signed ? h('a', { href: '#/invite', 'data-nav': 'invite' }, 'Invite') : null,
-    signed && !store.preview ? h('a', { href: '#/blessings', 'data-nav': 'blessings' }, 'Blessings') : null,
-    store.isAdmin || store.claimedId || count ? h('a', { href: '#/review', 'data-nav': 'review' }, 'Review', count ? h('span.count', String(count)) : null) : null,
-    store.isAdmin ? h('a', { href: '#/members', 'data-nav': 'members' }, 'Members') : null,
-    h('a', { href: 'people/', title: 'Family members who have passed away, one page each' }, 'Ancestors'),
-    h('a', { href: '#/library', 'data-nav': 'library', title: 'Videos and articles about the family and Chakwal' }, 'Library'),
-    h('a', { href: 'help.html' }, 'Help'),
-    h('a', { href: '#/export', 'data-nav': 'export', title: 'Download the tree as a PDF or a GEDCOM file' }, 'Export'),
-    themeButton(),
-    signed
-      ? h('button.linkish', { type: 'button', onclick: async () => {
-        await signOut();
-        toast('Signed out.');
-      } }, 'Sign out')
-      : h('button.btn.small.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
+  clear(nav, navItems({
+    root: state.root,
+    count,
+    onSignIn: openSignIn,
+    onSignOut: async () => {
+      await signOut();
+      toast('Signed out.');
+    },
+  }));
   for (const a of nav.querySelectorAll('[data-nav]')) a.classList.toggle('active', a.dataset.nav === state.view);
   $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   // Once they've claimed their box: their photo, blessings and badges instead.
@@ -392,36 +381,13 @@ async function start() {
   await renderHeader();
   if (!location.hash || /^#(access_token|error)/.test(location.hash)) go({ view: 'tree', root: store.fam.defaultRootId, selected: null }, true);
   else route();
+  // "Sign in" on the Help and Ancestors pages lands here with ?signin=1.
+  if (/[?&]signin=1\b/.test(location.hash)) {
+    history.replaceState(null, '', location.hash.replace(/[?&]signin=1\b/, ''));
+    if (!store.signedIn && !store.preview) openSignIn();
+  }
   // Invitees whose invitation names their box land on it, ready to claim it.
   welcomeToLinkedBox((id) => go({ view: 'tree', root: store.fam.primaryParentLink(id)?.parent_id || id, selected: id }));
 }
 
 start();
-
-// Light/dark switch in the menu. The label names the look you switch to.
-// The member's chip sits under the menu at the top right. When the menu is too
-// long to share the first row with the search box, it gets a row of its own
-// and the chip moves up beside the search box instead (.stacked), so the chip
-// never needs a row of its own.
-function fitHeader() {
-  const bar = document.querySelector('.topbar');
-  const right = bar.querySelector('.top-right');
-  bar.classList.remove('stacked');
-  if (!$('who').childNodes.length || getComputedStyle(right).display === 'contents') return;
-  if (right.offsetTop > bar.querySelector('.brand').offsetTop + 10) bar.classList.add('stacked');
-}
-let fitQueued = false;
-addEventListener('resize', () => {
-  if (fitQueued) return;
-  fitQueued = true;
-  requestAnimationFrame(() => { fitQueued = false; fitHeader(); });
-});
-
-function themeButton() {
-  const label = () => (currentTheme() === 'dark' ? '☀ Light' : '☾ Dark');
-  const b = h('button.linkish.theme-toggle', { type: 'button', title: 'Switch between light and dark colours (remembered on this device)', onclick: () => {
-    toggleTheme();
-    b.textContent = label();
-  } }, label());
-  return b;
-}
