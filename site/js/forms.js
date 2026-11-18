@@ -57,6 +57,18 @@ const LABELS = {
 };
 export { LABELS };
 
+// A warning under a "Who can see" choice when a living person's details or
+// photo are about to be made Public, so the choice is an informed one.
+function publicWarning(visSelect, isLiving, what) {
+  const note = h('p.vis-warn', { role: 'status', hidden: true },
+    `Public means anyone who opens the tree can see ${what}, including people outside the family. `
+    + 'For someone who is living, Branch only is safer: only signed-in family in their branch see it.');
+  const update = () => { note.hidden = !(visSelect.value === 'public' && isLiving()); };
+  visSelect.addEventListener('change', update);
+  queueMicrotask(update); // after the form exists
+  return { note, update };
+}
+
 async function send(kind, payload, opts, close) {
   try {
     const { applied } = await submitChange(kind, payload, opts);
@@ -103,6 +115,8 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
   }
 
   const visSelect = select('visibility', VIS, d.visibility || (p.is_living === false ? 'public' : 'branch'));
+  // "Choose..." (not yet known) counts as living, as everywhere else.
+  const detailsWarn = publicWarning(visSelect, () => form?.is_living?.value !== 'false', "this person's birth year, places, work, notes and story");
   const form = h('form.form', { novalidate: true },
     relation ? h('p.form-note', `Adding a ${relation.as} of ${fullName(of)}.`) : null,
     h('fieldset', h('legend', 'Name'),
@@ -124,7 +138,8 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
       mode === 'edit' ? historyList(person?.id) : null,
       field("What's uncertain", textArea('uncertainty', d.uncertainty, 2), 'e.g. "Birth year is approximate"')),
     h('fieldset', h('legend', 'Privacy'),
-      field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people default to branch only.')),
+      field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people default to branch only.'),
+      detailsWarn.note),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       h('button.btn.primary', { type: 'submit' }, liveNow(mode, person, relation) ? 'Save' : 'Send for approval')));
@@ -135,6 +150,7 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
   for (const k of ['gender', 'is_living']) form[k].addEventListener('change', () => form[k].classList.remove('missing'));
   form.is_living.addEventListener('change', () => {
     if (!visTouched) visSelect.value = form.is_living.value === 'false' ? 'public' : 'branch';
+    detailsWarn.update();
   });
 
   form.addEventListener('submit', async (e) => {
@@ -233,6 +249,7 @@ export async function openPhotoForm(person) {
     field(current ? 'Choose a different photo' : 'Photo', input),
     editor.el,
     field('Who can see this photo', vis),
+    publicWarning(vis, () => person.is_living !== false, 'this photo').note,
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       h('button.btn.primary', { type: 'submit' }, canManage(person.id) ? 'Save photo' : 'Send for approval')));
