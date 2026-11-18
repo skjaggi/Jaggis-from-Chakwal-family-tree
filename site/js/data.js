@@ -112,6 +112,21 @@ async function selectAll(table, columns = '*') {
   }
 }
 
+// Marriage dates/notes and adoption labels are not readable directly: the
+// database hands out only the ones this viewer may see, through a function.
+// Rows it leaves out keep their public columns (who, status) and look like an
+// ordinary marriage or child line.
+async function withPrivate(table, columns, fn, defaults = {}) {
+  const [rows, extra] = await Promise.all([
+    selectAll(table, columns).catch(() => null),
+    store.sb.rpc(fn).then(({ data, error }) => (error ? null : data)),
+  ]);
+  // Older database without the functions: read the whole table as before.
+  if (!rows || !extra) return selectAll(table);
+  const byId = new Map(extra.map((r) => [r.id, r]));
+  return rows.map((r) => ({ ...r, ...defaults, ...byId.get(r.id) }));
+}
+
 export async function loadData() {
   let people, details, parentChild, unions;
   if (store.preview) {
@@ -125,8 +140,8 @@ export async function loadData() {
     [people, details, parentChild, unions] = await Promise.all([
       selectAll('people'),
       selectAll('person_details'),
-      selectAll('parent_child'),
-      selectAll('unions'),
+      withPrivate('parent_child', 'id,parent_id,child_id,confidence', 'parent_link_details', { kind: 'biological' }),
+      withPrivate('unions', 'id,partner_a,partner_b,status,sort_order', 'union_details'),
     ]);
   }
   for (const p of people) p._order = p.birth_order ?? 1e6;

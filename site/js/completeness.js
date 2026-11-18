@@ -121,100 +121,129 @@ export function completenessSection(invites, profiles, removed = []) {
   const pick = (test) => { for (const r of reports) boxes.get(r.user.id).checked = test(r); update(); };
   const href = (id) => `#/tree/${fam.defaultRootId}?p=${id}&edit=1`;
 
+  // One draft email per branch admin, opened inside their own card.
+  const drafts = new Map(); // user id -> draft
+  const sendBody = (d) => ({ subject: d.subject.value, message: d.message.value, emails: [d.r.user.email.toLowerCase()] });
+  const markSent = (d) => {
+    d.sent = true;
+    d.status.textContent = 'Sent'; d.status.className = 'rem-tag ok';
+    for (const el of [d.subject, d.message, d.sendBtn]) el.disabled = true;
+    d.sendBtn.textContent = 'Sent';
+    d.closeBtn.textContent = 'Close';
+  };
+  async function sendOne(d) {
+    const res = await call(sendBody(d));
+    if (!res.sent?.length) throw new Error('not on the invite list');
+    markSent(d);
+  }
+
+  function makeDraft(r, slot) {
+    const who = r.user.display_name || r.user.email;
+    const subject = h('input', { type: 'text', value: SUBJECT, maxlength: 150, 'aria-label': 'Subject' });
+    const message = h('textarea', { rows: 12, value: draftMessage(r), maxlength: 5000, 'aria-label': 'Message' });
+    const status = h('span.rem-tag', 'Draft, not sent');
+    const preview = h('div.rem-preview', { hidden: true });
+    const d = { r, subject, message, status, sent: false };
+    const previewBtn = h('button.btn', { type: 'button', onclick: async () => {
+      if (!preview.hidden) { preview.hidden = true; previewBtn.textContent = 'Preview'; return; }
+      previewBtn.disabled = true;
+      try {
+        const res = await call({ preview: true, subject: subject.value, message: message.value, previewName: firstName(r.user) });
+        const frame = h('iframe', { title: `Email preview for ${who}`, sandbox: '' });
+        frame.srcdoc = res.html;
+        clear(preview, h('p.small.muted', h('strong', 'Subject: '), res.subject), frame);
+        preview.hidden = false;
+        previewBtn.textContent = 'Hide preview';
+      } catch (e) { toast(e.message, 'error'); }
+      previewBtn.disabled = false;
+    } }, 'Preview');
+    d.sendBtn = h('button.btn.primary', { type: 'button', onclick: async () => {
+      if (!subject.value.trim() || !message.value.trim()) return toast('Please write a subject and a message.', 'error');
+      if (!(await confirmDialog(`Send this email to ${who} (${r.user.email})? This can't be undone.`, 'Send'))) return;
+      d.sendBtn.disabled = true; status.textContent = 'Sending…';
+      try { await sendOne(d); toast(`Sent to ${who}.`, 'ok'); updateAll(); } catch (e) {
+        status.textContent = `Not sent: ${e.message}`; status.className = 'rem-tag no'; d.sendBtn.disabled = false; toast(e.message, 'error');
+      }
+    } }, `Send to ${firstName(r.user)}`);
+    const closeBtn = d.closeBtn = h('button.btn.ghost', { type: 'button', onclick: () => { drafts.delete(r.user.id); clear(slot); updateAll(); } }, 'Discard draft');
+    d.el = h('div.cmp-draft',
+      h('div.cmp-draft-head', h('span', h('strong', `Email to ${who}`), h('span.muted.small', ` ${r.user.email}`)), status),
+      h('label.field', h('span.field-label', 'Subject'), subject),
+      h('label.field', h('span.field-label', `Message (starts "Dear ${firstName(r.user)}," and ends with the Open the family tree button and your name)`), message),
+      h('div.form-actions', closeBtn, previewBtn, d.sendBtn),
+      preview);
+    return d;
+  }
+
+  const slots = new Map();
+  function openDraft(r, focus = true) {
+    if (drafts.has(r.user.id)) { if (focus) drafts.get(r.user.id).message.focus(); return; }
+    const slot = slots.get(r.user.id);
+    const d = makeDraft(r, slot);
+    drafts.set(r.user.id, d);
+    clear(slot, d.el);
+    if (focus) d.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateAll();
+  }
+
   const cards = reports.map((r) => {
     const box = h('input', { type: 'checkbox', id: `cmp-${r.user.id}`, checked: r.gaps.length > 0, disabled: !r.gaps.length, onchange: update });
     boxes.set(r.user.id, box);
+    const slot = h('div.cmp-slot');
+    slots.set(r.user.id, slot);
     const pct = r.total ? Math.round((r.complete / r.total) * 100) : 100;
     return h('li.cmp-card',
-      h('label.cmp-head', { for: `cmp-${r.user.id}` }, box,
-        h('span.cmp-who', h('strong', r.user.display_name || r.user.email), h('span.muted.small', ` · branch of ${fullName(fam.byId.get(r.user.claimed_person_id))}`)),
+      h('div.cmp-head',
+        h('label', { for: `cmp-${r.user.id}` }, box),
+        h('label.cmp-who', { for: `cmp-${r.user.id}` }, h('strong', r.user.display_name || r.user.email), h('span.muted.small', ` · branch of ${fullName(fam.byId.get(r.user.claimed_person_id))}`)),
         h('span.rem-tag' + (r.gaps.length ? '.half' : '.ok'), r.gaps.length ? `${r.gaps.length} of ${r.total} need details` : 'All complete')),
       h('div.cmp-bar', { title: `${pct}% complete` }, h('span', { style: `width:${pct}%` })),
-      r.gaps.length ? h('details.cmp-gaps',
-        h('summary', `Show what's missing (${r.gaps.length})`),
-        h('ul', r.gaps.map((g) => h('li', h('a', { href: href(g.id) }, g.name), g.you ? h('span.muted', ' (their own box)') : null, ': ', g.missing.join(', '))))) : null);
+      r.gaps.length ? h('div.cmp-row',
+        h('details.cmp-gaps',
+          h('summary', `Show what's missing (${r.gaps.length})`),
+          h('ul', r.gaps.map((g) => h('li', h('a', { href: href(g.id) }, g.name), g.you ? h('span.muted', ' (their own box)') : null, ': ', g.missing.join(', '))))),
+        h('button.btn.small.cmp-write', { type: 'button', onclick: () => openDraft(r) }, 'Write email')) : null,
+      slot);
   });
   update();
 
-  const drafts = h('div.cmp-drafts', { hidden: true });
-
-  const writeBtn = h('button.btn.primary', { type: 'button', onclick: () => {
+  const writeBtn = h('button.btn', { type: 'button', onclick: () => {
     const chosen = reports.filter((r) => boxes.get(r.user.id).checked && r.gaps.length);
     if (!chosen.length) return toast('Tick at least one person with missing details.', 'error');
-    buildDrafts(chosen);
-  } }, 'Write the reminder emails');
+    for (const r of chosen) openDraft(r, false);
+    toast(`${chosen.length} ${chosen.length === 1 ? 'draft is' : 'drafts are'} open in the cards above. Nothing has been sent.`, 'ok');
+  } }, 'Write emails for everyone ticked');
 
-  function buildDrafts(chosen) {
-    const items = chosen.map((r) => {
-      const subject = h('input', { type: 'text', value: SUBJECT, maxlength: 150, 'aria-label': 'Subject' });
-      const message = h('textarea', { rows: 12, value: draftMessage(r), maxlength: 5000, 'aria-label': 'Message' });
-      const status = h('span.rem-tag', 'Not sent');
-      const preview = h('div.rem-preview', { hidden: true });
-      const item = { r, subject, message, status, sent: false };
-      const previewBtn = h('button.btn.small', { type: 'button', onclick: async () => {
-        if (!preview.hidden) { preview.hidden = true; previewBtn.textContent = 'Preview'; return; }
-        previewBtn.disabled = true;
-        try {
-          const res = await call({ preview: true, subject: subject.value, message: message.value, previewName: firstName(r.user) });
-          const frame = h('iframe', { title: `Email preview for ${r.user.display_name || r.user.email}`, sandbox: '' });
-          frame.srcdoc = res.html;
-          clear(preview, h('p.small.muted', h('strong', 'Subject: '), res.subject), frame);
-          preview.hidden = false;
-          previewBtn.textContent = 'Hide preview';
-        } catch (e) { toast(e.message, 'error'); }
-        previewBtn.disabled = false;
-      } }, 'Preview');
-      const skip = h('input', { type: 'checkbox', checked: true, 'aria-label': `Send to ${r.user.display_name || r.user.email}` });
-      item.include = skip;
-      item.el = h('li.cmp-draft',
-        h('div.cmp-draft-head',
-          h('label', skip, ' ', h('strong', `To ${r.user.display_name || r.user.email}`), h('span.muted.small', ` ${r.user.email}`)),
-          status),
-        h('label.field', h('span.field-label', 'Subject'), subject),
-        h('label.field', h('span.field-label', `Message (starts "Dear ${firstName(r.user)}," and ends with the Open the family tree button and your name)`), message),
-        h('div.form-actions', previewBtn),
-        preview);
-      return item;
-    });
-
-    const sendAll = h('button.btn.primary', { type: 'button', onclick: async () => {
-      const go = items.filter((i) => i.include.checked && !i.sent);
-      if (!go.length) return toast('Nothing left to send.', 'error');
-      if (go.some((i) => !i.subject.value.trim() || !i.message.value.trim())) return toast('Every email needs a subject and a message.', 'error');
-      if (!(await confirmDialog(`Send ${go.length} personal reminder ${go.length === 1 ? 'email' : 'emails'}? Each person gets only their own. This can't be undone.`, `Send ${go.length}`))) return;
-      sendAll.disabled = true;
-      let ok = 0;
-      const bad = [];
-      for (const i of go) {
-        i.status.textContent = 'Sending…';
-        try {
-          const res = await call({ subject: i.subject.value, message: i.message.value, emails: [i.r.user.email.toLowerCase()] });
-          if (res.sent?.length) {
-            ok++; i.sent = true; i.status.textContent = 'Sent'; i.status.className = 'rem-tag ok';
-            i.include.checked = false; i.include.disabled = true;
-          } else { throw new Error('not on the invite list'); }
-        } catch (e) {
-          bad.push(i.r.user.display_name || i.r.user.email);
-          i.status.textContent = `Not sent: ${e.message}`; i.status.className = 'rem-tag no';
-        }
+  const sendAll = h('button.btn.primary', { type: 'button', onclick: async () => {
+    const go = [...drafts.values()].filter((d) => !d.sent);
+    if (!go.length) return toast('No drafts waiting to be sent.', 'error');
+    if (go.some((d) => !d.subject.value.trim() || !d.message.value.trim())) return toast('Every email needs a subject and a message.', 'error');
+    if (!(await confirmDialog(`Send all ${go.length} open ${go.length === 1 ? 'draft' : 'drafts'}? Each person gets only their own email: ${go.map((d) => d.r.user.display_name || d.r.user.email).join(', ')}. This can't be undone.`, `Send ${go.length}`))) return;
+    sendAll.disabled = true;
+    let ok = 0;
+    const bad = [];
+    for (const d of go) {
+      d.status.textContent = 'Sending…';
+      try { await sendOne(d); ok++; } catch (e) {
+        bad.push(d.r.user.display_name || d.r.user.email);
+        d.status.textContent = `Not sent: ${e.message}`; d.status.className = 'rem-tag no';
       }
-      sendAll.disabled = false;
-      toast(`Sent ${ok} ${ok === 1 ? 'email' : 'emails'}.${bad.length ? ` Could not send to ${bad.join(', ')}.` : ''}`, bad.length ? 'error' : 'ok');
-    } }, 'Send these emails');
-
-    clear(drafts,
-      h('h3', `Emails to review (${items.length})`),
-      h('p.muted', 'Each email lists only that person\'s missing details. Change any wording you like, tap Preview to see exactly what they will get, untick anyone you don\'t want to send to, then send. Replies come to your own email.'),
-      h('ol.cmp-draft-list', items.map((i) => i.el)),
-      h('div.form-actions', h('button.btn', { type: 'button', onclick: () => { drafts.hidden = true; } }, 'Close without sending'), sendAll));
-    drafts.hidden = false;
-    drafts.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    toast(`Sent ${ok} ${ok === 1 ? 'email' : 'emails'}.${bad.length ? ` Could not send to ${bad.join(', ')}.` : ''}`, bad.length ? 'error' : 'ok');
+    updateAll();
+  } }, 'Send all open drafts');
+  function updateAll() {
+    const n = [...drafts.values()].filter((d) => !d.sent).length;
+    sendAll.hidden = n === 0;
+    sendAll.disabled = false;
+    sendAll.textContent = `Send all open drafts (${n})`;
   }
+  updateAll();
 
   const withGaps = reports.filter((r) => r.gaps.length).length;
   return h('section.completeness',
     h('h2', 'Missing details'),
-    h('p.muted', `Checks every box each branch admin looks after (their own, everyone below it and their spouses) for a missing ${joinWords(CHECKS.map((c) => c.label))}. Tick who to remind, then write the emails: each one lists that person's own gaps, and you can edit and preview every email before it goes.`),
+    h('p.muted', `Checks every box each branch admin looks after (their own, everyone below it and their spouses) for a missing ${joinWords(CHECKS.map((c) => c.label))}. Tap Write email on anyone's card to draft their personal email, which lists only their own gaps. You can edit it, preview it, and send it to that person alone. Nothing is sent until you press Send.`),
     reports.length ? [
       h('div.row.rem-quick',
         h('span.muted.small', 'Select:'),
@@ -222,8 +251,7 @@ export function completenessSection(invites, profiles, removed = []) {
         h('button.btn.small.ghost', { type: 'button', onclick: () => pick(() => false) }, 'None'),
         count),
       h('ul.cmp-list', cards),
-      h('div.form-actions', writeBtn),
+      h('div.form-actions', writeBtn, sendAll),
     ] : h('p.muted', 'Nobody else has claimed a box yet, so there is no branch to check.'),
-    noBox ? h('p.small.muted', `${noBox} signed-in ${noBox === 1 ? 'member has' : 'members have'} not claimed a box yet, so there is nothing to check for them. Use "No box claimed" in Send a reminder email below to ask them to claim it first.`) : null,
-    drafts);
+    noBox ? h('p.small.muted', `${noBox} signed-in ${noBox === 1 ? 'member has' : 'members have'} not claimed a box yet, so there is nothing to check for them. Use "No box claimed" in Send a reminder email below to ask them to claim it first.`) : null);
 }

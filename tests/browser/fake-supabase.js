@@ -40,7 +40,7 @@ if (ADMIN) {
 window.__db = db;
 class Q {
   constructor(t) { this.t = t; this.f = []; this.op = 'select'; this.opts = {}; }
-  select(c, o = {}) { if (this.op === 'select') this.op = 'select'; this.opts = o; this.ret = true; return this; }
+  select(c, o = {}) { if (this.op === 'select') { this.op = 'select'; this.cols = c; } this.opts = o; this.ret = true; return this; }
   eq(k, v) { this.f.push(r => r[k] === v); return this; }
   neq(k, v) { this.f.push(r => r[k] !== v); return this; }
   gte(k, v) { this.f.push(r => r[k] >= v); return this; }
@@ -64,7 +64,11 @@ class Q {
       T.push(r); data = [r];
     } else if (this.op === 'update') { data = T.filter(match); data.forEach(r => Object.assign(r, this.row)); }
     else if (this.op === 'delete') { data = T.filter(match); db[this.t] = T.filter(r => !match(r)); }
-    else { data = T.filter(match); if (this.rg) data = data.slice(this.rg[0], this.rg[1] + 1); }
+    else {
+      data = T.filter(match); if (this.rg) data = data.slice(this.rg[0], this.rg[1] + 1);
+      // Column lists (no joins) return only those columns, like PostgREST.
+      if (this.cols && /^[a-z_,]+$/.test(this.cols)) { const cs = this.cols.split(','); data = data.map((r) => Object.fromEntries(cs.map((c) => [c, r[c]]))); }
+    }
     if (this.opts.head) return { data: null, count: data.length, error: null };
     if (this.one) return { data: data[0] ?? null, error: this.one === 'single' && !data[0] ? { message: 'none' } : null };
     return { data, error: null };
@@ -104,6 +108,11 @@ export function createClient() {
       return { data: { sent: true }, error: null };
     } },
     rpc: async (name, args) => {
+      // Marriage dates and adoption labels: visitors only get them for people who have passed away.
+      const dead = (id) => db.people.find((p) => p.id === id)?.is_living === false;
+      const anon = window.__FAKE_ROLE__ === 'anon';
+      if (name === 'union_details') return { data: db.unions.filter((u) => !anon || (dead(u.partner_a) && dead(u.partner_b))).map(({ id, start_date, end_date, note }) => ({ id, start_date, end_date, note })), error: null };
+      if (name === 'parent_link_details') return { data: db.parent_child.filter((l) => !anon || dead(l.child_id)).map(({ id, kind, note }) => ({ id, kind, note })), error: null };
       if (name === 'my_managed_people') {
         const c = db.profiles[0].claimed_person_id; if (!c) return { data: [], error: null };
         const ids = new Set([c]); let grew = true;

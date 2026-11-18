@@ -42,7 +42,7 @@ function liveNow(mode, person, relation) {
 // Gender and Living? are required: an empty "Choose..." shows until one is picked.
 const GENDERS = [['', 'Choose...'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
 const LIVING = [['', 'Choose...'], ['true', 'Living'], ['false', 'Deceased']];
-const VIS = [['branch', 'Branch only: family in this branch'], ['public', 'Public: anyone']];
+const VIS = [['branch', 'Family branch only: signed-in family in this branch'], ['public', 'Public: anyone']];
 const KINDS = [['biological', 'Birth'], ['adoptive', 'Adopted'], ['step', 'Step'], ['foster', 'Foster']];
 const CONF = [['confirmed', 'Confirmed'], ['uncertain', 'Not certain']];
 const STATUSES = [['married', 'Married'], ['divorced', 'Divorced'], ['widowed', 'Widowed'], ['separated', 'Separated'], ['partners', 'Partners']];
@@ -56,6 +56,18 @@ const LABELS = {
   uncertainty: "What's uncertain",
 };
 export { LABELS };
+
+// A warning under a "Who can see" choice when a living person's details or
+// photo are about to be made Public, so the choice is an informed one.
+function publicWarning(visSelect, isLiving, what) {
+  const note = h('p.vis-warn', { role: 'status', hidden: true },
+    `Public means anyone who opens the tree can see ${what}, including people outside the family. `
+    + 'For someone who is living, Family branch only is safer: only signed-in family in their branch see it.');
+  const update = () => { note.hidden = !(visSelect.value === 'public' && isLiving()); };
+  visSelect.addEventListener('change', update);
+  queueMicrotask(update); // after the form exists
+  return { note, update };
+}
 
 async function send(kind, payload, opts, close) {
   try {
@@ -102,7 +114,10 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
       h('div.row2', field('Marriage date', textInput('start_date', '')), field('End date', textInput('end_date', '', { placeholder: 'if divorced or widowed' }))));
   }
 
-  const visSelect = select('visibility', VIS, d.visibility || (p.is_living === false ? 'public' : 'branch'));
+  // New details always start as Family branch only (Sunil, Nov 17); people can choose Public.
+  const visSelect = select('visibility', VIS, d.visibility || 'branch');
+  // "Choose..." (not yet known) counts as living, as everywhere else.
+  const detailsWarn = publicWarning(visSelect, () => form?.is_living?.value !== 'false', "this person's birth year, places, work, notes and story");
   const form = h('form.form', { novalidate: true },
     relation ? h('p.form-note', `Adding a ${relation.as} of ${fullName(of)}.`) : null,
     h('fieldset', h('legend', 'Name'),
@@ -124,18 +139,14 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
       mode === 'edit' ? historyList(person?.id) : null,
       field("What's uncertain", textArea('uncertainty', d.uncertainty, 2), 'e.g. "Birth year is approximate"')),
     h('fieldset', h('legend', 'Privacy'),
-      field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people default to branch only.')),
+      field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. New details start as Family branch only.'),
+      detailsWarn.note),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       h('button.btn.primary', { type: 'submit' }, liveNow(mode, person, relation) ? 'Save' : 'Send for approval')));
 
-  // Deceased defaults to public, living to branch only, until the person picks one.
-  let visTouched = !!person;
-  visSelect.addEventListener('change', () => (visTouched = true));
   for (const k of ['gender', 'is_living']) form[k].addEventListener('change', () => form[k].classList.remove('missing'));
-  form.is_living.addEventListener('change', () => {
-    if (!visTouched) visSelect.value = form.is_living.value === 'false' ? 'public' : 'branch';
-  });
+  form.is_living.addEventListener('change', () => detailsWarn.update());
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -209,7 +220,7 @@ export async function openPhotoForm(person) {
   const current = store.photoUrls.get(person.id);
   const input = h('input', { type: 'file', accept: 'image/*', name: 'photo' });
   const editor = photoEditor();
-  const vis = select('visibility', VIS, person.photo_path ? (person.photo_visibility || 'branch') : person.is_living === false ? 'public' : 'branch');
+  const vis = select('visibility', VIS, person.photo_path ? (person.photo_visibility || 'branch') : 'branch');
   let picked = false;
   input.addEventListener('change', async () => {
     const f = input.files[0];
@@ -233,6 +244,7 @@ export async function openPhotoForm(person) {
     field(current ? 'Choose a different photo' : 'Photo', input),
     editor.el,
     field('Who can see this photo', vis),
+    publicWarning(vis, () => person.is_living !== false, 'this photo').note,
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       h('button.btn.primary', { type: 'submit' }, canManage(person.id) ? 'Save photo' : 'Send for approval')));
