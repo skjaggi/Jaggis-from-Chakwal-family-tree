@@ -63,24 +63,11 @@ const STYLE = `
   :root { --bg:#f6f8f5; --ink:#1d2a22; --muted:#5b6b61; --accent:#17706b; --line:#d9e2db; --card:#fff; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#121815; --ink:#e8efe9; --muted:#a3b2a8; --accent:#5cc0b5; --line:#33423a; --card:#1b231f; } }
   :root[data-theme="dark"] { --bg:#121815; --ink:#e8efe9; --muted:#a3b2a8; --accent:#5cc0b5; --line:#33423a; --card:#1b231f; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; display:block; height:auto; overflow:auto; }
+  html { height:auto; }
+  .topbar, .toast { font:15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; }
+  main { display:block; flex:none; overflow:visible; max-width:720px; margin:0 auto; padding:24px 16px 48px; }
   a { color:var(--accent); }
-  header.top { border-bottom:3px solid #c49a3a; padding:12px 16px; background:var(--card); }
-  header.top a { text-decoration:none; font-weight:700; color:var(--ink); display:inline-flex; align-items:center; gap:10px; }
-  header.top { display:flex; align-items:center; gap:10px; }
-  header.top { flex-wrap:wrap; }
-  header.top nav { display:flex; flex-wrap:wrap; gap:2px; margin-left:auto; justify-content:flex-end; }
-  header.top nav a { font-weight:400; padding:6px 10px; border-radius:8px; }
-  header.top nav a:hover, header.top nav a.active { background:var(--bg); }
-  header.top nav a.active { font-weight:600; }
-  header.top nav a[hidden] { display:none; }
-  header.top .logo { position:relative; line-height:0; cursor:zoom-in; }
-  header.top .logo > img { height:88px; width:auto; display:block; }
-  header.top .pop { display:none; pointer-events:none; position:absolute; top:calc(100% + 8px); left:0; z-index:5; padding:10px; background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:0 8px 24px rgb(0 0 0 / .25); }
-  header.top .pop img { display:block; width:min(500px, calc(100vw - 52px)); height:auto; }
-  header.top .logo:hover .pop, header.top .logo:focus .pop { display:block; }
-  @media (max-width:760px) { header.top .logo > img { height:48px; } header.top nav { margin-left:0; width:100%; justify-content:flex-start; gap:0; } header.top nav a { padding:6px 7px; font-size:.9rem; } }
   footer.foot { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
   footer.foot img { height:36px; width:auto; border-radius:6px; display:block; }
   h1 { margin:8px 0 4px; font-size:1.7rem; }
@@ -91,23 +78,28 @@ const STYLE = `
   dd { margin:0; }
   h2 { font-size:1.1rem; margin:20px 0 6px; }
   ul { margin:0; padding-left:20px; }
-  .btn { display:inline-block; background:var(--accent); color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; }
+  main .btn { display:inline-block; background:var(--accent); color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; }
   img.photo { width:120px; height:120px; object-fit:cover; border-radius:50%; border:3px solid #c49a3a; float:right; margin:0 0 12px 12px; }
   .muted { color:var(--muted); }
   footer { color:var(--muted); font-size:.85rem; margin-top:32px; }
 `;
 
-// The same menu as the family tree, so these pages are never a dead end.
-// The signed-in links show only when this browser has a sign-in saved.
-function navHtml(up) {
+// The same top bar as the family tree, so these pages are never a dead end.
+// The HTML holds the visitors' menu (for search engines and browsers without
+// JavaScript); js/page-header.js swaps in the full menu, the light/dark
+// switch, Sign in / Sign out and the member's chip, exactly as on the tree.
+function headerHtml(up) {
   const a = (href, label, extra = '') => `<a href="${up}${href}"${extra}>${label}</a>`;
-  return `<nav aria-label="Main">${[
+  return `<header class="topbar">
+<div class="brand"><span class="brand-logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="${up}img/brand/jaggis-logo3-168.webp" srcset="${up}img/brand/jaggis-logo3-320.webp 2x" width="124" height="88" alt=""><span class="logo-pop" role="img" aria-label="Jaggis of Chakwal logo: Generations today, a brighter tomorrow. Our roots, our strength, our family. Legacy, family, heritage."><img src="${up}img/brand/jaggis-logo3-800.webp" loading="lazy" width="558" height="400" alt=""></span></span><a href="${up}" class="site-title">Jaggis of Chakwal</a></div>
+<div class="search-wrap" role="combobox" aria-haspopup="listbox" aria-owns="search-results"><input id="search" type="search" placeholder="Search the family…" autocomplete="off" aria-label="Search for a person" aria-controls="search-results"><ul id="search-results" role="listbox" hidden></ul></div>
+<div class="top-right"><nav id="nav" aria-label="Main">${[
     a('#/tree', 'Tree'), a('#/outline', 'List'), a('#/dashboard', 'Dashboard'),
-    a('#/mine', 'My changes', ' data-signed hidden'), a('#/invite', 'Invite', ' data-signed hidden'), a('#/blessings', 'Blessings', ' data-signed hidden'),
-    a('people/', 'Ancestors', ' class="active" title="Family members who have passed away, one page each"'),
+    a('people/', 'Ancestors', ' class="active" aria-current="page" title="Family members who have passed away, one page each"'),
     a('#/library', 'Library', ' title="Videos and articles about the family and Chakwal"'),
     a('help.html', 'Help'), a('#/export', 'Export', ' title="Download the tree as a PDF or a GEDCOM file"'),
-  ].join('')}</nav><script>try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) for (const x of document.querySelectorAll('[data-signed]')) x.hidden = false; } catch {}</script>`;
+  ].join('')}</nav><div id="who" class="who"></div></div>
+</header>`;
 }
 
 function page({ title, description, canonical, body, jsonld, depth = 1 }) {
@@ -127,15 +119,18 @@ function page({ title, description, canonical, body, jsonld, depth = 1 }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(canonical)}">
 ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(/</g, '\\u003c')}</script>` : ''}
+<link rel="stylesheet" href="${up}css/app.css">
 <style>${STYLE}</style>
 </head>
-<body>
-<header class="top"><span class="logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="${up}img/brand/jaggis-logo3-168.webp" srcset="${up}img/brand/jaggis-logo3-320.webp 2x" width="124" height="88" alt=""><span class="pop" role="img" aria-label="Jaggis of Chakwal logo: Generations today, a brighter tomorrow. Our roots, our strength, our family. Legacy, family, heritage."><img src="${up}img/brand/jaggis-logo3-800.webp" loading="lazy" width="558" height="400" alt=""></span></span><a href="${up}">Jaggis of Chakwal</a>${navHtml(up)}</header>
+<body data-page="ancestors">
+${headerHtml(up)}
 <main>
 ${body}
 <footer>Part of the <a href="${up}">Jaggi family tree of Chakwal</a>, descending from Bakhshi Bhanna Mal Jaggi. Details of living family members are private and are not shown here.</footer>
 <footer class="foot"><img src="${up}img/brand/qn-mark-64.webp" srcset="${up}img/brand/qn-mark-64.webp 2x, ${up}img/brand/qn-mark-96.webp 3x" width="52" height="36" alt="Quantum Nexus LLC logo"><span>© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved.</span></footer>
 </main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="${up}js/page-header.js"></script>
 <script type="module">import { countView } from '${up}js/count.js'; countView(location.pathname);</script>
 </body>
 </html>

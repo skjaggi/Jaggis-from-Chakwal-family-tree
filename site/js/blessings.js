@@ -178,7 +178,9 @@ export function showHistorianCongrats(me) {
       h('button.btn.primary', { type: 'button', onclick: () => m.close() }, 'Thank you'))));
   return m;
 }
-export function showBlessingsIntro() {
+// `base`: the way back to the tree from pages outside it (Help, Ancestors).
+export function showBlessingsIntro(base = '') {
+  if (typeof base !== 'string') base = '';
   const step = (n, title, text, extra) => h('section.intro-step', h('h3', h('span.intro-n', String(n)), title), h('p', text), extra);
   const m = modal('Welcome to Family Blessings', h('div.bless-intro',
     h('p.intro-lead', coin(), ' Every time you add to the family tree, you earn ', h('b', 'blessings'), '. They show how much each of us has given to keeping our family story alive.'),
@@ -190,7 +192,7 @@ export function showBlessingsIntro() {
       ? 'Your blessings and badges show at the top right, next to your photo. Tap them to see the family leaderboard. Blessings count once a change is approved.'
       : 'Claim your own box with "This is me" to earn your first 5 blessings, and your blessings and badges will show at the top right. Blessings count once a change is approved.'),
     h('div.form-actions',
-      h('button.btn', { type: 'button', onclick: () => { m.close(); location.hash = '#/blessings'; } }, 'See the leaderboard'),
+      h('button.btn', { type: 'button', onclick: () => { m.close(); location.href = `${base}#/blessings`; } }, 'See the leaderboard'),
       h('button.btn.primary', { type: 'button', onclick: () => m.close() }, 'Got it'))));
   return m;
 }
@@ -198,18 +200,18 @@ export function showBlessingsIntro() {
 // ---------------------------------------------------------------- corner chip
 // At the top right once someone has signed in and claimed their box: their
 // photo, their blessings and the badges they have.
-export async function renderCorner(el) {
+export async function renderCorner(el, base = '') {
   if (!store.signedIn || store.preview || !store.claimedId) return false;
   let me = null;
   try { me = summarize(await loadBlessings()).find((m) => m.id === store.session.user.id); } catch { /* show without numbers */ }
   const p = store.fam.byId.get(store.claimedId);
   const photo = store.photoUrls.get(store.claimedId);
-  clear(el, h('a.me-chip', { href: '#/blessings', title: 'Your blessings and badges' },
+  clear(el, h('a.me-chip', { href: `${base}#/blessings`, title: 'Your blessings and badges' },
     photo ? h('img.me-photo', { src: photo, alt: '' }) : h('span.me-photo.me-initials', initials(p?.given_name || store.profile?.display_name || '')),
     h('span.me-name', store.profile?.display_name || (p ? fullName(p, { title: false }) : '')),
     h('span.me-points', coin(), ` ${me?.total ?? 0}`),
     me?.badges?.length ? h('span.me-badges', me.badges.map((b) => medal(b, 'mini-medal'))) : null),
-  h('button.me-help', { type: 'button', title: 'How blessings and badges work', 'aria-label': 'How blessings and badges work', onclick: showBlessingsIntro }, '?'));
+  h('button.me-help', { type: 'button', title: 'How blessings and badges work', 'aria-label': 'How blessings and badges work', onclick: () => showBlessingsIntro(base) }, '?'));
   return true;
 }
 

@@ -35,25 +35,29 @@
     .help-table td:last-child, .help-table th:last-child { text-align: right; white-space: nowrap; }
   </style>
 </head>
-<body>
+<body data-page="help">
   <header class="topbar">
     <div class="brand">
       <span class="brand-logo" tabindex="0" role="button" aria-label="Show the family logo larger"><img src="img/brand/jaggis-logo3-168.webp" srcset="img/brand/jaggis-logo3-320.webp 2x" width="124" height="88" alt=""><span class="logo-pop" role="img" aria-label="Jaggis of Chakwal logo: Generations today, a brighter tomorrow. Our roots, our strength, our family. Legacy, family, heritage."><img src="img/brand/jaggis-logo3-800.webp" loading="lazy" width="558" height="400" alt=""></span></span>
       <a href="./" class="site-title">Jaggis of Chakwal</a>
     </div>
-    <nav aria-label="Main">
-      <a href="./#/tree">Tree</a>
-      <a href="./#/outline">List</a>
-      <a href="./#/dashboard">Dashboard</a>
-      <a href="./#/mine" data-signed hidden>My changes</a>
-      <a href="./#/invite" data-signed hidden>Invite</a>
-      <a href="./#/blessings" data-signed hidden>Blessings</a>
-      <a href="people/" title="Family members who have passed away, one page each">Ancestors</a>
-      <a href="./#/library" title="Videos and articles about the family and Chakwal">Library</a>
-      <a href="help.html" class="active" aria-current="page">Help</a>
-      <a href="./#/export" title="Download the tree as a PDF or a GEDCOM file">Export</a>
-    </nav>
-    <script>try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) for (const a of document.querySelectorAll('[data-signed]')) a.hidden = false; } catch {}</script>
+    <div class="search-wrap" role="combobox" aria-haspopup="listbox" aria-owns="search-results">
+      <input id="search" type="search" placeholder="Search the family…" autocomplete="off" aria-label="Search for a person" aria-controls="search-results">
+      <ul id="search-results" role="listbox" hidden></ul>
+    </div>
+    <div class="top-right">
+      <!-- The visitors' menu; js/page-header.js swaps in the same menu as the tree for whoever is signed in. -->
+      <nav id="nav" aria-label="Main">
+        <a href="./#/tree">Tree</a>
+        <a href="./#/outline">List</a>
+        <a href="./#/dashboard">Dashboard</a>
+        <a href="people/" title="Family members who have passed away, one page each">Ancestors</a>
+        <a href="./#/library" title="Videos and articles about the family and Chakwal">Library</a>
+        <a href="help.html" class="active" aria-current="page">Help</a>
+        <a href="./#/export" title="Download the tree as a PDF or a GEDCOM file">Export</a>
+      </nav>
+      <div id="who" class="who"></div>
+    </div>
   </header>
 
   <main class="help">
@@ -139,6 +143,7 @@
       <li><strong>Find someone:</strong> type a name in <span class="ui">Search the family</span>. Different spellings, like Parkash and Prakash, still find them.</li>
       <li><strong>Start the tree from one person:</strong> open their details and tap <span class="ui">Show tree from here</span>. The line at the top shows their ancestors; tap any name there to go back up, or <span class="ui">Whole tree</span>.</li>
       <li><strong>List view:</strong> tap <span class="ui">List</span> at the top for a simple indented list, which is easier to read on a small phone.</li>
+      <li><strong>The same menu on every page:</strong> the bar at the top is the same on the tree, on this Help page and on the Ancestors pages. When you are signed in it shows all your items (and <span class="ui">Review</span> and <span class="ui">Members</span> for the admin), your photo, blessings and badges, and <span class="ui">Sign out</span>. You can also search for someone from any of these pages; picking a name takes you to them in the tree.</li>
       <li><strong>Light or dark:</strong> tap <span class="ui">☾ Dark</span> or <span class="ui">☀ Light</span> in the menu to switch colours. Your choice is remembered on that phone or computer; until you choose, the site follows your device's own setting.</li>
       <li><strong>The family logo:</strong> rest the mouse on the logo at the top left, or tap it on a phone, to see it large.</li>
       <li><strong>You, at the top:</strong> once you are signed in and have claimed your box, your photo, name, <a href="#blessings">blessings</a> and badges sit in the header (on a phone, beside the logo). Tap them to open the Blessings page; tap <span class="ui">?</span> for how blessings work.</li>
@@ -324,6 +329,8 @@
       <span>© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved.</span>
     </footer>
   </main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/page-header.js"></script>
 <script type="module">import { countView } from './js/count.js'; countView(location.pathname);</script>
 </body>
 </html>
