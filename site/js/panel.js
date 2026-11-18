@@ -118,7 +118,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
     h('p.tags',
       p.generation ? h('span.tag', `Generation ${p.generation}`) : null,
       status ? h('span.tag', status) : null,
-      d?.visibility === 'branch' ? h('span.tag.lock', 'Details: branch only') : null,
+      d?.visibility === 'branch' ? h('span.tag.lock', 'Details: family branch only') : null,
       pl?.confidence === 'uncertain' ? h('span.tag.warn', 'Parent not confirmed') : null),
     // The everyday buttons sit near the top so people find them without scrolling.
     h('div.panel-actions.panel-top',

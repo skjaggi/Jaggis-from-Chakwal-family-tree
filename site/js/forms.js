@@ -42,7 +42,7 @@ function liveNow(mode, person, relation) {
 // Gender and Living? are required: an empty "Choose..." shows until one is picked.
 const GENDERS = [['', 'Choose...'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
 const LIVING = [['', 'Choose...'], ['true', 'Living'], ['false', 'Deceased']];
-const VIS = [['branch', 'Branch only: family in this branch'], ['public', 'Public: anyone']];
+const VIS = [['branch', 'Family branch only: signed-in family in this branch'], ['public', 'Public: anyone']];
 const KINDS = [['biological', 'Birth'], ['adoptive', 'Adopted'], ['step', 'Step'], ['foster', 'Foster']];
 const CONF = [['confirmed', 'Confirmed'], ['uncertain', 'Not certain']];
 const STATUSES = [['married', 'Married'], ['divorced', 'Divorced'], ['widowed', 'Widowed'], ['separated', 'Separated'], ['partners', 'Partners']];
@@ -62,7 +62,7 @@ export { LABELS };
 function publicWarning(visSelect, isLiving, what) {
   const note = h('p.vis-warn', { role: 'status', hidden: true },
     `Public means anyone who opens the tree can see ${what}, including people outside the family. `
-    + 'For someone who is living, Branch only is safer: only signed-in family in their branch see it.');
+    + 'For someone who is living, Family branch only is safer: only signed-in family in their branch see it.');
   const update = () => { note.hidden = !(visSelect.value === 'public' && isLiving()); };
   visSelect.addEventListener('change', update);
   queueMicrotask(update); // after the form exists
@@ -138,7 +138,7 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
       mode === 'edit' ? historyList(person?.id) : null,
       field("What's uncertain", textArea('uncertainty', d.uncertainty, 2), 'e.g. "Birth year is approximate"')),
     h('fieldset', h('legend', 'Privacy'),
-      field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people default to branch only.'),
+      field('Who can see dates, places and notes', visSelect, 'The name always shows in the tree. Details of living people start as Family branch only.'),
       detailsWarn.note),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
