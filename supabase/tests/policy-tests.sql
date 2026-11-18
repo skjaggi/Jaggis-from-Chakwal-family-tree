@@ -55,6 +55,37 @@ do $$ begin
   end;
 end $$;
 rollback;
+-- Maiden names of married women are hidden from visitors.
+insert into public.people (id, given_name, surname, other_names, gender) values
+  ('00000000-0000-0000-0000-0000000000f1', 'Wife', 'Maidenname', 'Wife Maidenname Marriedname', 'female'),
+  ('00000000-0000-0000-0000-0000000000f2', 'Husband', 'Jaggi', 'Bobby', 'male'),
+  ('00000000-0000-0000-0000-0000000000f3', 'Bride', 'Jaggi', 'Bride ?', 'female'),
+  ('00000000-0000-0000-0000-0000000000f4', 'Single', 'Jaggi', 'Sunny', 'female');
+insert into public.unions (partner_a, partner_b) values
+  ('00000000-0000-0000-0000-0000000000f2', '00000000-0000-0000-0000-0000000000f1'),
+  ('00000000-0000-0000-0000-0000000000f2', '00000000-0000-0000-0000-0000000000f3');
+begin;
+set local role anon;
+do $$ begin
+  begin
+    perform surname from public.people limit 1;
+    raise exception 'FAILED: anon read last names directly';
+  exception when insufficient_privilege then raise notice 'ok: anon cannot read last names directly';
+  end;
+end $$;
+select pg_temp.expect((select surname from public.public_names() where id = '00000000-0000-0000-0000-0000000000f1') = 'Marriedname', 'visitor sees a married woman''s married last name');
+select pg_temp.expect(not exists (select 1 from public.public_names() where id = '00000000-0000-0000-0000-0000000000f1' and (other_names is not null or surname = 'Maidenname')), 'visitor never gets her maiden name');
+select pg_temp.expect((select surname from public.public_names() where id = '00000000-0000-0000-0000-0000000000f3') is null, 'married name unknown: visitor sees first name only');
+select pg_temp.expect((select surname || '/' || other_names from public.public_names() where id = '00000000-0000-0000-0000-0000000000f2') = 'Jaggi/Bobby', 'married man keeps his names');
+select pg_temp.expect((select surname || '/' || other_names from public.public_names() where id = '00000000-0000-0000-0000-0000000000f4') = 'Jaggi/Sunny', 'unmarried woman keeps her names');
+rollback;
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect((select surname from public.people where id = '00000000-0000-0000-0000-0000000000f1') = 'Maidenname', 'signed-in family see the maiden name');
+rollback;
+delete from public.people where id in ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000f2', '00000000-0000-0000-0000-0000000000f3', '00000000-0000-0000-0000-0000000000f4');
+
 -- Marriage dates: public only when both spouses have passed away.
 update public.unions set start_date = '1950' where partner_a = pg_temp.pid('Om Parkash') or partner_b = pg_temp.pid('Om Parkash');
 insert into public.people (id, given_name, is_living) values ('00000000-0000-0000-0000-0000000000d1', 'DeadA', false), ('00000000-0000-0000-0000-0000000000d2', 'DeadB', false), ('00000000-0000-0000-0000-0000000000d3', 'SpouseS', true);
