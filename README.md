@@ -4,9 +4,11 @@ A family tree website for the descendants of **Bakhshi Bhanna Mal Jaggi** of pre
 
 - Anyone with the link can browse the tree, top-down, starting from any person, and search by name (spelling variants like *Parkash / Prakash* still match).
 - Invited family members sign in with their email (no passwords) and can add people, edit details, link relatives, and upload one profile photo per person.
-- Every change waits for the admin's approval before it appears.
+- Members who claim their own box can change their own family straight away; other changes wait for the admin or that branch's admin to approve them.
 - Details and photos of living people are visible only to their own branch unless the person adding them chooses *Public*.
 - Works on phones. The tree can be exported as a GEDCOM file for other genealogy programs.
+
+**Requirements:** [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) describes everything the site does; every feature pull request updates it and the Help page (`site/help.html`).
 
 **Setup:** see [docs/SETUP.md](docs/SETUP.md). Until Supabase is connected the site runs in a read-only preview of the starting data.
 
@@ -44,4 +46,4 @@ Both run on every pull request (`.github/workflows/tests.yml`).
 
 ## Planned for version 2
 
-Branch admins (approvals delegated from generation 4 down), linking documents such as certificates and letters, GEDCOM import, and letting other families start their own trees.
+Linked documents such as certificates and letters, GEDCOM import, and "How are we related?" between any two people. Letting other families start their own trees comes later. See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md).
