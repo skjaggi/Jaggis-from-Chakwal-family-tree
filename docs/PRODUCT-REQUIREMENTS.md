@@ -172,7 +172,17 @@ Everything the wizard asked, plus:
 - **Blessings:** on or off; point values; generation multipliers; badges, including **special badges** the admin creates (name, icon, description) and gives to people, such as "Founder of our family tree".
 - **Library:** on or off; topics.
 - **Public ancestor pages for search engines:** off by default; when on, only for people marked as passed away, with Public details only.
-- **Emails:** sender name (default: the family name), reply-to address (default: the admin), editable invite and reminder wording, with preview.
+- **Emails:** editable invite and reminder wording, with preview. How emails are sent is in 5.3.1.
+
+#### 5.3.1 Who invitation emails come from (proposal, waiting for Sunil's OK)
+
+Sunil asked (20 Nov 2026) whether invitations use the email of the admin who started the family tree. Proposal:
+
+- Emails are **sent by the product**, from its own address (for example `invites@<brand>.com`). The product never needs the admin's email password, and its emails are set up so Gmail, Outlook and Yahoo trust them and do not put them in spam. Sending "from" the admin's own Gmail or Outlook address is not possible for a website without their password, and mail providers would mark such emails as fake.
+- The **sender name is the person who invited them**, for example **"Sunil Jaggi via BanyanKin"**, so the relative recognises who it is from.
+- **Reply-to is the inviter's own email address**, so when a relative presses Reply, the answer goes straight to the inviter, not to the product.
+- The same rule applies to reminders and Missing details emails sent by an admin. Automatic emails (sign-in codes, receipts) come from the product's name only.
+- Later option (Heritage plan): a family with its own domain can send from its own address (for example `family@smithfamily.com`) after a one-time check of that domain.
 - **Admins:** add or remove other admins; transfer ownership of the family site.
 - **Plan and billing:** current plan, usage (people, photos), upgrade, invoices, cancel.
 - **Export everything / delete family site:** a zip with GEDCOM, photos and stories; deleting needs typing the family name and waits 30 days before it is final.
@@ -273,7 +283,29 @@ Nothing needs to be paid while the product is being built (December 2026 to Marc
 
 **Break-even:** at about $47 a family after Stripe fees, **one Family plan a month** (12 families a year) covers the running costs once launched.
 
-### 8.3 What the Jaggi site costs today
+### 8.3 Full budget at a glance
+
+Sunil (20 Nov 2026): keep all of these items in the budget.
+
+| Item | Type | Cost |
+|---|---|---|
+| Supabase: database, sign-in, photo storage, daily backups | Monthly | $25 |
+| Email service: invitations, sign-in links, reminders | Monthly | $0 (up to 3,000 emails a month), then $20 |
+| Domain names: the product's .com, plus the .in | Yearly | about $12 + $8 a year (about $1 to $2 a month) |
+| GitHub (code, tests, private repository) | Monthly | free |
+| Website hosting, each family's own web address, secure https | Monthly | free |
+| Visitor counts (GoatCounter) | Monthly | free |
+| **Running total** | | **about $26 a month during the pilot, about $46 to $50 a month after launch** |
+| Card processing fees (Stripe) | Per payment | 2.9% + 30 cents, taken only from money families pay |
+| Legal review of Terms of Service and Privacy Policy | One-time | $500 to $1,500 |
+| Trademark for the brand name | One-time | about $350 per filing (per class), plus any lawyer fee |
+| Apple App Store developer account | Yearly, when the iPhone app comes | $99 a year |
+| Google Play developer account | One-time, when the Android app comes | $25 |
+| Business email address for Sunil (for example `sunil@<brand>.com`, Google Workspace or similar) | Optional, monthly | about $6 a month |
+| Printed family books | Per order | paid by the family per book; the product adds a margin |
+| More photo space or a bigger email plan | Only with growth | see 8.2 |
+
+### 8.4 What the Jaggi site costs today
 
 Nothing: it runs on the free Supabase plan, GitHub Pages and Gmail. It keeps running this way until it moves onto the product (if decided).
 
@@ -364,7 +396,8 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | Pricing agreed to start; free plan proposal (4.4); audience everyone; private repository explained (3.3). |
+| 20 Nov 2026 | | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
+| 20 Nov 2026 | #28 | Pricing agreed to start; free plan proposal (4.4); audience everyone; private repository explained (3.3). |
 | 20 Nov 2026 | #27 | Brand and domain name suggestions with availability and prices (section 10); Jaggi site move as a seamless test; Quantum Nexus LLC under consideration. |
 | 20 Nov 2026 | #27 | Sunil's first answers: timeline to June 2027, cost breakdown (section 8), legal help options (section 9), remaining open questions. |
 | 20 Nov 2026 | #26 | First draft: Jaggi-specific inventory, build and commercial options with recommendations, product requirements, phases, costs, open questions. |
