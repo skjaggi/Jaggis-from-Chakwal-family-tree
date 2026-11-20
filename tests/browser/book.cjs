@@ -189,6 +189,13 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     if (!(famAll > famBefore)) fail(`${tpl}: A page for everyone did not add pages (${famBefore} -> ${famAll})`);
     await pg.uncheck('#bk-all-pages'); await pg.waitForTimeout(600);
     if ((await pg.$$('.bk-page[data-key^="fam:"]')).length !== famBefore) fail(`${tpl}: unticking did not go back`);
+    // A married person's page: their photo and their spouse's photo the same size, joined by rings.
+    const coupleKey = famPages.find((k) => seed.unions.some((u) => `fam:${u.partner_a}` === k || `fam:${u.partner_b}` === k));
+    const cp = `.bk-page[data-key="${coupleKey}"]`;
+    if (!await pg.$(`${cp} .bp-couple .bp-ring .bp-rings svg`)) fail(`${tpl}: no rings between the couple on ${coupleKey}`);
+    const sizes = await pg.$$eval(`${cp} .bp-couple .bp-cp > .bp-photo`, (els) => els.map((e) => e.offsetWidth));
+    if (sizes.length < 2 || Math.min(...sizes) / Math.max(...sizes) < 0.8) fail(`${tpl}: couple photos differ in size (${sizes})`);
+    if (await pg.$(`${cp} .bp.has-issue`)) fail(`${tpl}: couple page does not fit`);
     // Preview as a book: the cover alone, then two pages side by side, turned with the arrow keys.
     await pg.click('#bk-preview-btn'); await pg.waitForTimeout(600);
     const where0 = await pg.textContent('.bk-flip-where');
