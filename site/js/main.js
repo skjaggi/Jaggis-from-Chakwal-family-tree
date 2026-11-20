@@ -167,15 +167,81 @@ function renderBreadcrumbs() {
   const fam = store.fam;
   const chain = fam.lineage(state.root);
   const crumbs = $('crumbs');
-  const parts = chain.map((id, i) => {
+  const path = (ids) => ids.map((id, i) => {
     const p = fam.byId.get(id);
-    const last = i === chain.length - 1;
+    const last = i === ids.length - 1 && id === state.root;
     return [i ? h('span.sep', '›') : null,
-      last ? h('strong', shortName(p)) : h('button.link', { type: 'button', onclick: () => go({ root: id }) }, shortName(p))];
+      last ? h('strong', shortName(p)) : h('button.link', { type: 'button', title: `Start the tree from ${shortName(p)}`, onclick: () => go({ root: id, selected: null }) }, shortName(p))];
   });
+  const whole = state.root !== fam.defaultRootId
+    ? h('button.btn.small', { type: 'button', onclick: () => go({ root: fam.defaultRootId, selected: null }) }, 'Whole tree') : null;
+  // Visitors: the plain "Showing from" path.
+  if (!store.signedIn) {
+    clear(crumbs, h('span.muted', 'Showing from: '), path(chain), whole);
+    addTrail(crumbs);
+    return;
+  }
+  // Members: the line of ancestors above, then a drop-down to pick where the
+  // tree starts, then how many generations are above the chosen person.
+  const above = chain.length - 1;
+  const first = (id) => fam.byId.get(id)?.given_name || shortName(fam.byId.get(id));
   clear(crumbs,
-    h('span.muted', 'Showing from: '), parts,
-    state.root !== fam.defaultRootId ? h('button.btn.small', { type: 'button', onclick: () => go({ root: fam.defaultRootId }) }, 'Whole tree') : null);
+    h('span.muted', 'Start tree from '),
+    above > 0 ? h('span.start-path', chain.slice(0, -1).map((id, i) => [i ? h('span.sep', '›') : null,
+      h('button.link', { type: 'button', title: `Start the tree from ${shortName(fam.byId.get(id))}`, onclick: () => go({ root: id, selected: null }) }, first(id))]),
+    h('span.sep', '›')) : null,
+    startPicker(fam),
+    h('span.start-gen', `Gen ${fam.byId.get(state.root)?.generation ?? chain.length}`,
+      above > 0 ? ` · ${above} generation${above === 1 ? '' : 's'} above` : null));
+  addTrail(crumbs);
+}
+
+// The tree's "you are here" path (the generation of the person in the middle
+// of the screen and their line) shares this one line, so the tree gets the
+// room. The List view doesn't need it.
+function addTrail(crumbs) {
+  if (!tree?.trail) return;
+  tree.trail.hidden = state.view !== 'tree';
+  crumbs.append(tree.trail);
+}
+
+// A drop-down of everyone who has children, grouped by generation and in
+// alphabetical order within each. Two people with the same name in one
+// generation get their parent's name to tell them apart.
+function startPicker(fam) {
+  const people = [];
+  const seen = new Set();
+  const walk = (id, depth) => {
+    if (seen.has(id)) return;
+    seen.add(id);
+    const kids = fam.treeChildren(id);
+    if (!kids.length) return;
+    const p = fam.byId.get(id);
+    people.push({ p, gen: p.generation ?? depth + 1 });
+    for (const c of kids) walk(c.id, depth + 1);
+  };
+  walk(fam.defaultRootId, 0);
+  // A starting person outside the main tree (or with no children) stays listed.
+  if (!people.some((x) => x.p.id === state.root)) {
+    const p = fam.byId.get(state.root);
+    people.push({ p, gen: p.generation ?? fam.lineage(p.id).length });
+  }
+  const gens = [...new Set(people.map((x) => x.gen))].sort((a, b) => a - b);
+  const label = (x, list) => {
+    const name = shortName(x.p);
+    if (list.filter((y) => shortName(y.p) === name).length < 2) return name;
+    const parent = fam.byId.get(fam.primaryParentLink(x.p.id)?.parent_id);
+    return parent ? `${name} (child of ${parent.given_name})` : name;
+  };
+  return h('select', {
+    id: 'start-from',
+    'aria-label': 'Start the tree from',
+    onchange: (e) => go({ root: e.target.value, selected: null }),
+  }, gens.map((g) => {
+    const list = people.filter((x) => x.gen === g).sort((a, b) => shortName(a.p).localeCompare(shortName(b.p)));
+    return h('optgroup', { label: `Generation ${g}` },
+      list.map((x) => h('option', { value: x.p.id, selected: x.p.id === state.root }, label(x, list))));
+  }));
 }
 
 // ---------------------------------------------------------------- search

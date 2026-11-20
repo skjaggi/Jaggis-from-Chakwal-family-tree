@@ -103,10 +103,11 @@ export class TreeView {
       const r = svg.getBoundingClientRect();
       this.svg.call(this.zoom.scaleTo, g0 * e.scale, [e.clientX - r.left, e.clientY - r.top]);
     });
-    // The "you are here" bar.
-    this.trail = document.createElement('div');
+    // The "you are here" path. It sits at the end of the "Start tree from"
+    // line above the tree (main.js puts it there).
+    this.trail = document.createElement('span');
     this.trail.className = 'tree-trail';
-    this.container.parentElement.append(this.trail);
+    this.trail.setAttribute('aria-label', 'You are here');
     this.zoom.on('zoom.trail', () => this.updateTrail());
   }
 
@@ -135,11 +136,14 @@ export class TreeView {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'linkish';
-      b.textContent = shortName(store.fam.byId.get(id));
-      b.title = 'Go to ' + b.textContent;
+      const p = store.fam.byId.get(id);
+      b.textContent = p?.given_name || shortName(p);
+      b.title = 'Go to ' + shortName(p);
       b.onclick = () => this.centerOn(id);
       this.trail.append(b);
     });
+    // Keep the person in the middle of the screen (the end of the path) in view.
+    this.trail.scrollLeft = this.trail.scrollWidth;
   }
 
   // Keep the tree from floating away: allow scrolling a little past its edges only.
@@ -209,7 +213,7 @@ export class TreeView {
     const maxX = Math.max(...this.nodes.map((d) => d.x + d.w / 2)) + 20;
     const minY = Math.min(...this.nodes.map((d) => d.y)) - H / 2 - 20;
     const maxY = Math.max(...this.nodes.map((d) => d.bottom)) + 40;
-    const top = this.scrollMode ? 60 : 24;
+    const top = 24;
     // Small enough to show everything, but never so small the names can't be read.
     let k = Math.min(width / (maxX - minX), (height - top) / (maxY - minY), 1);
     k = Math.max(k, phone ? 0.75 : 0.5);
@@ -523,7 +527,7 @@ export class TreeView {
     const tx = width / 2 - ((minX + maxX) / 2) * k;
     const contentFits = (maxX - minX) * k <= width;
     const x = contentFits ? tx : width / 2 - this.nodes[0].cx * k;
-    const t = d3.zoomIdentity.translate(x, (this.scrollMode ? 60 : 24) - minY * k).scale(k);
+    const t = d3.zoomIdentity.translate(x, 24 - minY * k).scale(k);
     this.limitPan();
     this.trailId = null;
     this.svg.transition().duration(300).call(this.zoom.transform, t);

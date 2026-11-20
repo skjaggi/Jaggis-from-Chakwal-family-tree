@@ -148,7 +148,8 @@ The tree launched with about 70 people transcribed from the two family tree PDFs
 
 ### 8.1 Tree view
 
-- One view: a vertical scrolling tree with the root centred at the top. Scroll with mouse wheel, two fingers or drag; pinch or **+ / −** to zoom. The bar at the top ("you are here") shows the generation and family being viewed; tap a name to go there.
+- One view: a vertical scrolling tree with the root centred at the top. Scroll with mouse wheel, two fingers or drag; pinch or **+ / −** to zoom. One line above the tree holds both where the tree starts and the "you are here" path (the generation and family in the middle of the screen; tap a name to go there). On phones it splits into a few short rows that scroll sideways instead of wrapping.
+- **Start tree from** (signed-in members only): a drop-down of everyone who has children, grouped by generation (alphabetical within each; same names in one generation show their parent). Picking someone redraws the tree from them and their descendants (married-in spouses still shown). The line shows their ancestors above as clickable names (to step back up), and a badge such as "Gen 4 · 3 generations above". Not remembered: each visit still opens on the member's own line. Visitors keep "Showing from" with the ancestor path and **Whole tree**.
 - **Opens on your own line:** a signed-in member with a claimed box (or, until they claim, the box their invitation is linked to) first sees the tree from the top ancestor with only the path down to their own box open, their box and all their descendants open, and every other branch closed. On wider screens it zooms out to show that line (never below half size); on phones it starts at their box. It applies on the first look at the main tree and again right after signing in or having a claim approved; after that, what they open or close stays as they left it. Visitors and members with no box at all see the first three generations. **View as** opens the viewed member's line the same way.
 - **Show tree from here** redraws the tree from any person; the ancestor line at the top leads back up, or **Whole tree**.
 - Compact layout: children without children of their own are stacked in a column; a teal circle under a box shows the number of children and opens or closes that family.
@@ -285,6 +286,7 @@ It is a preview, not a sign-in as them: the admin's own login is used to read th
 | 17 Nov 2026 | Family Library with admin approval. Missing details reminders per branch admin (core fields as in 8.8). Help page updated in every feature pull request. |
 | 19 Nov 2026 | Sunil: the admin can view the site as any member (a read-only preview) from the top of the site. |
 | 19 Nov 2026 | Sunil: the tree opens on the signed-in member's own line (path down to them, them and their descendants open, other branches closed). |
+| 20 Nov 2026 | Sunil: members (not visitors) get a "Start tree from" drop-down of people with children, with a generation badge and clickable ancestor path; not remembered between visits; married-in spouses still shown. The start line and the "you are here" bar share one line. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -299,6 +301,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | **Start tree from** drop-down for members, with "Gen N · N generations above" badge and ancestor path; start line and "you are here" bar combined into one line. |
 | 19 Nov 2026 | | View as opens on the viewed member's own line; members not yet claimed open on their invitation's box. |
 | 19 Nov 2026 | #22 | Admin **View as**: preview the site as any member (menu, landing tree, buttons, edit rights, branch-only details); nothing is saved or sent while viewing. |
 | 19 Nov 2026 | #21 | Tree opens on the signed-in member's own line. |
