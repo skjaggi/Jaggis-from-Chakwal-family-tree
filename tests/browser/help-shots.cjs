@@ -48,6 +48,50 @@ const quiet = (pg) => pg.evaluate(() => { const t = document.getElementById('toa
   await shot(pg, 'sign-in');
   await ctx.close();
 
+  // Start tree from: the line above the tree, with numbered labels.
+  const tapashi = idOf('Tapashi Ram');
+  const harbans = idOf('Harbans Lal');
+  const label = (pg, side) => pg.evaluate((side) => {
+    if (!side) for (const el of document.querySelectorAll('header')) el.style.visibility = 'hidden';
+    if (side) { const g = document.querySelector('.start-gen'); if (g) g.style.marginLeft = '18px'; const c = document.getElementById('crumbs'); c.style.paddingLeft = '30px'; }
+    const marks = [['.start-path', 1], ['#start-from', 2], ['.start-gen', 3], ['.tree-trail .gen', 4]];
+    for (const [sel, n] of marks) {
+      const el = document.querySelector(sel);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      const m = document.createElement('div');
+      m.textContent = n;
+      Object.assign(m.style, { position: 'fixed', left: side ? `${r.left - 23}px` : `${r.left + Math.min(r.width, 160) / 2 - 10}px`, top: side ? `${r.top + r.height / 2 - 10}px` : `${r.top - 21}px`, width: '20px', height: '20px', borderRadius: '50%', background: '#c0392b', color: '#fff', font: '700 13px/20px system-ui, sans-serif', textAlign: 'center', zIndex: 99, boxShadow: '0 0 0 2px #fff' });
+      document.body.append(m);
+    }
+  }, side);
+  {
+    const c2 = await b.newContext({ viewport: { width: 1200, height: 520 }, deviceScaleFactor: 2 });
+    for (const [u, f] of [['https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', '/.vendor/d3.esm.js'], ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', '/fake-supabase.js']]) await c2.route(u, (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + f) }));
+    await c2.route('**/js/config.js', (r) => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k', siteTitle: 'Jaggis of Chakwal', adminName: 'Sunil' };" }));
+    await c2.addInitScript(() => { window.__FAKE_ROLE__ = 'member'; window.__FAKE_NAME__ = 'Asha'; sessionStorage.setItem('claim-welcome', '1'); sessionStorage.setItem('claim-not-in-tree', '1'); try { for (const k of ['blessings-intro', 'blessingsIntro', 'founder-thanks']) localStorage.setItem(k, '1'); } catch {} });
+    const p2 = await c2.newPage();
+    p2.on('pageerror', (e) => errors.push(e.message));
+    await p2.goto(`${SITE}#/tree/${tapashi}`); await p2.waitForSelector('#start-from'); await p2.waitForTimeout(900);
+    await p2.keyboard.press('Escape'); await p2.waitForTimeout(200);
+    await p2.locator('#claim-banner button', { hasText: 'Later' }).click().catch(() => {});
+    await p2.waitForTimeout(300);
+    await label(p2);
+    const top = await p2.$eval('#crumbs', (e) => e.getBoundingClientRect().top);
+    await p2.screenshot({ path: path.join(OUT, 'start-from.jpg'), type: 'jpeg', quality: 80, clip: { x: 0, y: top - 22, width: 1080, height: 76 } });
+    await c2.close();
+  }
+  ctx = await context(b, 'member');
+  pg = await ctx.newPage();
+  pg.on('pageerror', (e) => errors.push(e.message));
+  await pg.goto(`${SITE}#/tree/${harbans}`); await pg.waitForSelector('#start-from'); await pg.waitForTimeout(900);
+  await pg.keyboard.press('Escape'); await pg.waitForTimeout(200);
+  await pg.locator('#claim-banner button', { hasText: 'Later' }).click().catch(() => {});
+  await pg.waitForTimeout(300);
+  await label(pg, true);
+  await shot(pg, 'start-from-phone');
+  await ctx.close();
+
   // Signed-in family member
   ctx = await context(b, 'member');
   pg = await ctx.newPage();

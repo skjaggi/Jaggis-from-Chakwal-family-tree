@@ -29,6 +29,7 @@ The Jaggis of Chakwal family tree is a phone-friendly website where anyone can l
 
 | Release | Target | Status |
 |---|---|---|
+| 20 Nov 2026 | | Help section 4: labelled pictures of the Start tree from line (desktop and phone); help pictures retaken with the new line. |
 | Version 1 | Thanksgiving, 26 Nov 2026 | **Live** since 13 Nov 2026, at familytree.sjaggi.com since 14 Nov. Several items first planned for version 2 shipped early: branch admins, custom domain, source and uncertainty fields on screen, edit history. |
 | Version 2 | Early 2027 | Planned: linked documents (certificates, letters), GEDCOM import, "How are we related?" between any two people, automatic Library preview pictures. |
 | Future | Later | Open sign-up so any family can start its own tree, self-hosting, App Store and Play Store apps, more languages, prize draws for Blessings. |
