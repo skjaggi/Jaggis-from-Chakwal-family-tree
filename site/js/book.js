@@ -173,10 +173,13 @@ function autoPages(fam, s) {
   // The tree chart, split over as many pages as it needs.
   const rows = chartRows(fam, rootId);
   const size = SIZES[s.size] || SIZES.sq12;
-  const cols = size.w >= 10 ? 3 : 2;
-  const lineIn = (base(size) * 1.32) / 72;
+  // Normally the whole chart goes on one page, its type sized to fill it
+  // (fitCharts). Only a very large tree, too big even at 5.5 pt type in
+  // three columns, is split over more pages.
+  const cols = 3;
+  const lineIn = (5.5 * 1.32) / 72;
   const usable = size.h - 2 * margin(size) - 1.2; // heading and footer
-  const perPage = Math.max(10, Math.floor((usable / lineIn) * 0.8)) * cols;
+  const perPage = Math.max(10, Math.floor((usable / lineIn) * 0.85)) * cols;
   for (let i = 0, n = 1; i < rows.length; i += perPage, n++) {
     pages.push({ key: `chart:${n}`, type: 'chart', label: `Family tree chart${rows.length > perPage ? ` (${n})` : ''}`, rows: rows.slice(i, i + perPage), cont: n > 1, cols });
   }
@@ -497,10 +500,18 @@ function addItem(key, t) {
 // the generation before. Its size shrinks to fit the page (see fitTrees).
 function photoTree(page, style, { edit }) {
   const fam = view.fam;
+  // Children are grouped under their parents: the blood parent, with the
+  // other parent (their spouse) beside them when the tree has one.
   const groups = new Map();
   for (const id of page.all) {
     const par = fam.primaryParentLink(id)?.parent_id || '';
-    (groups.get(par) || groups.set(par, []).get(par)).push(id);
+    let other = '';
+    if (par) {
+      const sps = fam.spouses(par).filter((x) => x.person).map((x) => x.person.id);
+      other = fam.parentLinks(id).map((l) => l.parent_id).find((x) => x !== par && sps.includes(x)) || (sps.length === 1 ? sps[0] : '');
+    }
+    const k = `${par}|${other}`;
+    (groups.get(k) || groups.set(k, []).get(k)).push(id);
   }
   const short = (p) => fullName(p, { title: false }).replace(/\s+Jaggi$/, '');
   const node = (id, cls = '') => {
@@ -512,10 +523,15 @@ function photoTree(page, style, { edit }) {
   };
   const n = page.all.length;
   const tree = h(`div.bp-ptree.pt-${style}.fit`, { style: `--n:${n}` },
-    h('div.pt-groups', [...groups.entries()].map(([par, kids]) => h('div.pt-group',
-      par ? node(par, '.pt-parent') : null,
+    h('div.pt-groups', [...groups.entries()].map(([k, kids]) => {
+      const [par, other] = k.split('|');
+      return h('div.pt-group',
+      par ? (other && fam.byId.has(other)
+        ? h('div.pt-couple', node(par, '.pt-parent'), node(other, '.pt-parent.pt-spouse'))
+        : node(par, '.pt-parent')) : null,
       par ? h('div.pt-stem') : null,
-      h('div.pt-kids', kids.map((id) => node(id)))))));
+      h('div.pt-kids', kids.map((id) => node(id))));
+    })));
   const size = SIZES[B.data.settings.size] || SIZES.sq12;
   // A first guess at the photo size; fitTrees() shrinks it if needed.
   const area = (size.w - 2 * margin(size)) * (size.h - 2 * margin(size) - 2.4);
@@ -524,8 +540,32 @@ function photoTree(page, style, { edit }) {
   return tree;
 }
 
+// Size the tree chart's type to fill its page: the largest type that fits,
+// in one, two or three columns (fewer columns when it makes little difference).
+function fitCharts(root) {
+  for (const el of root.querySelectorAll('.bp-chart')) {
+    const size = SIZES[B.data.settings.size] || SIZES.sq12;
+    const max = base(size) * 1.5;
+    const fits = () => el.scrollHeight <= el.clientHeight + 1 && el.scrollWidth <= el.clientWidth + 1;
+    let best = null;
+    for (const cols of [1, 2, 3]) {
+      el.style.columnCount = String(cols);
+      let lo = 4, hi = max;
+      for (let i = 0; i < 12; i++) {
+        const mid = (lo + hi) / 2;
+        el.style.fontSize = `${mid}pt`;
+        if (fits()) lo = mid; else hi = mid;
+      }
+      if (!best || lo > best.fs * 1.08) best = { cols, fs: lo };
+    }
+    el.style.columnCount = String(best.cols);
+    el.style.fontSize = `${Math.max(4, best.fs - 0.05).toFixed(2)}pt`;
+  }
+}
+
 // Shrink each photo tree until it fits its page.
 function fitTrees(root) {
+  fitCharts(root);
   for (const t of root.querySelectorAll('.bp-ptree')) {
     let size = parseFloat(t.style.getPropertyValue('--node')) || 1;
     for (let i = 0; i < 16 && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1) && size > 0.3; i++) {
