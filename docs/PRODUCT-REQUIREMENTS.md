@@ -305,7 +305,7 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 | Name | Domain | Why it fits | First year | Renews at |
 |---|---|---|---|---|
-| **BanyanKin** *(top pick)* | banyankin.com | Banyan (India's tree, known everywhere) + kin (family); short, unusual, easy to remember; fits today's look | $11.81 | $11.81 a year |
+| **BanyanKin** *(top pick)* | banyankin.com | Banyan (India's tree, known everywhere) + kin (family); short, unusual, easy to remember; fits today's look | $11.81 (checked) | $11.81 |
 | **Tree of Family** | treeoffamily.com | Says exactly what it is in plain English; easy for older relatives | $11.81 (checked) | $11.81 |
 | **KinTapestry** | kintapestry.com | Families woven together; warm and premium-sounding, good for the printed book | $11.81 (checked) | $11.81 |
 | **Banyan Lineage** | banyanlineage.com | Clear that it is about ancestry; dignified | $11.81 (checked) | $11.81 |
