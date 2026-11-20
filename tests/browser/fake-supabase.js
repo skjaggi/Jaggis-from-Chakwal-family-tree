@@ -8,7 +8,7 @@ if (!window.__FAKE_INTRO__) try { localStorage.setItem('blessings-intro-seen:' +
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: window.__FAKE_UNLINKED__ ? null : SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' || window.__FAKE_CLAIMED__ ? SUNIL : null, created_at: new Date().toISOString() }],
-  invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [],
+  invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [], book_drafts: [],
 };
 // Sample Library links (window.__FAKE_LIBRARY__): approved ones, plus one suggestion waiting.
 if (window.__FAKE_LIBRARY__) {

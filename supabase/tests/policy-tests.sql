@@ -336,6 +336,32 @@ set local role anon;
 select pg_temp.expect((select count(*) from public.library_links) = 1, 'visitors see approved public links only');
 rollback;
 
+-- Family book drafts: admins only
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+insert into public.book_drafts (title, data) values ('Test book', '{"settings": {"template": "heritage"}}');
+select pg_temp.expect((select count(*) from public.book_drafts) = 1, 'admin saves and reads a book draft');
+select pg_temp.expect((select created_by from public.book_drafts) = '00000000-0000-0000-0000-00000000000a', 'book draft records who made it');
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect((select count(*) from public.book_drafts) = 0, 'members cannot see book drafts');
+do $$ begin
+  begin
+    insert into public.book_drafts (title) values ('Sneaky book');
+    raise exception 'FAILED: member made a book draft';
+  exception when insufficient_privilege then raise notice 'ok: members cannot make book drafts';
+  end;
+end $$;
+set local role anon;
+do $$ begin
+  begin
+    perform 1 from public.book_drafts;
+    raise exception 'FAILED: visitor read book drafts';
+  exception when insufficient_privilege then raise notice 'ok: visitors cannot read book drafts';
+  end;
+end $$;
+rollback;
+
 -- Storage: branch photo readable only by branch
 insert into storage.objects (bucket_id, name) values ('photos-branch', pg_temp.pid('Sunil Kumar')::text || '/a.jpg');
 alter table storage.objects enable row level security;

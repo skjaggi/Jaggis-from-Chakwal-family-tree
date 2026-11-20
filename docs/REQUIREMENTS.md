@@ -139,7 +139,7 @@ From a person's card (or the pencil on any tree box): **Suggest an edit**, **Add
 
 ### 7.3 Database tables (Supabase)
 
-`people`, `person_details`, `parent_child`, `unions` (the tree); `change_requests` (suggestions and history); `invites`, `profiles`, `removed_members` (members); `blessing_adjustments` (manual blessings; points themselves come from the `blessings_ledger` view); `library_links`; `research_questions` (open questions); `not_duplicates`; `page_views` (member visits).
+`people`, `person_details`, `parent_child`, `unions` (the tree); `change_requests` (suggestions and history); `invites`, `profiles`, `removed_members` (members); `blessing_adjustments` (manual blessings; points themselves come from the `blessings_ledger` view); `library_links`; `research_questions` (open questions); `not_duplicates`; `page_views` (member visits); `book_drafts` (family books, admins only) and the private storage bucket `book-photos` (photos uploaded for a book).
 
 ### 7.4 Seed data
 
@@ -241,12 +241,26 @@ It is a preview, not a sign-in as them: the admin's own login is used to read th
 ### 8.10 Look and branding
 
 - Banyan theme: teal and gold, pastel branch colours; **light / dark** switch in the menu (remembered per device; follows the device until chosen).
-- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review and Members for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
+- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review, Members and Book for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
 - Footer on every page: "© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved." with the Quantum Nexus mark.
 
 ### 8.11 Help
 
 `site/help.html` is the user manual for every feature above, with screenshots. It is updated in the same pull request as each feature change.
+
+### 8.12 Family book maker (admins, pilot)
+
+Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) section 5.9. Menu item **Book** (`#/book`), admins only while it is tested (Sunil, 20 Nov 2026).
+
+- **Make a new book:** choose a design (**Heritage**, **Classic**, **Modern**), a page size (8 × 8, 10 × 10 or 12 × 12 in square; 8.5 × 11 in portrait; 11 × 8.5 in landscape), and where it starts (the whole tree or any person with children: that person, their descendants and spouses). Option to give pages only to people with a photo, story, spouse or children (on by default; everyone else is named on their parents' page and in the chart). Option to add 0.125 in printer's bleed.
+- **Built automatically from the tree:** cover (logo, "N generations from …", up to four early photos, optional family edition line), About this book, the family tree chart (indented, branch colours, split over pages as needed), then per generation a title page and one page per person or couple (photo, spouse photo, years, birthplace, place of passing, work, marriages, children, Notes / Story of both), and a back page (logo, copyright and Quantum Nexus mark).
+- **Heritage design** follows the coffee table book plan: cream pages, deep green and gold, faint banyan, classic serif for names and stories, clean sans for labels; Devanagari and Gurmukhi fonts for Hindi and Punjabi.
+- **Editing on screen:** every text on every page can be changed in place; every photo can be replaced (upload up to 15 MB, a tree photo, or none); story, photo and quote pages can be added; pages can be moved, hidden and reset to the tree. Changes are stored on top of the tree, so **Rebuild from the tree** brings in new people and details and keeps the changes. A book never changes the tree.
+- **Warnings:** photos under about 150 dots per inch at their printed size ("may print blurry"), text that does not fit its page, and an odd page count.
+- **Print-ready PDF:** the browser's print to PDF at the book's exact page size (plus bleed if chosen), one page per page, no editing marks. Best in Chrome or Edge on a computer.
+- **Saved in the database** (Sunil chose this over per-device on 20 Nov 2026): table `book_drafts` (title, settings and changes as JSON, who and when), admins only by row-level security; uploaded photos in the private bucket `book-photos`, admins only.
+- **Privacy:** a book contains what the admin can see, including Family branch only details; the screen says to keep the PDF within the family. The coffee table book's own approval and opt-out steps are separate (later).
+- **Later:** ordering printed copies through a print partner (Lulu, Blurb or Peecho) and payment; opening the book maker to members; per-family editions; more page types (branch chapters, world map, index, QR codes).
 
 ## 9. Hosting and technical requirements
 
@@ -288,6 +302,7 @@ It is a preview, not a sign-in as them: the admin's own login is used to read th
 | 19 Nov 2026 | Sunil: the admin can view the site as any member (a read-only preview) from the top of the site. |
 | 19 Nov 2026 | Sunil: the tree opens on the signed-in member's own line (path down to them, them and their descendants open, other branches closed). |
 | 20 Nov 2026 | Sunil: members (not visitors) get a "Start tree from" drop-down of people with children, with a generation badge and clickable ancestor path; not remembered between visits; married-in spouses still shown. The start line and the "you are here" bar share one line. |
+| 20 Nov 2026 | Sunil: pilot the automatic family book maker on this site, admins only while testing; book changes saved in the database. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -302,6 +317,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | **Family book maker** (admins, pilot): Heritage, Classic and Modern designs, sizes up to 12 × 12 in, built from the tree, edited on screen, warnings, print-ready PDF; new `book_drafts` table and `book-photos` bucket. |
 | 20 Nov 2026 | | Started the product requirements for a generic family tree product any family can set up ([PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md)). No change to this site. |
 | 20 Nov 2026 | | **Start tree from** drop-down for members, with "Gen N · N generations above" badge and ancestor path; start line and "you are here" bar combined into one line. |
 | 19 Nov 2026 | | View as opens on the viewed member's own line; members not yet claimed open on their invitation's box. |
