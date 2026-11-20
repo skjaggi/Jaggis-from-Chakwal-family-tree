@@ -52,6 +52,14 @@ function go({ view = state.view, root = state.root, selected = state.selected } 
 let lastRoot = null;
 let lastView = null;
 let needsRedraw = false;
+// Signed-in members with a claimed box open the tree on their own line (the
+// path down to them, them and everyone below; other branches closed). This
+// happens on the first look at the main tree, and again right after signing
+// in or having a claim approved. `lineFor` remembers whose line was opened.
+let lineFor = null;
+function myLineId() {
+  return store.signedIn && !store.preview ? store.claimedId : null;
+}
 async function route() {
   parseHash();
   // "&edit=1" (from the Dashboard's missing-field lists): open the card and its edit form.
@@ -99,7 +107,16 @@ async function route() {
   $('outline').hidden = state.view !== 'outline';
   $('tree-tools').hidden = state.view !== 'tree';
   if (state.view === 'tree') {
-    if (tree.rootId !== state.root) tree.setRoot(state.root);
+    const mine = myLineId();
+    if (mine && mine !== lineFor && !state.selected && state.root === store.fam.defaultRootId && tree.openLine(state.root, mine)) {
+      lineFor = mine;
+      needsRedraw = false;
+    } else if (!mine && lineFor && !state.selected && state.root === store.fam.defaultRootId) {
+      // Signed out, or now looking as someone without a box: back to the usual view.
+      lineFor = null;
+      tree.setRoot(state.root);
+      needsRedraw = false;
+    } else if (tree.rootId !== state.root) tree.setRoot(state.root);
     else if (needsRedraw || lastView !== 'tree') {
       tree.render();
       if (lastView !== 'tree') tree.fit();
