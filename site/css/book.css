@@ -128,7 +128,7 @@ body[data-view="book"] .page { max-width: 1280px; }
 /* Tree chart */
 .bp-chart { flex: 1 1 auto; min-height: 0; overflow: hidden; column-gap: 0.35in; column-fill: auto; font-family: Inter, system-ui, sans-serif; font-size: 0.8em; line-height: 1.32; }
 .bp-chart.cols-2 { column-count: 2; } .bp-chart.cols-3 { column-count: 3; }
-.bp-row { padding-left: calc(var(--d) * 0.85em + 0.5em); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid var(--br, #c9c2ad); break-inside: avoid; }
+.bp-row { padding-left: calc(var(--d) * 0.85em + 1.5em); text-indent: -1em; overflow-wrap: anywhere; border-left: 3px solid var(--br, #c9c2ad); break-inside: avoid; }
 .bp-row-name { font-weight: 600; }
 .bp-row-years, .bp-row-sp { color: var(--soft); }
 .bp-row[data-branch="1"], .bp[data-branch="1"] { --br: #2a78d6; } .bp-row[data-branch="2"], .bp[data-branch="2"] { --br: #eb6834; }
@@ -338,3 +338,12 @@ body[data-view="book"] .page { max-width: 1280px; }
 .pt-parent .pt-name { white-space: nowrap; }
 /* The banyan tree style draws its own big tree, so the page's faint one steps back. */
 .tpl-heritage .t-gen:has(.pt-banyan)::before { display: none; }
+
+/* A parent and their spouse side by side, the children below both. */
+.pt-couple { display: flex; align-items: flex-start; }
+.pt-couple { position: relative; }
+.pt-couple .pt-node { width: calc(var(--node) * 1.0); }
+.pt-couple .pt-name { white-space: normal; overflow-wrap: normal; word-break: normal; }
+.pt-couple .pt-ph { position: relative; z-index: 1; }
+.pt-couple::before { content: ""; position: absolute; left: 25%; right: 25%; top: calc(var(--node) * 0.31); height: var(--pt-lw); background: var(--pt-line); }
+.pt-arch .pt-couple::before { top: calc(var(--node) * 0.39); }

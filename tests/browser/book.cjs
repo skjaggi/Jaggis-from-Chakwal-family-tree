@@ -55,6 +55,11 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     // Everyone in the tree descends from Bhanna Mal, so the chart lists all the blood line.
     const rows = await pg.$$eval('.bp-row', (els) => els.length);
     if (rows < 40) fail(`${tpl}: chart has ${rows} rows`);
+    // The chart fits on one page, its type sized up to fill it.
+    if (pages.includes('chart:2')) fail(`${tpl}: chart split over pages`);
+    const chartPt = await pg.$eval('.bp-chart', (el) => parseFloat(el.style.fontSize));
+    if (!(chartPt > 9)) fail(`${tpl}: chart type only ${chartPt} pt`);
+    if (await pg.$('.bk-page[data-key="chart:1"] .bp.has-issue')) fail(`${tpl}: chart does not fit its page`);
     // The 1933 plaque photo is too small for a 12 x 12 page: a warning shows.
     const kesar = seed.people.find((p) => p.given_name === 'Kesar Mal');
     await pg.waitForTimeout(800);
@@ -67,6 +72,9 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     const gen5 = seed.people.filter((p) => p.generation === 5 && seed.parent_child.some((l) => l.child_id === p.id)).length; // born into the family
     const nodes = await pg.$$eval('.bk-page[data-key="gen:5"] .pt-kids .pt-node', (els) => els.length);
     if (nodes !== gen5) fail(`${tpl}: Generation 5 photo tree has ${nodes} people, expected ${gen5}`);
+    // A parent's husband or wife stands beside them, above the children.
+    const couples = await pg.$$eval('.bk-page[data-key="gen:6"] .pt-couple', (els) => els.map((e) => e.innerText.replace(/\s+/g, ' ')));
+    if (!couples.some((c) => /Harbans Lal.*Shakuntala/.test(c))) fail(`${tpl}: no Harbans Lal + Shakuntala couple in Generation 6 (${couples.slice(0, 3)})`);
     const styles = await pg.$$eval('.bk-page[data-key^="gen:"] .bp-ptree', (els) => els.map((e) => [...e.classList].find((c) => c.startsWith('pt-'))));
     if (new Set(styles).size !== styles.length) fail(`${tpl}: generation trees repeat a style (${styles})`);
     if (await pg.$('.bk-page[data-key^="gen:"] .bp.has-issue')) fail(`${tpl}: a photo tree does not fit its page`);
