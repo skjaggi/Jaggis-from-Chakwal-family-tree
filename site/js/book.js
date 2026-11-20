@@ -245,6 +245,7 @@ let saveTimer = null;
 let saving = Promise.resolve();
 
 const edits = (key) => (B.data.edits ||= {})[key] || {};
+const isGone = (key, id) => !!edits(key).gone?.includes(id);
 const setEdit = (key, fn) => {
   const e = { ...edits(key) };
   fn(e);
@@ -252,6 +253,7 @@ const setEdit = (key, fn) => {
   if (Object.keys(e.ph || {}).length === 0) delete e.ph;
   if (!e.hidden) delete e.hidden;
   if (e.adds && !e.adds.length) delete e.adds;
+  if (e.gone && !e.gone.length) delete e.gone;
   if (Object.keys(e).length) B.data.edits[key] = e;
   else delete B.data.edits[key];
   queueSave();
@@ -259,6 +261,7 @@ const setEdit = (key, fn) => {
 
 // An editable piece of text: the tree's words unless the admin changed them.
 function text(key, field, auto, { tag = 'div', cls = '', ph = 'Click to add text', edit }) {
+  if (isGone(key, `f:${field}`)) return null;
   const own = edits(key).f?.[field];
   const value = own ?? auto ?? '';
   const el = h(`${tag}.bp-ed${cls ? `.${cls}` : ''}`, value);
@@ -267,6 +270,8 @@ function text(key, field, auto, { tag = 'div', cls = '', ph = 'Click to add text
   el.setAttribute('contenteditable', 'plaintext-only');
   if (el.contentEditable !== 'plaintext-only') el.setAttribute('contenteditable', 'true');
   el.dataset.ph = ph;
+  el.dataset.delKey = key;
+  el.dataset.del = `f:${field}`;
   el.spellcheck = true;
   el.addEventListener('blur', () => {
     const v = el.innerText.replace(/\u00a0/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
@@ -294,6 +299,7 @@ function photoSrc(key, slot, autoPersonId) {
 
 // A photo frame. Clicking it (while editing) opens the photo chooser.
 function photo(key, slot, autoPersonId, { cls = '', label = '', edit, monogram = '' }) {
+  if (isGone(key, `p:${slot}`)) return null;
   const src = photoSrc(key, slot, autoPersonId);
   const frame = h(`div.bp-photo${cls ? `.${cls}` : ''}`, { 'data-slot': slot },
     src ? h('img', { src, alt: label })
@@ -301,6 +307,8 @@ function photo(key, slot, autoPersonId, { cls = '', label = '', edit, monogram =
   if (!src) frame.classList.add('empty');
   if (edit) {
     frame.classList.add('clickable');
+    frame.dataset.delKey = key;
+    frame.dataset.del = `p:${slot}`;
     frame.title = 'Click to replace this photo';
     frame.append(h('span.bp-photo-hint', src ? 'Replace photo' : 'Add a photo'));
     frame.addEventListener('click', () => choosePhoto(key, slot, autoPersonId, label));
@@ -324,7 +332,7 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
     // Up to four photos from the earliest generations.
     const withPhotos = descendants(fam, view.rootId).map((x) => x.id).filter((id) => store.photoUrls.has(id)).slice(0, 4);
     const strip = [0, 1, 2, 3].map((i) => photo(key, `c${i}`, withPhotos[i], { cls: 'bp-cover-ph', edit, label: 'Cover photo' }))
-      .filter((el) => edit || !el.classList.contains('empty'));
+      .filter((el) => el && (edit || !el.classList.contains('empty')));
     body = [
       h('div.bp-cover-frame'),
       h('img.bp-cover-logo', { src: 'img/brand/jaggis-logo3-800.webp', alt: 'Jaggis of Chakwal: Legacy, Family, Heritage' }),
@@ -399,7 +407,7 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
   }
   const showFoot = !['cover'].includes(page.type);
   const pageEl = h(`div.bp.t-${page.type}`, { 'data-key': key },
-    h('div.bp-inner', body, addedItems(key, { edit }), showFoot ? runFoot(n, edit) : null));
+    h('div.bp-inner', body, addedItems(key, { edit }), showFoot ? runFoot(n, edit) : null, placedItems(key, { edit })));
   if (page.type === 'family') {
     const br = branchesOf(fam).of.get(page.id);
     if (br?.slot) pageEl.dataset.branch = br.slot;
@@ -427,8 +435,9 @@ function familyPage(page, { edit }) {
   ].filter(([, v]) => v);
   const factsAuto = facts.map(([k, v]) => `${k}: ${v}`).join('\n');
   const own = edits(key).f?.facts;
-  const factsEl = edit || own == null
-    ? h('dl.bp-facts', facts.map(([k, v]) => [h('dt', k), h('dd', v)]))
+  const factsGone = isGone(key, 'f:facts');
+  const factsEl = !factsGone && (edit || own == null)
+    ? h('dl.bp-facts', edit ? { 'data-del-key': key, 'data-del': 'f:facts' } : {}, facts.map(([k, v]) => [h('dt', k), h('dd', v)]))
     : null;
   const layout = edits(key).layout || page.layoutAuto || 'left';
   return [
@@ -446,7 +455,7 @@ function familyPage(page, { edit }) {
         text(key, 'name', fullName(p), { tag: 'h1', cls: 'bp-name', edit }),
         text(key, 'years', lifeLine(p, d), { cls: 'bp-years', edit, ph: 'Years' }),
         own != null ? text(key, 'facts', factsAuto, { cls: 'bp-facts-text', edit }) : factsEl,
-        edit && own == null ? h('button.bp-mini', { type: 'button', onclick: (e) => { e.stopPropagation(); setEdit(key, (x) => { x.f = { ...(x.f || {}), facts: factsAuto }; }); rerenderPage(key); } }, 'Edit these lines') : null,
+        edit && own == null && !factsGone ? h('button.bp-mini', { type: 'button', onclick: (e) => { e.stopPropagation(); setEdit(key, (x) => { x.f = { ...(x.f || {}), facts: factsAuto }; }); rerenderPage(key); } }, 'Edit these lines') : null,
         h('div.bp-rule'),
         text(key, 'headline', '', { tag: 'h2', cls: 'bp-headline', edit, ph: 'Optional: a short headline, like a favourite saying' }),
         text(key, 'story', [d.notes, ...spouses.map((sp) => { const n = fam.details.get(sp.person.id)?.notes; return n ? `${sp.person.given_name}: ${n}` : ''; })].filter(Boolean).join('\n\n'), { cls: 'bp-story.fit', edit, ph: 'Add a story or memory' }),
@@ -455,32 +464,146 @@ function familyPage(page, { edit }) {
 }
 
 // Photos and text boxes the admin added to a page ("+ Photo", "+ Text").
-// They sit below the page's own content: photos side by side with a caption
-// each, text boxes underneath.
+// New ones sit below the page's own content: photos side by side with a
+// caption each, text boxes underneath. Once dragged by their ✥ handle they
+// stay where they were put (x, y and width as fractions of the page area).
+function removeAdd(key, id) {
+  setEdit(key, (x) => {
+    x.adds = (x.adds || []).filter((a) => a.id !== id);
+    if (x.f) delete x.f[`a:${id}`];
+    if (x.ph) delete x.ph[`a:${id}`];
+  });
+}
+
+function addEl(key, a, { edit }) {
+  const el = a.t === 'photo'
+    ? h('figure.bp-add-ph.bp-item', { 'data-add': a.id },
+      photo(key, `a:${a.id}`, null, { cls: 'bp-add-frame', edit, label: 'Added photo' }),
+      text(key, `a:${a.id}`, '', { cls: 'bp-caption', edit, ph: 'Caption: names, place, year' }))
+    : h('div.bp-add-text.bp-item', { 'data-add': a.id },
+      text(key, `a:${a.id}`, '', { cls: 'bp-add-ed', edit, ph: 'Write here: a memory, a saying, a note' }));
+  if (a.x != null) {
+    el.classList.add('placed');
+    el.style.left = `${a.x * 100}%`;
+    el.style.top = `${a.y * 100}%`;
+    el.style.width = `${a.w * 100}%`;
+  }
+  if (edit) {
+    el.append(
+      h('button.bp-move', { type: 'button', title: 'Drag to move this anywhere on the page', 'aria-label': 'Move', onpointerdown: (e) => dragItem(e, key, a.id, 'move') }, '✥'),
+      h('button.bp-del', { type: 'button', title: 'Remove this from the page', 'aria-label': 'Remove', onclick: (e) => { e.stopPropagation(); removeAdd(key, a.id); rerenderPage(key); } }, '×'),
+      h('span.bp-grip', { title: 'Drag to make it bigger or smaller', onpointerdown: (e) => dragItem(e, key, a.id, 'size') }));
+  }
+  return el;
+}
+
 function addedItems(key, { edit }) {
-  const adds = edits(key).adds || [];
+  const adds = (edits(key).adds || []).filter((a) => a.x == null);
   if (!adds.length) return null;
-  const remove = (id) => (e) => {
-    e.stopPropagation();
-    setEdit(key, (x) => {
-      x.adds = (x.adds || []).filter((a) => a.id !== id);
-      if (!x.adds.length) delete x.adds;
-      if (x.f) delete x.f[`a:${id}`];
-      if (x.ph) delete x.ph[`a:${id}`];
-    });
-    rerenderPage(key);
-  };
-  const del = (id) => (edit ? h('button.bp-del', { type: 'button', title: 'Remove this from the page', 'aria-label': 'Remove', onclick: remove(id) }, '×') : null);
   const photos = adds.filter((a) => a.t === 'photo');
   const texts = adds.filter((a) => a.t === 'text');
   return h('div.bp-adds',
-    photos.length ? h(`div.bp-add-photos.n${Math.min(photos.length, 4)}`, photos.map((a) => h('figure.bp-add-ph',
-      photo(key, `a:${a.id}`, null, { cls: 'bp-add-frame', edit, label: 'Added photo' }),
-      text(key, `a:${a.id}`, '', { cls: 'bp-caption', edit, ph: 'Caption: names, place, year' }),
-      del(a.id)))) : null,
-    texts.map((a) => h('div.bp-add-text',
-      text(key, `a:${a.id}`, '', { cls: 'bp-add-ed', edit, ph: 'Write here: a memory, a saying, a note' }),
-      del(a.id))));
+    photos.length ? h(`div.bp-add-photos.n${Math.min(photos.length, 4)}`, photos.map((a) => addEl(key, a, { edit }))) : null,
+    texts.map((a) => addEl(key, a, { edit })));
+}
+
+function placedItems(key, { edit }) {
+  const adds = (edits(key).adds || []).filter((a) => a.x != null);
+  return h('div.bp-float', adds.map((a) => addEl(key, a, { edit })));
+}
+
+// Drag an added photo or text box (by its ✥ handle) or resize it (by its
+// corner). The page is drawn scaled down, so pointer moves are measured
+// against the page area's size on screen.
+function dragItem(e, key, id, mode) {
+  e.preventDefault();
+  e.stopPropagation();
+  const handle = e.currentTarget;
+  const item = handle.closest('.bp-item');
+  const area = item.closest('.bp-inner');
+  const layer = area.querySelector(':scope > .bp-float');
+  const ar = area.getBoundingClientRect();
+  const ir = item.getBoundingClientRect();
+  let x = (ir.left - ar.left) / ar.width;
+  let y = (ir.top - ar.top) / ar.height;
+  let w = ir.width / ar.width;
+  if (!item.classList.contains('placed')) {
+    item.classList.add('placed');
+    layer.append(item);
+  }
+  const place = () => {
+    w = Math.min(1, Math.max(0.08, w));
+    x = Math.min(1 - w, Math.max(0, x));
+    y = Math.min(0.97, Math.max(0, y));
+    item.style.left = `${x * 100}%`;
+    item.style.top = `${y * 100}%`;
+    item.style.width = `${w * 100}%`;
+  };
+  place();
+  const start = { px: e.clientX, py: e.clientY, x, y, w };
+  item.classList.add('dragging');
+  handle.setPointerCapture?.(e.pointerId);
+  const move = (ev) => {
+    const dx = (ev.clientX - start.px) / ar.width;
+    const dy = (ev.clientY - start.py) / ar.height;
+    if (mode === 'move') { x = start.x + dx; y = start.y + dy; } else { w = start.w + dx; }
+    place();
+  };
+  const up = () => {
+    handle.removeEventListener('pointermove', move);
+    handle.removeEventListener('pointerup', up);
+    handle.removeEventListener('pointercancel', up);
+    item.classList.remove('dragging');
+    setEdit(key, (ed) => { ed.adds = (ed.adds || []).map((a) => (a.id === id ? { ...a, x: +x.toFixed(4), y: +y.toFixed(4), w: +w.toFixed(4) } : a)); });
+    checkPage(item.closest('.bp'));
+  };
+  handle.addEventListener('pointermove', move);
+  handle.addEventListener('pointerup', up);
+  handle.addEventListener('pointercancel', up);
+}
+
+// One "Delete" button that floats over whichever text or photo the pointer
+// (or keyboard focus) is on, anywhere in the book.
+let delBtn = null;
+let delTarget = null;
+let delHide = null;
+function setupDelete(pagesEl) {
+  delBtn?.remove();
+  delBtn = h('button.bk-del-float', { type: 'button', title: 'Delete this from the page (Undo changes brings it back)', 'aria-label': 'Delete this' }, '🗑 Delete');
+  document.body.append(delBtn);
+  const show = (el) => {
+    clearTimeout(delHide);
+    delTarget = el;
+    const r = el.getBoundingClientRect();
+    // Just outside the item's right edge, so it never covers what you click;
+    // above its corner when there is no room on the right.
+    const right = r.right + 92 < innerWidth;
+    delBtn.style.top = `${Math.max(4, right ? r.top : r.top - 28)}px`;
+    delBtn.style.left = `${right ? r.right + 6 : Math.max(4, r.right - 84)}px`;
+    delBtn.classList.add('on');
+  };
+  const hideSoon = () => { clearTimeout(delHide); delHide = setTimeout(() => { delBtn?.classList.remove('on'); delTarget = null; }, 350); };
+  const find = (t) => t?.closest?.('[data-del]');
+  pagesEl.addEventListener('pointerover', (e) => { const el = find(e.target); if (el) show(el); });
+  pagesEl.addEventListener('pointerout', (e) => { if (find(e.target) && !find(e.relatedTarget)) hideSoon(); });
+  pagesEl.addEventListener('focusin', (e) => { const el = find(e.target); if (el) show(el); });
+  pagesEl.addEventListener('scroll', hideSoon, { passive: true });
+  addEventListener('scroll', hideSoon, { passive: true });
+  delBtn.addEventListener('pointerover', () => clearTimeout(delHide));
+  delBtn.addEventListener('pointerout', hideSoon);
+  delBtn.addEventListener('pointerdown', (e) => e.preventDefault()); // keep the text's focus
+  delBtn.addEventListener('click', () => {
+    const el = delTarget;
+    if (!el?.isConnected) return;
+    const key = el.dataset.delKey;
+    const id = el.dataset.del;
+    delBtn.classList.remove('on');
+    const add = /^[fp]:a:(.+)$/.exec(id);
+    if (add) removeAdd(key, add[1]);
+    else setEdit(key, (x) => { x.gone = [...new Set([...(x.gone || []), id])]; });
+    rerenderPage(key);
+    toast(add ? 'Removed from the page.' : 'Deleted. "Undo changes" above the page brings it back.');
+  });
 }
 
 function addItem(key, t) {
@@ -682,6 +805,7 @@ function scaleAll() {
     box.style.width = `${pw * s}px`;
     box.style.height = `${ph * s}px`;
     box.firstElementChild.style.transform = `scale(${s})`;
+    box.firstElementChild.style.setProperty('--ui', String(1 / s)); // keeps the editing handles a usable size on screen
   }
 }
 
@@ -792,7 +916,7 @@ function pageCard(k) {
   const hidden = !!edits(k).hidden;
   const n = pageNumber(k);
   const i = view.order.indexOf(k);
-  const edited = !!(edits(k).f || edits(k).ph || edits(k).adds || edits(k).layout || edits(k).style);
+  const edited = !!(edits(k).f || edits(k).ph || edits(k).adds || edits(k).layout || edits(k).style || edits(k).gone);
   const el = renderPage(page, { edit: !hidden, n });
   const box = h('div.bk-scale', h('div.bk-doc', el));
   sizeVars(box.firstElementChild);
@@ -807,7 +931,7 @@ function pageCard(k) {
         h('button.btn.small', { type: 'button', onclick: () => { setEdit(k, (e) => { e.hidden = !hidden; }); renderPages(); } }, hidden ? 'Show' : 'Hide'),
         edited && !page.extra ? h('button.btn.small', { type: 'button', title: 'Go back to what the tree says, for this page', onclick: async () => {
           if (!await confirmDialog(`Undo every change on "${labelOf(k)}" and go back to what the tree says?`, 'Undo changes')) return;
-          setEdit(k, (e) => { delete e.f; delete e.ph; delete e.adds; delete e.layout; delete e.style; });
+          setEdit(k, (e) => { delete e.f; delete e.ph; delete e.adds; delete e.layout; delete e.style; delete e.gone; });
           rerenderPage(k);
         } }, 'Undo changes') : null,
         hidden ? null : h('button.btn.small', { type: 'button', title: 'Add another photo to this page', onclick: () => addItem(k, 'photo') }, '+ Photo'),
@@ -845,6 +969,127 @@ function afterRender() {
   requestAnimationFrame(run);
   document.fonts?.ready.then(run);
   setTimeout(run, 1500);
+}
+
+// ------------------------------------------------------------------ book preview
+
+// The whole book as a book: the cover on its own, then two pages side by
+// side as they will face each other once printed and bound, turned with a
+// page-turn (arrows, the keyboard, a click on a page, or a swipe). One page
+// at a time on a phone.
+function openFlipbook(startIndex = 0) {
+  document.querySelector('.bk-flip')?.remove();
+  const keys = visibleOrder();
+  if (!keys.length) return;
+  const size = SIZES[B.data.settings.size] || SIZES.sq12;
+  const bleed = B.data.settings.bleed ? BLEED : 0;
+  const pw = (size.w + 2 * bleed) * 96;
+  const ph = (size.h + 2 * bleed) * 96;
+  const single = () => innerWidth < 760;
+  // Spreads: [left, right] page indexes; the cover is a right-hand page.
+  const spreads = () => {
+    if (single()) return keys.map((_, i) => [i]);
+    const out = [[null, 0]];
+    for (let i = 1; i < keys.length; i += 2) out.push([i, i + 1 < keys.length ? i + 1 : null]);
+    return out;
+  };
+  let list = spreads();
+  let at = Math.max(0, list.findIndex((sp) => sp.includes(startIndex)));
+  let busy = false;
+  let swiped = false;
+  const stage = h('div.bk-flip-stage');
+  const where = h('span.bk-flip-where');
+  const prevBtn = h('button.bk-flip-arrow.prev', { type: 'button', 'aria-label': 'Previous pages', title: 'Previous (←)', onclick: () => go(-1) }, '‹');
+  const nextBtn = h('button.bk-flip-arrow.next', { type: 'button', 'aria-label': 'Next pages', title: 'Next (→)', onclick: () => go(1) }, '›');
+  const slider = h('input.bk-flip-slider', { type: 'range', min: 0, max: list.length - 1, value: at, 'aria-label': 'Go to page', oninput: (e) => { at = +e.target.value; draw(); } });
+  const close = () => { overlay.remove(); removeEventListener('keydown', onKey); removeEventListener('resize', onResize); document.body.classList.remove('bk-flip-open'); };
+  const overlay = h('div.bk-flip', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Book preview' },
+    h('div.bk-flip-top',
+      h('strong.bk-flip-title', B.title),
+      where,
+      h('button.btn.small', { type: 'button', onclick: close }, '✕ Close preview')),
+    h('div.bk-flip-main', prevBtn, stage, nextBtn),
+    h('div.bk-flip-bottom', slider, h('span.muted.small', 'Click a page or use ← → to turn pages. Esc closes.')));
+  const scale = () => {
+    const sw = stage.clientWidth - 8;
+    const sh = stage.clientHeight - 8;
+    return Math.min(sh / ph, sw / (single() ? pw : 2 * pw));
+  };
+  // One page, drawn at real size and scaled down, or a blank space.
+  const pageBox = (i, s, side) => {
+    const box = h(`div.bk-flip-page.${side}`, { style: `width:${pw * s}px;height:${ph * s}px` });
+    if (i == null) { box.classList.add('blank'); return box; }
+    const doc = h('div.bk-doc', { style: `transform:scale(${s});transform-origin:0 0` }, renderPage(view.byKey.get(keys[i]), { edit: false, n: i + 1 }));
+    sizeVars(doc);
+    box.append(doc);
+    if (side !== 'leaf') box.addEventListener('click', () => { if (!swiped) go(side === 'left' && !single() ? -1 : 1); });
+    return box;
+  };
+  const fit = (el) => { requestAnimationFrame(() => fitTrees(el)); document.fonts?.ready.then(() => fitTrees(el)); };
+  const label = () => {
+    const sp = list[at].filter((x) => x != null).map((x) => x + 1);
+    where.textContent = sp.length > 1 ? `Pages ${sp[0]}–${sp[1]} of ${keys.length}` : `Page ${sp[0]} of ${keys.length}`;
+    prevBtn.disabled = at === 0;
+    nextBtn.disabled = at === list.length - 1;
+    slider.value = at;
+  };
+  const spread = (sp, s) => {
+    const row = h('div.bk-flip-spread');
+    if (single()) row.append(pageBox(sp[0], s, 'right'));
+    else row.append(pageBox(sp[0], s, 'left'), h('div.bk-flip-spine'), pageBox(sp[1], s, 'right'));
+    return row;
+  };
+  const draw = () => {
+    const s = scale();
+    const row = spread(list[at], s);
+    clear(stage, row);
+    fit(row);
+    label();
+  };
+  // Turn one leaf: the page being turned rotates about the spine and shows
+  // the next (or previous) page on its back.
+  const go = (d) => {
+    const to = at + d;
+    if (busy || to < 0 || to >= list.length) return;
+    if (single() || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      at = to;
+      draw();
+      return;
+    }
+    busy = true;
+    const s = scale();
+    const cur = list[at];
+    const nxt = list[to];
+    // Underneath: the page that stays, and the far page of the new spread.
+    const under = d > 0 ? [cur[0], nxt[1]] : [nxt[0], cur[1]];
+    const row = spread(under, s);
+    const leaf = h(`div.bk-leaf.${d > 0 ? 'fwd' : 'back'}`, { style: `width:${pw * s}px;height:${ph * s}px` },
+      h('div.bk-leaf-face.front', pageBox(d > 0 ? cur[1] : cur[0], s, 'leaf')),
+      h('div.bk-leaf-face.back', pageBox(d > 0 ? nxt[0] : nxt[1], s, 'leaf')));
+    row.append(leaf);
+    clear(stage, row);
+    fit(row);
+    requestAnimationFrame(() => requestAnimationFrame(() => leaf.classList.add('turn')));
+    const done = () => { at = to; busy = false; draw(); };
+    leaf.addEventListener('transitionend', done, { once: true });
+    setTimeout(() => { if (busy) done(); }, 1200);
+  };
+  const onKey = (e) => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(-1);
+  };
+  let resizeT;
+  const onResize = () => { clearTimeout(resizeT); resizeT = setTimeout(() => { const first = list[at].find((x) => x != null); list = spreads(); slider.max = list.length - 1; at = Math.max(0, list.findIndex((sp) => sp.includes(first))); draw(); }, 120); };
+  let sx = null;
+  stage.addEventListener('pointerdown', (e) => { sx = e.clientX; });
+  stage.addEventListener('pointerup', (e) => { if (sx != null && Math.abs(e.clientX - sx) > 50) { swiped = true; setTimeout(() => { swiped = false; }, 350); go(e.clientX < sx ? 1 : -1); } sx = null; }, true);
+  addEventListener('keydown', onKey);
+  addEventListener('resize', onResize);
+  document.body.classList.add('bk-flip-open');
+  document.body.append(overlay);
+  draw();
+  overlay.querySelector('.bk-flip-top button')?.focus();
 }
 
 // ------------------------------------------------------------------ print
@@ -974,6 +1219,7 @@ async function openBook(container, id) {
       toast('Rebuilt: new people and details from the tree are in, and your changes are kept.');
     } }, '↻ Rebuild from the tree'),
     h('button.btn.small', { type: 'button', onclick: () => addPageMenu(null) }, '+ Add a page'),
+    h('button.btn.small', { type: 'button', id: 'bk-preview-btn', title: 'See the book as a book: two pages side by side, turn the pages', onclick: () => openFlipbook() }, '📖 Preview as a book'),
     h('button.btn.small.primary', { type: 'button', onclick: printBook }, 'Make the print-ready PDF'),
     h('span.muted.small', { id: 'bk-saved' }, 'Saved'));
   clear(container,
@@ -985,6 +1231,7 @@ async function openBook(container, id) {
         h('p.muted.small', 'Click any words on a page to change them, and any photo to replace it. Changes save by themselves.'),
         h('details.bk-nav-wrap', { open: innerWidth > 900 }, h('summary', 'All pages'), h('nav.bk-nav', { id: 'bk-nav' }))),
       h('div.bk-pages', { id: 'bk-pages' })));
+  setupDelete(document.getElementById('bk-pages'));
   renderPages();
 }
 addEventListener('resize', () => { if (document.getElementById('bk-pages')) scaleAll(); });

@@ -347,3 +347,49 @@ body[data-view="book"] .page { max-width: 1280px; }
 .pt-couple .pt-ph { position: relative; z-index: 1; }
 .pt-couple::before { content: ""; position: absolute; left: 25%; right: 25%; top: calc(var(--node) * 0.31); height: var(--pt-lw); background: var(--pt-line); }
 .pt-arch .pt-couple::before { top: calc(var(--node) * 0.39); }
+
+/* ---------- moving added photos and text, deleting anything */
+.bp-float { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.bp-float > .bp-item { pointer-events: auto; }
+.bp-item.placed { position: absolute; margin: 0; }
+.bp-item.dragging { outline: 2px dashed #17706b; outline-offset: 2px; opacity: 0.92; }
+.bp-move { position: absolute; top: calc(-11px * var(--ui, 1)); left: calc(-11px * var(--ui, 1)); z-index: 4; width: calc(24px * var(--ui, 1)); height: calc(24px * var(--ui, 1)); padding: 0; border-radius: 50%; border: 1px solid #b9c4bd; background: #fff; color: #17706b; font: 700 calc(15px * var(--ui, 1))/1 Inter, system-ui, sans-serif; cursor: grab; touch-action: none; }
+.bp-move:active { cursor: grabbing; }
+.bp-grip { position: absolute; right: calc(-8px * var(--ui, 1)); bottom: calc(-8px * var(--ui, 1)); z-index: 4; width: calc(16px * var(--ui, 1)); height: calc(16px * var(--ui, 1)); border-radius: 0.04in; background: #17706b; border: 2px solid #fff; cursor: nwse-resize; touch-action: none; }
+.bp-item:not(:hover):not(:focus-within):not(.dragging) > :is(.bp-move, .bp-grip, .bp-del) { opacity: 0.35; }
+.bk-del-float { position: fixed; z-index: 60; display: none; padding: 3px 9px; border-radius: 999px; border: 1px solid #e4b4b0; background: #fff; color: #b3261e; font: 600 12px Inter, system-ui, sans-serif; box-shadow: 0 2px 6px rgb(0 0 0 / 0.18); cursor: pointer; }
+.bk-del-float.on { display: block; }
+.bk-del-float:hover { background: #b3261e; color: #fff; }
+
+/* ---------- book preview with page turning */
+body.bk-flip-open { overflow: hidden; }
+.bk-flip { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; background: radial-gradient(ellipse at 50% 40%, #3a3a36, #1b1b19); color: #eee; }
+.bk-flip-top, .bk-flip-bottom { display: flex; align-items: center; gap: 12px; padding: 10px 16px; flex-wrap: wrap; }
+.bk-flip-top .bk-flip-where { margin-right: auto; color: #cfcac0; font-size: 0.9rem; }
+.bk-flip-title { font-size: 1rem; }
+.bk-flip-bottom { justify-content: center; }
+.bk-flip-bottom .muted { color: #aaa; }
+.bk-flip-slider { width: min(420px, 70vw); }
+.bk-flip-main { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; gap: 6px; padding: 0 6px; }
+.bk-flip-stage { flex: 1 1 auto; height: 100%; min-width: 0; display: flex; align-items: center; justify-content: center; perspective: 2400px; touch-action: pan-y; }
+.bk-flip-arrow { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgb(255 255 255 / 0.14); color: #fff; font-size: 30px; line-height: 1; cursor: pointer; }
+.bk-flip-arrow:disabled { opacity: 0.25; cursor: default; }
+.bk-flip-spread { position: relative; display: flex; box-shadow: 0 18px 40px rgb(0 0 0 / 0.55); transform-style: preserve-3d; }
+.bk-flip-page { position: relative; overflow: hidden; background: #fff; cursor: pointer; }
+.bk-flip-page.blank { background: transparent; cursor: default; }
+.bk-flip-page.left::after, .bk-flip-page.right::after { content: ""; position: absolute; top: 0; bottom: 0; width: 9%; pointer-events: none; }
+.bk-flip-page.left::after { right: 0; background: linear-gradient(90deg, transparent, rgb(0 0 0 / 0.16)); }
+.bk-flip-page.right::after { left: 0; background: linear-gradient(270deg, transparent, rgb(0 0 0 / 0.16)); }
+.bk-flip-page.blank::after { display: none; }
+.bk-flip-spine { width: 2px; background: rgb(0 0 0 / 0.35); }
+.bk-leaf { position: absolute; top: 0; transform-style: preserve-3d; transition: transform 0.75s cubic-bezier(0.45, 0.05, 0.3, 1); z-index: 5; }
+.bk-leaf.fwd { right: 0; transform-origin: left center; }
+.bk-leaf.back { left: 0; transform-origin: right center; }
+.bk-leaf.fwd.turn { transform: rotateY(-180deg); }
+.bk-leaf.back.turn { transform: rotateY(180deg); }
+.bk-leaf-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; background: #fff; }
+.bk-leaf-face.back { transform: rotateY(180deg); }
+.bk-leaf-face .bk-flip-page { cursor: default; }
+.bk-leaf-face > .blank { background: transparent; }
+@media (max-width: 759px) { .bk-flip-arrow { width: 34px; height: 34px; font-size: 24px; } .bk-flip-top, .bk-flip-bottom { padding: 8px 10px; } }
+.bp-item > .bp-del { top: calc(-11px * var(--ui, 1)); right: calc(-11px * var(--ui, 1)); width: calc(24px * var(--ui, 1)); height: calc(24px * var(--ui, 1)); padding: 0; font-size: calc(16px * var(--ui, 1)); }
