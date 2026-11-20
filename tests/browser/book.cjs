@@ -182,6 +182,13 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
       await card.scrollIntoViewIfNeeded(); await pg.waitForTimeout(200);
       await pg.screenshot({ path: `${OUT}${tpl}-12-editor-warning.png` });
     }
+    // "A page for everyone" gives the people without a photo, story, spouse or children a page too.
+    const famBefore = (await pg.$$('.bk-page[data-key^="fam:"]')).length;
+    await pg.check('#bk-all-pages'); await pg.waitForTimeout(600);
+    const famAll = (await pg.$$('.bk-page[data-key^="fam:"]')).length;
+    if (!(famAll > famBefore)) fail(`${tpl}: A page for everyone did not add pages (${famBefore} -> ${famAll})`);
+    await pg.uncheck('#bk-all-pages'); await pg.waitForTimeout(600);
+    if ((await pg.$$('.bk-page[data-key^="fam:"]')).length !== famBefore) fail(`${tpl}: unticking did not go back`);
     // Preview as a book: the cover alone, then two pages side by side, turned with the arrow keys.
     await pg.click('#bk-preview-btn'); await pg.waitForTimeout(600);
     const where0 = await pg.textContent('.bk-flip-where');
