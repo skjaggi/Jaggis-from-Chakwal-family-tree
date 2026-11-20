@@ -1,6 +1,6 @@
 # Family Tree Product: Requirements (draft)
 
-**Status:** draft, 20 November 2026 (updated with Sunil's answers the same day). Nothing here is built yet. Items marked **Decision needed** are waiting for Sunil.
+**Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. The only open item is the brand name (section 11).
 
 This document plans how the Jaggis of Chakwal family tree becomes a product that **any family** can sign up for, set up on their own, and use, with no technical help. The Jaggi site (https://familytree.sjaggi.com) keeps working exactly as it does today and becomes the product's first family ("tenant #1").
 
@@ -72,7 +72,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 - **Email:** Gmail cannot be used to send a product's emails. Use an email service such as Resend or Postmark (free for small volumes, then about $20 a month), sending from the product's own domain.
 - **Payments:** Stripe (no monthly fee; about 3% per payment). Stripe handles cards, receipts and cancellations.
 - **Supabase plan:** move to Supabase Pro (about $25 a month) before the first paying family, for daily backups and no pausing. One project serves all families.
-- **Code repository:** the current repository is **public**, which means anyone on the internet can read and copy all of the site's code (not the family's data, which lives in Supabase and is protected). That was fine for one family's site. For a product that earns money, the code is the business, so it should live in a **private** repository: only Sunil (and anyone he invites) can see it. Websites run the same way from a private repository; GitHub's free plan allows private repositories. **Decision needed.**
+- **Code repository:** the current repository is **public**, which means anyone on the internet can read and copy all of the site's code (not the family's data, which lives in Supabase and is protected). That was fine for one family's site. For a product that earns money, the code is the business, so it should live in a **private** repository: only Sunil (and anyone he invites) can see it. Websites run the same way from a private repository; GitHub's free plan allows private repositories. **Agreed (Sunil, 20 Nov 2026):** the product is built in a new private repository; the Jaggi repository stays as it is.
 
 ## 4. Commercial options
 
@@ -105,7 +105,7 @@ Sunil (20 Nov 2026): about $49 a year looks right to start with.
 | | Free | Family | Heritage |
 |---|---|---|---|
 | Price | $0 | about $49 a year (or $5 a month) | about $99 a year |
-| People in the tree | up to 3 generations or about 50 people (proposal, see 4.4) | unlimited | unlimited |
+| People in the tree | up to 3 generations or about 50 people (see 4.4) | unlimited | unlimited |
 | Photos | up to 100 | up to 5,000 | up to 25,000 |
 | Members | unlimited | unlimited | unlimited |
 | Logo and colours | colours only | yes | yes |
@@ -116,9 +116,9 @@ Sunil (20 Nov 2026): about $49 a year looks right to start with.
 | Remove "Made with <product>" | no | no | yes |
 | Help | Help manual | email help | priority help, setup call |
 
-### 4.4 How the free plan ends (proposal, waiting for Sunil's OK)
+### 4.4 How the free plan ends (agreed 20 Nov 2026)
 
-Sunil suggested free for about 1 month or 3 generations, with paid plans beyond that. Proposal:
+Sunil suggested free for about 1 month or 3 generations, with paid plans beyond that. Agreed:
 
 - **The Free plan has no time limit.** It stays free while the tree has **up to 3 generations or about 50 people**, whichever comes first. A strict 1-month limit would hurt families, because relatives join and fill in branches slowly, over months.
 - **Every new family site gets all features for its first 30 days** (Family plan features: logo, Blessings, Library, PDF book). This is the "1 month" part: families see everything the paid plan offers.
@@ -130,7 +130,7 @@ Printed books are ordered separately through a print-on-demand partner (for exam
 
 **Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free pilot** for 5 to 10 families Sunil invites (April to May 2027) before charging anyone.
 
-**Decision needed:** price levels. Selling under Quantum Nexus LLC is under consideration (Sunil, 20 Nov 2026).
+**Agreed:** prices as above to start with. Selling under Quantum Nexus LLC is under consideration (Sunil, 20 Nov 2026).
 
 ## 5. Product requirements
 
@@ -174,15 +174,15 @@ Everything the wizard asked, plus:
 - **Public ancestor pages for search engines:** off by default; when on, only for people marked as passed away, with Public details only.
 - **Emails:** editable invite and reminder wording, with preview. How emails are sent is in 5.3.1.
 
-#### 5.3.1 Who invitation emails come from (proposal, waiting for Sunil's OK)
+#### 5.3.1 Who invitation emails come from (agreed 20 Nov 2026)
 
-Sunil asked (20 Nov 2026) whether invitations use the email of the admin who started the family tree. Proposal:
+Sunil asked (20 Nov 2026) whether invitations use the email of the admin who started the family tree. Agreed:
 
 - Emails are **sent by the product**, from its own address (for example `invites@<brand>.com`). The product never needs the admin's email password, and its emails are set up so Gmail, Outlook and Yahoo trust them and do not put them in spam. Sending "from" the admin's own Gmail or Outlook address is not possible for a website without their password, and mail providers would mark such emails as fake.
 - The **sender name is the person who invited them**, for example **"Sunil Jaggi via BanyanKin"**, so the relative recognises who it is from.
 - **Reply-to is the inviter's own email address**, so when a relative presses Reply, the answer goes straight to the inviter, not to the product.
 - The same rule applies to reminders and Missing details emails sent by an admin. Automatic emails (sign-in codes, receipts) come from the product's name only.
-- **Ways to invite, all on the Invite screen** (proposal):
+- **Ways to invite, all on the Invite screen:**
   1. **Send invitation** (default): the product emails it as above ("<Inviter> via <Brand>", replies to the inviter).
   2. **Send from my own email** (Sunil asked 20 Nov 2026 for the admin's own, familiar address): opens the inviter's own mail program or Gmail with the invitation already written (to, subject, text and sign-in link); they just press Send. It comes from their own address, so relatives recognise it, and the product never needs their password.
   3. **WhatsApp**: carried over from the Jaggi site, where it works today on phones and on the desktop (Sunil tested 20 Nov 2026); opens WhatsApp with the invitation message and link ready to send.
@@ -383,11 +383,9 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 ## 11. Open questions for Sunil
 
-Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). Still open:
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3) and invitation emails (5.3.1), all agreed. Still open:
 
-1. **Free plan.** OK with the proposal in 4.4 (free with no time limit up to 3 generations or about 50 people; all features for the first 30 days)?
-2. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public? See section 3.3.
-3. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+1. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
 
 ## 12. Decisions
 
@@ -396,12 +394,14 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
-| 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (proposal in 4.4 waiting for his OK). Launch for everyone, not only South Asian families. |
+| 20 Nov 2026 | Sunil approved the plan as written: free plan (4.4), private repository for the product (3.3), invitation emails and the four ways to invite (5.3.1). Only the brand name stays open. |
+| 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (details in 4.4). Launch for everyone, not only South Asian families. |
 
 ## Change log
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | Sunil approved the plan; proposals marked agreed. |
 | 20 Nov 2026 | | Invitation options (5.3.1): Send from my own email, WhatsApp (carried over, works on desktop), Copy link; Google send-as left for later. |
 | 20 Nov 2026 | #29 | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
 | 20 Nov 2026 | #28 | Pricing agreed to start; free plan proposal (4.4); audience everyone; private repository explained (3.3). |
