@@ -57,8 +57,12 @@ let needsRedraw = false;
 // happens on the first look at the main tree, and again right after signing
 // in or having a claim approved. `lineFor` remembers whose line was opened.
 let lineFor = null;
+// Their claimed box, or else the box their invitation is linked to (so the
+// admin's "View as" opens on that member's branch too).
 function myLineId() {
-  return store.signedIn && !store.preview ? store.claimedId : null;
+  if (!store.signedIn || store.preview) return null;
+  const id = store.claimedId || store.profile?.person_id || null;
+  return id && store.fam.byId.has(id) ? id : null;
 }
 async function route() {
   parseHash();
@@ -108,7 +112,10 @@ async function route() {
   $('tree-tools').hidden = state.view !== 'tree';
   if (state.view === 'tree') {
     const mine = myLineId();
-    if (mine && mine !== lineFor && !state.selected && state.root === store.fam.defaultRootId && tree.openLine(state.root, mine)) {
+    if (mine && mine !== lineFor && !state.selected && state.root === store.fam.defaultRootId) {
+      // Their box is not under the main tree: show the usual view rather than
+      // leaving the previous person's line open.
+      if (!tree.openLine(state.root, mine)) tree.setRoot(state.root);
       lineFor = mine;
       needsRedraw = false;
     } else if (!mine && lineFor && !state.selected && state.root === store.fam.defaultRootId) {

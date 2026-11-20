@@ -5,6 +5,10 @@ const seed = JSON.parse(fs.readFileSync(__dirname + '/../../site/data/seed.json'
 const idOf = (g) => seed.people.find((p) => p.given_name === g).id;
 const SUNIL = idOf('Sunil Kumar'); const HARBANS = idOf('Harbans Lal');
 const OUT = process.env.PREVIEW_DIR;
+// Someone in another branch (a grandchild of Prabh Dyal), invited but not yet claimed.
+const PRABH = seed.people.find((p) => /Prabh Dyal/.test(p.given_name)).id;
+const kidOf = (id) => seed.parent_child.find((l) => l.parent_id === id)?.child_id;
+const OTHER = kidOf(kidOf(PRABH)) || kidOf(PRABH);
 const fail = []; const check = (ok, what) => { console.log(ok ? 'ok  ' : 'FAIL', what); if (!ok) fail.push(what); };
 (async () => {
   const b = await chromium.launch(); const errors = [];
@@ -34,6 +38,8 @@ const fail = []; const check = (ok, what) => { console.log(ok ? 'ok  ' : 'FAIL',
       check(!(await nav()).includes('Members') && (await nav()).includes('Review'), 'member menu: ' + await nav());
       check(await pg.locator('#nav .viewas-btn').count() === 1, 'View as still offered to the real admin');
     }
+    // The tree opens on her own line, as when she signs in: her box is drawn.
+    check(await pg.locator(`g.node[data-id="${SUNIL}"]`).count() > 0, 'tree opens on her own line');
     if (OUT) await pg.waitForTimeout(3600);
     if (OUT) await pg.screenshot({ path: `${OUT}/2-tree-as-member-${tag}.png` });
     // Their own box: Edit form says Save (changes go live for a branch admin)... and nothing is saved.
@@ -65,6 +71,12 @@ const fail = []; const check = (ok, what) => { console.log(ok ? 'ok  ' : 'FAIL',
       await pg.reload(); await pg.waitForSelector('#nav a'); await pg.waitForTimeout(600);
       check(!(await pg.locator('#viewas-banner').isHidden()), 'still viewing after reload');
       check(await pg.evaluate(() => window.__db.page_views.filter((v) => v.view === 'members').length) <= 1, 'visits not logged while viewing');
+      // Someone else, linked to a box in another branch but not claimed yet: their line opens instead.
+      await pg.evaluate((id) => { const u = window.__db.profiles.find((x) => x.id === 'u-4'); u.person_id = id; }, OTHER);
+      await pg.locator('#viewas-banner button', { hasText: 'Someone else' }).click();
+      await pg.fill('.viewas-pick input', 'came'); await pg.locator('.viewas-row').first().click(); await pg.waitForTimeout(800);
+      const drawn = await pg.$$eval('g.node', (els) => els.map((e) => e.dataset.id));
+      check(drawn.includes(OTHER) && !drawn.includes(SUNIL), 'switching opens the other member\'s line and closes the previous one');
       await pg.locator('#viewas-banner button', { hasText: 'Back to my view' }).click(); await pg.waitForTimeout(600);
       check(await pg.locator('#viewas-banner').isHidden() && (await nav()).includes('Members'), 'back to admin view');
       await pg.goto(`http://localhost:8765/#/tree/${HARBANS}?p=${SUNIL}`); await pg.waitForSelector('#panel .panel-top'); await pg.waitForTimeout(400);
