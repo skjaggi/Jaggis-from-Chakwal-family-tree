@@ -1,6 +1,6 @@
-# Family Tree Product: Requirements (draft)
+# Family Tree Product: Requirements
 
-**Status:** draft, 20 November 2026 (updated with Sunil's answers the same day). Nothing here is built yet. Items marked **Decision needed** are waiting for Sunil.
+**Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. The only open item is the brand name (section 11).
 
 This document plans how the Jaggis of Chakwal family tree becomes a product that **any family** can sign up for, set up on their own, and use, with no technical help. The Jaggi site (https://familytree.sjaggi.com) keeps working exactly as it does today and becomes the product's first family ("tenant #1").
 
@@ -28,7 +28,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 |---|---|---|
 | Name and logo | "Jaggis of Chakwal", the Jaggis logo images, page titles, Google site name | Family name, tagline and logo chosen in setup; a simple monogram logo is made automatically if they have none |
 | Colours | Banyan teal and gold | A few colour themes to pick from, plus a custom main colour |
-| Footer | "© 2026 Jaggi Family and Quantum Nexus LLC", Quantum Nexus mark | "© <year> <family name>" plus a small "Made with <product>" link |
+| Footer | "© 2026 Jaggi Family and Quantum Nexus LLC", Quantum Nexus mark | "© &lt;year&gt; &lt;family name&gt;" plus a small "Made with &lt;product&gt;" link |
 | Help manual | Written about the Jaggi family, with Jaggi screenshots | One general manual for all families, showing the family's own name, with neutral sample screenshots |
 | Founder and Creator badges | Hard-coded for Suraj and Sunil by account id | Admin can create their own special badges and give them to anyone |
 | Blessings | Generation 1 named as Bakhshi Bhanna Mal Jaggi; fixed point values | Root ancestor's name filled in automatically; admin can turn Blessings on or off and adjust points |
@@ -72,7 +72,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 - **Email:** Gmail cannot be used to send a product's emails. Use an email service such as Resend or Postmark (free for small volumes, then about $20 a month), sending from the product's own domain.
 - **Payments:** Stripe (no monthly fee; about 3% per payment). Stripe handles cards, receipts and cancellations.
 - **Supabase plan:** move to Supabase Pro (about $25 a month) before the first paying family, for daily backups and no pausing. One project serves all families.
-- **Code repository:** the current repository is **public**, which means anyone on the internet can read and copy all of the site's code (not the family's data, which lives in Supabase and is protected). That was fine for one family's site. For a product that earns money, the code is the business, so it should live in a **private** repository: only Sunil (and anyone he invites) can see it. Websites run the same way from a private repository; GitHub's free plan allows private repositories. **Decision needed.**
+- **Code repository:** the current repository is **public**, which means anyone on the internet can read and copy all of the site's code (not the family's data, which lives in Supabase and is protected). That was fine for one family's site. For a product that earns money, the code is the business, so it should live in a **private** repository: only Sunil (and anyone he invites) can see it. Websites run the same way from a private repository; GitHub's free plan allows private repositories. **Agreed (Sunil, 20 Nov 2026):** the product is built in a new private repository; the Jaggi repository stays as it is.
 
 ## 4. Commercial options
 
@@ -105,7 +105,7 @@ Sunil (20 Nov 2026): about $49 a year looks right to start with.
 | | Free | Family | Heritage |
 |---|---|---|---|
 | Price | $0 | about $49 a year (or $5 a month) | about $99 a year |
-| People in the tree | up to 3 generations or about 50 people (proposal, see 4.4) | unlimited | unlimited |
+| People in the tree | up to 3 generations or about 50 people (see 4.4) | unlimited | unlimited |
 | Photos | up to 100 | up to 5,000 | up to 25,000 |
 | Members | unlimited | unlimited | unlimited |
 | Logo and colours | colours only | yes | yes |
@@ -113,12 +113,12 @@ Sunil (20 Nov 2026): about $49 a year looks right to start with.
 | Blessings, Library, Dashboard | Dashboard only | yes | yes |
 | PDF family book and GEDCOM export | GEDCOM only | yes | yes, plus book design templates |
 | Own address (custom domain) | no | add-on | included |
-| Remove "Made with <product>" | no | no | yes |
+| Remove "Made with &lt;product&gt;" | no | no | yes |
 | Help | Help manual | email help | priority help, setup call |
 
-### 4.4 How the free plan ends (proposal, waiting for Sunil's OK)
+### 4.4 How the free plan ends (agreed 20 Nov 2026)
 
-Sunil suggested free for about 1 month or 3 generations, with paid plans beyond that. Proposal:
+Sunil suggested free for about 1 month or 3 generations, with paid plans beyond that. Agreed:
 
 - **The Free plan has no time limit.** It stays free while the tree has **up to 3 generations or about 50 people**, whichever comes first. A strict 1-month limit would hurt families, because relatives join and fill in branches slowly, over months.
 - **Every new family site gets all features for its first 30 days** (Family plan features: logo, Blessings, Library, PDF book). This is the "1 month" part: families see everything the paid plan offers.
@@ -126,11 +126,11 @@ Sunil suggested free for about 1 month or 3 generations, with paid plans beyond 
 - When the tree reaches the free limit (a 4th generation, or about 50 people), the admin is asked to upgrade before adding more. Adding is paused, never deleted. The admin gets a friendly email a week before the trial ends and when the limit is near.
 - **Members never pay.** Only the family admin chooses and pays for a plan.
 
-Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin.
+Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin. How the book service works is in 5.9.
 
 **Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free pilot** for 5 to 10 families Sunil invites (April to May 2027) before charging anyone.
 
-**Decision needed:** price levels. Selling under Quantum Nexus LLC is under consideration (Sunil, 20 Nov 2026).
+**Agreed:** prices as above to start with. Selling under Quantum Nexus LLC is under consideration (Sunil, 20 Nov 2026).
 
 ## 5. Product requirements
 
@@ -174,14 +174,20 @@ Everything the wizard asked, plus:
 - **Public ancestor pages for search engines:** off by default; when on, only for people marked as passed away, with Public details only.
 - **Emails:** editable invite and reminder wording, with preview. How emails are sent is in 5.3.1.
 
-#### 5.3.1 Who invitation emails come from (proposal, waiting for Sunil's OK)
+#### 5.3.1 Who invitation emails come from (agreed 20 Nov 2026)
 
-Sunil asked (20 Nov 2026) whether invitations use the email of the admin who started the family tree. Proposal:
+Sunil asked (20 Nov 2026) whether invitations use the email of the admin who started the family tree. Agreed:
 
 - Emails are **sent by the product**, from its own address (for example `invites@<brand>.com`). The product never needs the admin's email password, and its emails are set up so Gmail, Outlook and Yahoo trust them and do not put them in spam. Sending "from" the admin's own Gmail or Outlook address is not possible for a website without their password, and mail providers would mark such emails as fake.
 - The **sender name is the person who invited them**, for example **"Sunil Jaggi via BanyanKin"**, so the relative recognises who it is from.
 - **Reply-to is the inviter's own email address**, so when a relative presses Reply, the answer goes straight to the inviter, not to the product.
 - The same rule applies to reminders and Missing details emails sent by an admin. Automatic emails (sign-in codes, receipts) come from the product's name only.
+- **Ways to invite, all on the Invite screen:**
+  1. **Send invitation** (default): the product emails it as above ("&lt;Inviter&gt; via &lt;Brand&gt;", replies to the inviter).
+  2. **Send from my own email** (Sunil asked 20 Nov 2026 for the admin's own, familiar address): opens the inviter's own mail program or Gmail with the invitation already written (to, subject, text and sign-in link); they just press Send. It comes from their own address, so relatives recognise it, and the product never needs their password.
+  3. **WhatsApp**: carried over from the Jaggi site, where it works today on phones and on the desktop (Sunil tested 20 Nov 2026); opens WhatsApp with the invitation message and link ready to send.
+  4. **Copy link**: copies the invitation message and link to paste into a text message, Facebook, Signal or anywhere else.
+- Later option, not planned now: "Sign in with Google to send from your Gmail". It would send from the admin's own Gmail automatically, but Google requires a paid security review for apps that send mail on a user's behalf, so it is left out unless families ask for it.
 - Later option (Heritage plan): a family with its own domain can send from its own address (for example `family@smithfamily.com`) after a one-time check of that domain.
 - **Admins:** add or remove other admins; transfer ownership of the family site.
 - **Plan and billing:** current plan, usage (people, photos), upgrade, invoices, cancel.
@@ -222,6 +228,42 @@ Every feature in `REQUIREMENTS.md` sections 4 to 8 becomes available to every fa
 - English first; names accept any script. Hindi and Punjabi screens are a good later step for the first audience.
 - Accessible: large tap targets, readable font sizes, works with screen readers.
 
+### 5.9 Printed family book service (agreed 20 Nov 2026)
+
+Sunil asked (20 Nov 2026): can the product build the book automatically from ready-made design templates, with no manual work, and then let families change the text, replace pictures and add or change stories? **Yes.** It works like the photo books from Shutterfly or Mixbook, but filled from the family tree.
+
+**How it works**
+
+1. **Choose a design.** The family admin picks one of several ready-made book templates (for example Classic, Heritage and Modern), a size (for example 8.5x11 inches, 11x8.5 landscape, or a 12x12 coffee-table size) and which part of the tree to include (the whole tree, or one branch from a chosen ancestor).
+2. **The book builds itself.** In a minute or so the product lays out the whole book with no manual work: a cover with the family name and logo, a family tree chart, then a page or a two-page spread per person or couple, with their photo, years, places, work and story, in generation order. Long stories flow onto extra pages. People without photos get a tasteful placeholder or a smaller layout.
+3. **Make it yours.** An easy page editor in the browser (also on a tablet) lets the family:
+   - change any text (titles, captions, stories), with spelling check;
+   - replace or add pictures, and move or zoom them inside their frame;
+   - add pages for stories, letters, old documents or photo collages;
+   - reorder, hide or add people and pages;
+   - add a dedication and a foreword.
+   Edits stay in the book only; a button offers to copy a corrected story or date back into the tree too.
+4. **Check it.** A full preview shows every page as it will print. The product warns about pictures that are too low-resolution to print sharply, text that runs off a page, and empty pages.
+5. **Share before ordering (optional).** Other family members can view the draft and leave comments; the admin decides.
+6. **Order.** The family chooses hardcover or softcover and the number of copies, sees the price including shipping, and pays. The product makes a print-ready PDF and sends it to a **print-on-demand** partner through that partner's ordering connection (API). The partner prints, binds and ships each copy straight to each address; the family gets tracking emails.
+7. **Reorder any time** from the saved book, and a digital PDF copy can be downloaded.
+
+**Print partners** (to be confirmed with each partner before building):
+
+| Partner | Good for | Notes |
+|---|---|---|
+| **Lulu** | First choice: well-documented ordering API, ships worldwide (including India via partners), no minimum order | Standard sizes up to about 8.5x11 and 11x8.5 hardcover; no 12x12 |
+| **Blurb** | Premium photo books and lay-flat pages, 12x12 size | Ordering API for businesses is by arrangement |
+| **Peecho** and others | Ordering API, many formats | Compare quality and prices during the pilot |
+
+**Rough cost per copy** (late 2026 list prices, to be confirmed with real quotes): a 100-page full-colour hardcover about 8.5x11 costs about **$35 to $50 to print**, a 12x12 premium photo book about **$80 to $130**, plus shipping of about **$8 to $20** in the US (more abroad). The product adds a margin of, say, 20 to 30% for the design, layout and editor. Example: a family book that costs $40 to print sells for about **$52 plus shipping**. Families pay per order; there is no stock and no upfront cost to the business.
+
+**What it takes to build:** the book templates and automatic layout reuse the "Make the PDF" family book the Jaggi site already has, so the starting point exists. New work: two or three templates, the page editor, print-quality checks, the print partner's ordering connection, and payment through Stripe. About **6 to 8 weeks** of work.
+
+**Pilot on the Jaggi site first** (Sunil, 20 Nov 2026): the book builder is built and tested on the Jaggi family tree before it goes into the product, the same way the rest of the product grew from the Jaggi site.
+
+**When in the product:** after the paid launch (from July 2027, as part of phase 5). The Jaggi coffee table book planned for early 2027 can serve as the model for the first "Heritage" template, so the design work is reused.
+
 ## 6. Keeping the Jaggi site working
 
 - The Jaggi site keeps running unchanged on familytree.sjaggi.com while the product is built.
@@ -247,7 +289,7 @@ Sunil (20 Nov 2026): spread the work over about six months, with the paid launch
 | 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
 | 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; rehearse and then make the Jaggi site move (section 6) | April to May 2027 |
 | 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
-| 5. Later | App Store and Google Play apps, printed book ordering, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
+| 5. Later | Printed family book service (5.9, from July 2027), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
 These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
@@ -377,11 +419,9 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 ## 11. Open questions for Sunil
 
-Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). Still open:
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3), invitation emails (5.3.1) and the printed book service (5.9, piloted on the Jaggi site first), all agreed. Still open:
 
-1. **Free plan.** OK with the proposal in 4.4 (free with no time limit up to 3 generations or about 50 people; all features for the first 30 days)?
-2. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public? See section 3.3.
-3. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+1. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
 
 ## 12. Decisions
 
@@ -390,13 +430,19 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
-| 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (proposal in 4.4 waiting for his OK). Launch for everyone, not only South Asian families. |
+| 20 Nov 2026 | Sunil: yes to the printed family book service (5.9); build and test it on the Jaggi family tree first. |
+| 20 Nov 2026 | Sunil approved the plan as written: free plan (4.4), private repository for the product (3.3), invitation emails and the four ways to invite (5.3.1). Only the brand name stays open. |
+| 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (details in 4.4). Launch for everyone, not only South Asian families. |
 
 ## Change log
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
+| 20 Nov 2026 | | Printed book service agreed, pilot on the Jaggi site first. |
+| 20 Nov 2026 | | Printed family book service proposal: automatic layout from templates, page editor, print-on-demand ordering (5.9). |
+| 20 Nov 2026 | | Sunil approved the plan; proposals marked agreed. |
+| 20 Nov 2026 | | Invitation options (5.3.1): Send from my own email, WhatsApp (carried over, works on desktop), Copy link; Google send-as left for later. |
+| 20 Nov 2026 | #29 | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
 | 20 Nov 2026 | #28 | Pricing agreed to start; free plan proposal (4.4); audience everyone; private repository explained (3.3). |
 | 20 Nov 2026 | #27 | Brand and domain name suggestions with availability and prices (section 10); Jaggi site move as a seamless test; Quantum Nexus LLC under consideration. |
 | 20 Nov 2026 | #27 | Sunil's first answers: timeline to June 2027, cost breakdown (section 8), legal help options (section 9), remaining open questions. |
