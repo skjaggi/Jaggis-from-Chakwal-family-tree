@@ -818,3 +818,24 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
 /* Warning under "Who can see" when a living person's details or photo are set to Public */
 .vis-warn { margin: 6px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--warn-bg); color: var(--warn-ink); font-size: 0.9rem; }
 .vis-warn[hidden] { display: none; }
+
+/* "View as" (admin only): strip across the top while previewing a member's view,
+   and the member picker. */
+.viewas-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: #e9e4f7; color: #3b2a6b; border-bottom: 2px solid #7c63c7; }
+.viewas-banner[hidden] { display: none; }
+.viewas-banner .claim-actions { display: inline-flex; gap: 8px; align-items: center; margin-left: auto; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .viewas-banner { background: #2c2545; color: #e2dbff; border-bottom-color: #9d88e6; } }
+:root[data-theme="dark"] .viewas-banner { background: #2c2545; color: #e2dbff; border-bottom-color: #9d88e6; }
+.viewas-pick input[type="search"] { width: 100%; margin: 4px 0 10px; }
+.viewas-list { list-style: none; margin: 0; padding: 0; max-height: min(60vh, 460px); overflow-y: auto; }
+.viewas-list li + li { border-top: 1px solid var(--line); }
+.viewas-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; width: 100%; padding: 9px 6px; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 6px; }
+.viewas-row:hover, .viewas-row:focus-visible { background: var(--hover, rgba(23, 112, 107, 0.08)); }
+.viewas-row .muted { grid-column: 1; overflow-wrap: anywhere; }
+.viewas-tag { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: var(--warn-bg, #fdf3d6); color: var(--warn-ink, #5b4310); max-width: 15em; text-align: center; }
+.viewas-tag.ok { background: rgba(23, 112, 107, 0.14); color: var(--accent); }
+@media (max-width: 560px) {
+  .viewas-row { grid-template-columns: 1fr; }
+  .viewas-tag { grid-column: 1; grid-row: auto; justify-self: start; max-width: none; }
+  .viewas-banner .viewas-note { display: none; }
+}

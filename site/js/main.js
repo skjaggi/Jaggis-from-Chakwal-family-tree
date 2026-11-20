@@ -17,6 +17,7 @@ import { renderExport } from './export.js';
 import { downloadGedcom } from './gedcom.js';
 import { countView } from './count.js';
 import { renderLibrary } from './library.js';
+import { openViewAsPicker, renderViewAsBanner, exitViewAs, resumeViewAs } from './view-as.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { view: 'tree', root: null, selected: null };
@@ -292,15 +293,33 @@ async function renderHeader() {
       await signOut();
       toast('Signed out.');
     },
+    onViewAs: pickViewAs,
   }));
   for (const a of nav.querySelectorAll('[data-nav]')) a.classList.toggle('active', a.dataset.nav === state.view);
-  $('who').textContent = signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
+  $('who').textContent = store.viewAs ? `Viewing as ${store.profile?.display_name || store.profile?.email}` : signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   // Once they've claimed their box: their photo, blessings and badges instead.
   if (signed) await renderCorner($('who')).catch(() => false);
   fitHeader();
-  if (signed && !maybeShowFounderThanks() && !maybeShowBlessingsIntro()) maybeShowHistorianCongrats().catch(() => false);
+  renderViewAsBanner($('viewas-banner'), { onSwitch: pickViewAs, onExit: leaveViewAs });
+  // Pop-ups are remembered per browser, so they stay off while viewing as someone.
+  if (signed && !store.viewAs && !maybeShowFounderThanks() && !maybeShowBlessingsIntro()) maybeShowHistorianCongrats().catch(() => false);
   $('preview-banner').hidden = !store.preview;
   await renderClaimBanner();
+}
+
+// Admin only: look at the site as a member sees it, starting from the tree
+// view they would land on after signing in.
+function pickViewAs() {
+  openViewAsPicker((u) => {
+    toast(`Now viewing as ${u.display_name || u.email}. Nothing is saved or sent.`, 'ok');
+    go({ view: 'tree', root: store.fam.defaultRootId, selected: null });
+  });
+}
+
+function leaveViewAs() {
+  exitViewAs();
+  toast('Back to your own view.', 'ok');
+  go({ view: 'tree', root: store.fam.defaultRootId, selected: null });
 }
 
 // Signed-in members who haven't claimed their own box see a reminder at the
@@ -364,6 +383,8 @@ async function start() {
     clear($('loading'), h('p', 'The family tree could not be loaded. Please check your connection and reload.'), h('p.muted.small', e.message));
     return;
   }
+  // An admin who was viewing as a member in this tab carries on after a reload.
+  await resumeViewAs().catch((e) => console.warn('view as', e));
   $('loading').remove();
   if (signIn?.error) toast(signIn.error, 'error');
   else if (signIn?.ok) toast(store.signedIn ? 'You are signed in.' : 'The sign-in link could not be used. Please ask for a new one.', store.signedIn ? 'ok' : 'error');
@@ -403,8 +424,13 @@ async function start() {
     history.replaceState(null, '', location.hash.replace(/[?&]signin=1\b/, ''));
     if (!store.signedIn && !store.preview) openSignIn();
   }
+  // "View as" on the Help and Ancestors pages lands here with ?viewas=1.
+  if (/[?&]viewas=1\b/.test(location.hash)) {
+    history.replaceState(null, '', location.hash.replace(/[?&]viewas=1\b/, ''));
+    if (store.isRealAdmin) pickViewAs();
+  }
   // Invitees whose invitation names their box land on it, ready to claim it.
-  welcomeToLinkedBox((id) => go({ view: 'tree', root: store.fam.primaryParentLink(id)?.parent_id || id, selected: id }));
+  if (!store.viewAs) welcomeToLinkedBox((id) => go({ view: 'tree', root: store.fam.primaryParentLink(id)?.parent_id || id, selected: id }));
 }
 
 start();

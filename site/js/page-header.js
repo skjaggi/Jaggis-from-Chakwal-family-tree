@@ -38,6 +38,8 @@ async function render() {
     active,
     count,
     onSignIn: () => { location.href = `${base}#/tree?signin=1`; },
+    // "View as" works on the tree pages: go there and open the member list.
+    onViewAs: () => { location.href = `${base}#/tree?viewas=1`; },
     onSignOut: async () => {
       await signOut();
       toast('Signed out.');
