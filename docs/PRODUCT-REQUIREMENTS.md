@@ -1,6 +1,6 @@
 # Family Tree Product: Requirements
 
-**Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. The only open item is the brand name (section 11).
+**Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. Open items: the brand name (section 11) and the printed book service proposal (5.9).
 
 This document plans how the Jaggis of Chakwal family tree becomes a product that **any family** can sign up for, set up on their own, and use, with no technical help. The Jaggi site (https://familytree.sjaggi.com) keeps working exactly as it does today and becomes the product's first family ("tenant #1").
 
@@ -126,7 +126,7 @@ Sunil suggested free for about 1 month or 3 generations, with paid plans beyond 
 - When the tree reaches the free limit (a 4th generation, or about 50 people), the admin is asked to upgrade before adding more. Adding is paused, never deleted. The admin gets a friendly email a week before the trial ends and when the limit is near.
 - **Members never pay.** Only the family admin chooses and pays for a plan.
 
-Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin.
+Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin. How the book service works is in 5.9.
 
 **Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free pilot** for 5 to 10 families Sunil invites (April to May 2027) before charging anyone.
 
@@ -228,6 +228,40 @@ Every feature in `REQUIREMENTS.md` sections 4 to 8 becomes available to every fa
 - English first; names accept any script. Hindi and Punjabi screens are a good later step for the first audience.
 - Accessible: large tap targets, readable font sizes, works with screen readers.
 
+### 5.9 Printed family book service (proposal, waiting for Sunil's OK)
+
+Sunil asked (20 Nov 2026): can the product build the book automatically from ready-made design templates, with no manual work, and then let families change the text, replace pictures and add or change stories? **Yes.** It works like the photo books from Shutterfly or Mixbook, but filled from the family tree.
+
+**How it works**
+
+1. **Choose a design.** The family admin picks one of several ready-made book templates (for example Classic, Heritage and Modern), a size (for example 8.5x11 inches, 11x8.5 landscape, or a 12x12 coffee-table size) and which part of the tree to include (the whole tree, or one branch from a chosen ancestor).
+2. **The book builds itself.** In a minute or so the product lays out the whole book with no manual work: a cover with the family name and logo, a family tree chart, then a page or a two-page spread per person or couple, with their photo, years, places, work and story, in generation order. Long stories flow onto extra pages. People without photos get a tasteful placeholder or a smaller layout.
+3. **Make it yours.** An easy page editor in the browser (also on a tablet) lets the family:
+   - change any text (titles, captions, stories), with spelling check;
+   - replace or add pictures, and move or zoom them inside their frame;
+   - add pages for stories, letters, old documents or photo collages;
+   - reorder, hide or add people and pages;
+   - add a dedication and a foreword.
+   Edits stay in the book only; a button offers to copy a corrected story or date back into the tree too.
+4. **Check it.** A full preview shows every page as it will print. The product warns about pictures that are too low-resolution to print sharply, text that runs off a page, and empty pages.
+5. **Share before ordering (optional).** Other family members can view the draft and leave comments; the admin decides.
+6. **Order.** The family chooses hardcover or softcover and the number of copies, sees the price including shipping, and pays. The product makes a print-ready PDF and sends it to a **print-on-demand** partner through that partner's ordering connection (API). The partner prints, binds and ships each copy straight to each address; the family gets tracking emails.
+7. **Reorder any time** from the saved book, and a digital PDF copy can be downloaded.
+
+**Print partners** (to be confirmed with each partner before building):
+
+| Partner | Good for | Notes |
+|---|---|---|
+| **Lulu** | First choice: well-documented ordering API, ships worldwide (including India via partners), no minimum order | Standard sizes up to about 8.5x11 and 11x8.5 hardcover; no 12x12 |
+| **Blurb** | Premium photo books and lay-flat pages, 12x12 size | Ordering API for businesses is by arrangement |
+| **Peecho** and others | Ordering API, many formats | Compare quality and prices during the pilot |
+
+**Rough cost per copy** (late 2026 list prices, to be confirmed with real quotes): a 100-page full-colour hardcover about 8.5x11 costs about **$35 to $50 to print**, a 12x12 premium photo book about **$80 to $130**, plus shipping of about **$8 to $20** in the US (more abroad). The product adds a margin of, say, 20 to 30% for the design, layout and editor. Example: a family book that costs $40 to print sells for about **$52 plus shipping**. Families pay per order; there is no stock and no upfront cost to the business.
+
+**What it takes to build:** the book templates and automatic layout reuse the "Make the PDF" family book the Jaggi site already has, so the starting point exists. New work: two or three templates, the page editor, print-quality checks, the print partner's ordering connection, and payment through Stripe. About **6 to 8 weeks** of work.
+
+**When:** after the paid launch (from July 2027, as part of phase 5). The Jaggi coffee table book planned for early 2027 can serve as the model for the first "Heritage" template, so the design work is reused.
+
 ## 6. Keeping the Jaggi site working
 
 - The Jaggi site keeps running unchanged on familytree.sjaggi.com while the product is built.
@@ -253,7 +287,7 @@ Sunil (20 Nov 2026): spread the work over about six months, with the paid launch
 | 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
 | 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; rehearse and then make the Jaggi site move (section 6) | April to May 2027 |
 | 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
-| 5. Later | App Store and Google Play apps, printed book ordering, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
+| 5. Later | Printed family book service (5.9, from July 2027), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
 These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
@@ -385,7 +419,8 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3) and invitation emails (5.3.1), all agreed. Still open:
 
-1. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+1. **Printed book service.** OK with the proposal in 5.9 (automatic book from templates, families edit text, pictures and stories, print-on-demand ordering, from July 2027)?
+2. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
 
 ## 12. Decisions
 
@@ -401,6 +436,7 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | Printed family book service proposal: automatic layout from templates, page editor, print-on-demand ordering (5.9). |
 | 20 Nov 2026 | | Sunil approved the plan; proposals marked agreed. |
 | 20 Nov 2026 | | Invitation options (5.3.1): Send from my own email, WhatsApp (carried over, works on desktop), Copy link; Google send-as left for later. |
 | 20 Nov 2026 | #29 | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
