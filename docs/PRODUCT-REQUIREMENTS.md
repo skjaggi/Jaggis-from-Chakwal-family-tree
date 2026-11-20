@@ -182,6 +182,12 @@ Sunil asked (20 Nov 2026) whether invitations use the email of the admin who sta
 - The **sender name is the person who invited them**, for example **"Sunil Jaggi via BanyanKin"**, so the relative recognises who it is from.
 - **Reply-to is the inviter's own email address**, so when a relative presses Reply, the answer goes straight to the inviter, not to the product.
 - The same rule applies to reminders and Missing details emails sent by an admin. Automatic emails (sign-in codes, receipts) come from the product's name only.
+- **Ways to invite, all on the Invite screen** (proposal):
+  1. **Send invitation** (default): the product emails it as above ("<Inviter> via <Brand>", replies to the inviter).
+  2. **Send from my own email** (Sunil asked 20 Nov 2026 for the admin's own, familiar address): opens the inviter's own mail program or Gmail with the invitation already written (to, subject, text and sign-in link); they just press Send. It comes from their own address, so relatives recognise it, and the product never needs their password.
+  3. **WhatsApp**: carried over from the Jaggi site, where it works today on phones and on the desktop (Sunil tested 20 Nov 2026); opens WhatsApp with the invitation message and link ready to send.
+  4. **Copy link**: copies the invitation message and link to paste into a text message, Facebook, Signal or anywhere else.
+- Later option, not planned now: "Sign in with Google to send from your Gmail". It would send from the admin's own Gmail automatically, but Google requires a paid security review for apps that send mail on a user's behalf, so it is left out unless families ask for it.
 - Later option (Heritage plan): a family with its own domain can send from its own address (for example `family@smithfamily.com`) after a one-time check of that domain.
 - **Admins:** add or remove other admins; transfer ownership of the family site.
 - **Plan and billing:** current plan, usage (people, photos), upgrade, invoices, cancel.
@@ -396,7 +402,8 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
+| 20 Nov 2026 | | Invitation options (5.3.1): Send from my own email, WhatsApp (carried over, works on desktop), Copy link; Google send-as left for later. |
+| 20 Nov 2026 | #29 | Full budget table (8.3); invitation email proposal: sent by the product, inviter's name as sender, replies to the inviter (5.3.1). |
 | 20 Nov 2026 | #28 | Pricing agreed to start; free plan proposal (4.4); audience everyone; private repository explained (3.3). |
 | 20 Nov 2026 | #27 | Brand and domain name suggestions with availability and prices (section 10); Jaggi site move as a seamless test; Quantum Nexus LLC under consideration. |
 | 20 Nov 2026 | #27 | Sunil's first answers: timeline to June 2027, cost breakdown (section 8), legal help options (section 9), remaining open questions. |
