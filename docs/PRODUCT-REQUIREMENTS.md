@@ -1,6 +1,6 @@
 # Family Tree Product: Requirements (draft)
 
-**Status:** first draft, 20 November 2026. Nothing here is built yet. Items marked **Decision needed** are waiting for Sunil.
+**Status:** draft, 20 November 2026 (updated with Sunil's answers the same day). Nothing here is built yet. Items marked **Decision needed** are waiting for Sunil.
 
 This document plans how the Jaggis of Chakwal family tree becomes a product that **any family** can sign up for, set up on their own, and use, with no technical help. The Jaggi site (https://familytree.sjaggi.com) keeps working exactly as it does today and becomes the product's first family ("tenant #1").
 
@@ -116,9 +116,9 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 
 Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin.
 
-**Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free closed beta** for 5 to 10 invited families before charging anyone.
+**Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free pilot** for 5 to 10 families Sunil invites (April to May 2027) before charging anyone.
 
-**Decision needed:** price levels; whether to sell under Quantum Nexus LLC.
+**Decision needed:** price levels. Selling under Quantum Nexus LLC is under consideration (Sunil, 20 Nov 2026).
 
 ## 5. Product requirements
 
@@ -207,55 +207,151 @@ Every feature in `REQUIREMENTS.md` sections 4 to 8 becomes available to every fa
 - When the product is ready, the Jaggi data moves in as family #1, with the Jaggis logo, banyan colours, Founder and Creator badges (as special badges), Library topics, branch level 4 and current privacy rules all set as **its settings**. Members keep their logins, boxes, blessings and history. familytree.sjaggi.com points at the product.
 - The move is done with a full backup and a rollback plan, and only with Sunil's go-ahead.
 
-**Decision needed:** move the Jaggi site onto the product (recommended), or keep it as a separate site for good.
+**Sunil (20 Nov 2026):** test moving the Jaggi site onto the product, as long as it is seamless for the Jaggi family. "Seamless" means:
 
-## 7. Phases (rough)
+- Same address (familytree.sjaggi.com), same look, logo, menu and Help wording for the Jaggi family.
+- Nobody has to sign up again: the same emails sign in the same way; claimed boxes, roles, blessings, badges, Library links, pending suggestions and history are all kept.
+- No visible downtime: the move is rehearsed first on a copy of the Jaggi data on a test address, Sunil and a few relatives try it, and only then does the real address switch over (late evening Arizona time, a few minutes at most).
+- If anything is wrong, the address switches straight back to today's site, which stays untouched until the move has run well for a month.
 
-| Phase | What | Rough time |
+## 7. Phases and timeline
+
+Sunil (20 Nov 2026): spread the work over about six months, with the paid launch in **June 2027**. The coffee table book (first quarter of 2027) runs alongside.
+
+| Phase | What | When (target) |
 |---|---|---|
-| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | 2 to 3 weeks |
-| 1. Many families | Families table, family-aware security rules and tests, new hosting, email service, family addresses | 3 to 4 weeks |
-| 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | 3 to 4 weeks |
-| 3. Closed beta | 5 to 10 invited families, free; fix what confuses them; Jaggi site moves in | 4 to 6 weeks |
-| 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms, custom domains | 2 to 3 weeks |
-| 5. Later | App Store and Google Play apps, printed book ordering, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | ongoing |
+| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | December 2026 to mid-January 2027 |
+| 1. Many families | Families table, family-aware security rules and tests, new hosting, email service, family addresses | mid-January to February 2027 |
+| 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
+| 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; rehearse and then make the Jaggi site move (section 6) | April to May 2027 |
+| 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
+| 5. Later | App Store and Google Play apps, printed book ordering, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
-At this pace a closed beta could start around **February 2027** and a paid launch around **spring 2027**, after the coffee table book work in the first quarter. These are estimates, not promises.
+These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
-## 8. Running costs (estimate)
+## 8. Running costs
 
-| Item | Before paying families | With paying families |
+Sunil (20 Nov 2026): about $50 a month is fine. Prices below are the services' published list prices as of late 2026 and should be rechecked when each is signed up for.
+
+### 8.1 Monthly costs from the pilot onward
+
+Nothing needs to be paid while the product is being built (December 2026 to March 2027): the free plans are enough. Paid plans start with the pilot in April 2027, because real families' photos and stories need daily backups.
+
+| Item | What it is for | Plan | Cost a month |
+|---|---|---|---|
+| **Supabase** | The database for all families (people, relationships, members), sign-in, photo storage, and the small server programs that send emails | Pro: includes daily backups, 8 GB of data, 100 GB of photos, 100,000 members a month, no pausing | **$25** |
+| **Email service** (Resend or Postmark) | Sending invitations, sign-in codes, reminders and receipts from the product's own address, reliably and without landing in spam | Free up to 3,000 emails a month; the next plan (50,000 a month) | **$0 during the pilot, then $20** |
+| **Product domain** | The product's web address (for example `<brand>.com`) and its email address | One domain | **about $1.25** ($15 a year) |
+| **Website hosting** (Cloudflare Pages) | Serving the website itself, the families' own addresses (`smith.<brand>.com`) and custom domains | Free; the first 100 custom domains are free, then about 10 cents each a month | **$0** |
+| **Visitor counts** (GoatCounter) | Anonymous visit numbers, no cookies | Free for this size | **$0** |
+| **Code and tests** (GitHub, private repository) | Keeping the code and running the automatic tests | Free plan includes 2,000 test minutes a month | **$0** |
+| **Total** | | | **about $26 during the pilot, about $46 once launched** |
+
+### 8.2 Costs that only come with income or later
+
+| Item | When | Cost |
 |---|---|---|
-| Supabase | free | about $25 a month, more as photos grow |
-| Website hosting (Cloudflare Pages) | free | free |
-| Email service | free (up to a few thousand emails a month) | about $20 a month |
-| Product domain name | about $15 a year | same |
-| Stripe | none | about 3% of each payment |
-| Apple and Google developer accounts | none | $99 a year and $25 once, when the store apps come |
-| Lawyer review of Terms and Privacy Policy | none | a one-off fee, optional but recommended |
+| **Stripe** (card payments) | Each payment | 2.9% + 30 cents; on a $49 yearly plan about $1.72, so the family's $49 brings in about $47.28 |
+| **More photo space** | Only when all families together pass 100 GB of photos (roughly 150,000 photos) | about 2 cents per extra GB a month |
+| **Bigger email plan** | Only above 50,000 emails a month | about $35 to $90 a month |
+| **Apple developer account** | When the iPhone app comes (after June 2027) | $99 a year (about $8 a month) |
+| **Google Play developer account** | When the Android app comes | $25 once |
+| **Trademark for the brand name** | When the name is chosen | about $350 per class with the US Patent and Trademark Office, plus any lawyer fee |
+| **Lawyer help** | Before the paid launch | one-off; see section 9 |
 
-Roughly **$50 a month** once paying families start. About 15 families on the Family plan cover it.
+**Break-even:** at about $47 a family after Stripe fees, **one Family plan a month** (12 families a year) covers the running costs once launched.
 
-## 9. Open questions for Sunil
+### 8.3 What the Jaggi site costs today
 
-1. **Brand name.** The product needs a name that is not Jaggi. Ideas to start the discussion (availability not yet checked): *Vanshavali* (Hindi for family lineage), *Banyan* or *FamilyBanyan* (fits today's look), *KinKeeper*, *RootKeeper*. Do you have a name in mind?
-2. **Budget.** Is about $50 a month in running costs, once families pay, acceptable? Any budget for a lawyer, a designer or ads?
-3. **Pricing.** Are you comfortable with freemium and roughly $49 a year per family, members free? Or do you prefer one-time payments, or free with paid printed books only?
-4. **Timeline.** Is a closed beta around February 2027 and a paid launch in spring 2027 right, or do you want it sooner or later relative to the coffee table book?
-5. **Jaggi site.** Move it onto the product as family #1 when ready (recommended), or keep it separate?
-6. **Company.** Sell under Quantum Nexus LLC?
-7. **First audience.** Start with families of the South Asian diaspora, or everyone from day one?
-8. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public?
-9. **Beta families.** Do you have 5 to 10 families in mind for a free closed beta?
+Nothing: it runs on the free Supabase plan, GitHub Pages and Gmail. It keeps running this way until it moves onto the product (if decided).
 
-## 10. Decisions
+## 9. Legal help (Sunil has no lawyer yet)
+
+*This is a list of options to explore, not legal advice.* A lawyer is not needed to build the product, but should look at the documents below before families pay (June 2027), and ideally before the pilot.
+
+### 9.1 What the product needs a lawyer for
+
+| Need | Why |
+|---|---|
+| **Terms of Service** | The agreement every family admin accepts: what they may upload, who owns the family's content (the family), limits on our responsibility, cancellation and refunds |
+| **Privacy Policy** | Required by law for any site that collects names and emails; must cover information about **living people added by relatives**, children's information, and US state laws such as California's |
+| **Photo and copyright policy** | How to handle someone asking to remove a photo they own or that shows them |
+| **Brand name and trademark** | Check the chosen name is free to use, then register it |
+| **Company and insurance** | Whether selling under Quantum Nexus LLC is the right set-up (an Arizona LLC already gives personal protection), and whether to buy cyber liability insurance in case of a data breach |
+| **Overseas families** | If families in the EU or UK sign up, their privacy rules (GDPR) add a few requirements |
+
+### 9.2 Ways to get legal help, cheapest first
+
+| Option | What you get | Rough cost |
+|---|---|---|
+| **Policy generators** (Termly, iubenda, TermsFeed) | Fill in a questionnaire; they write the Privacy Policy and Terms and keep them updated as laws change. A good starting draft for a lawyer to review. | free to about $15 a month |
+| **SCORE** (score.org) | Free mentoring for small businesses from retired business people, some of them lawyers; good for "what do I need?" questions | free |
+| **State Bar of Arizona lawyer referral** (and the Maricopa County Bar referral service) | Introduces you to a local business or technology lawyer, usually with a low-cost first half-hour consultation | about $35 to $50 for the first consultation |
+| **Legal plans** (LegalZoom, Rocket Lawyer) | A monthly plan with short calls to an attorney and document reviews; trademark filing packages | about $40 a month, or a few hundred dollars for a trademark package |
+| **Flat-fee lawyer marketplaces** (UpCounsel, ContractsCounsel) | Post the job ("review Terms of Service and Privacy Policy for a family history website"); lawyers quote a fixed price | about $500 to $1,500 for both documents |
+| **Small-business or technology law firm** | Full review and ongoing advice | $250 to $450 an hour |
+
+**Suggested path:** a policy generator for the drafts (now, free), a referral-service consultation to confirm what is needed (before the pilot, about $50), then a flat-fee review of the final Terms and Privacy Policy plus the trademark (spring 2027, about $1,000 to $2,000 all together).
+
+## 10. Brand and domain names
+
+Sunil (20 Nov 2026): suggest names that work for families in the US, India and other countries; the final choice comes closer to development.
+
+**What makes a good name here:** short and easy to spell in any accent; plain English words that Indian, American and other families all know; nothing tied to one religion, caste, language or country; a matching **.com** available at the normal price; ideally a picture behind it. The **banyan** tree is a good picture for all audiences: it is India's national tree, a symbol of long life and shelter, well known in the US, and its branches grow down into new roots, just like a family. It also matches the look the Jaggi site already has.
+
+### 10.1 Suggested names with a .com that is free to register
+
+Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (price). An unregistered .com always costs the normal price; there are no premium .com prices from the registry. Prices are Porkbun's; GoDaddy and Namecheap charge about $11 to $25 for the first year and about $15 to $23 a year to renew.
+
+| Name | Domain | Why it fits | First year | Renews at |
+|---|---|---|---|---|
+| **BanyanKin** *(top pick)* | banyankin.com | Banyan (India's tree, known everywhere) + kin (family); short, unusual, easy to remember; fits today's look | $11.81 (checked) | $11.81 |
+| **Tree of Family** | treeoffamily.com | Says exactly what it is in plain English; easy for older relatives | $11.81 (checked) | $11.81 |
+| **KinTapestry** | kintapestry.com | Families woven together; warm and premium-sounding, good for the printed book | $11.81 (checked) | $11.81 |
+| **Banyan Lineage** | banyanlineage.com | Clear that it is about ancestry; dignified | $11.81 (checked) | $11.81 |
+| **Banyan Lines** | banyanlines.com | Family lines growing from one tree | $11.81 | $11.81 |
+| **KinshipMap** | kinshipmap.com | Says what it does (how everyone is related) | $11.81 | $11.81 |
+| **Our Roots Tree** | ourrootstree.com | Simple, friendly | $11.81 | $11.81 |
+| **Roots Ever** / **Banyan Ever** | rootsever.com, banyanever.com | "Our roots, forever" | $11.81 | $11.81 |
+| **Vansh Kin** | vanshkin.com | *Vansh* is Hindi and Punjabi for lineage; strong for Indian families, less clear to others | $11.81 | $11.81 |
+
+"(checked)" means the Porkbun price was looked up for that exact name; the others are unregistered .com names, which are always the standard price. All names still need a **trademark search** before choosing (see section 9).
+
+### 10.2 Good names whose .com is taken
+
+| Name | .com | Other endings free to register (first year, then yearly) |
+|---|---|---|
+| FamilyBanyan | **For resale at $120,000** | familybanyan.app ($8.75, then $14.93); familybanyan.family ($5.66, then $35.53) |
+| Kinlines | Taken, not listed for sale | kinlines.app ($8.75, then $14.93); kinlines.family ($5.66, then $35.53) |
+| OurBanyan | Taken | ourbanyan.app ($8.75, then $14.93); ourbanyan.family |
+| KinRoots | **For resale at $10,000** | kinroots.family |
+| KinKeeper | **For resale at $9,999** | none (.app and .family are taken too) |
+| Vanshavali | **For resale at $4,595** | n/a |
+| KinStory, Heritree, Rootline, KinNest | Taken, not listed for sale | .family versions free |
+
+**Advice:** prefer a name with its **.com** free at the normal price (section 10.1). People type ".com" by habit, and emails from a .com are trusted more. A **.family** address looks charming but renews at about $35 a year. Once a name is chosen, also register the **.in** (India, about $8 a year) and possibly **.app**, so nobody else takes them: about $35 a year for all three.
+
+## 11. Open questions for Sunil
+
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered). Still open:
+
+1. **Pricing.** Are you comfortable with freemium and roughly $49 a year per family, members free? Or do you prefer one-time payments, or free with paid printed books only?
+2. **First audience.** Start with families of the South Asian diaspora, or everyone from day one?
+3. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public?
+4. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+
+## 12. Decisions
 
 | Date | Decision |
 |---|---|
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
+| 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
+| 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
 
 ## Change log
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | First draft: Jaggi-specific inventory, build and commercial options with recommendations, product requirements, phases, costs, open questions. |
+| 20 Nov 2026 | | Brand and domain name suggestions with availability and prices (section 10); Jaggi site move as a seamless test; Quantum Nexus LLC under consideration. |
+| 20 Nov 2026 | #27 | Sunil's first answers: timeline to June 2027, cost breakdown (section 8), legal help options (section 9), remaining open questions. |
+| 20 Nov 2026 | #26 | First draft: Jaggi-specific inventory, build and commercial options with recommendations, product requirements, phases, costs, open questions. |
