@@ -147,7 +147,7 @@ A friendly step-by-step screen, one question per screen, with **Back**, **Skip f
 
 1. **Your family's name**, for example "The Mehtas of Lahore". A short tagline is optional.
 2. **Your site's address**: suggested from the name (`mehtas-of-lahore.<product>.com`); the person can change it; the wizard says at once if it is taken.
-3. **Your logo**: upload a picture, or pick one of the automatically made monograms (initials in a crest). Cropping is done on screen.
+3. **Your logo** (Sunil, 20 Nov 2026): pick one of several **ready-made family logo templates** that fill in the family's own name automatically, just as the Jaggi logo says "Jaggis of Chakwal". The wizard already knows the family name and place from step 1, so every template is shown with their name in it straight away; they tap the one they like. Or they can upload their own logo. Details in 5.2.1.
 4. **Your colours**: pick one of 6 to 8 ready-made themes (with a live preview of the tree), or choose a main colour. Light and dark work automatically.
 5. **Who is at the top of your tree?** Two choices: "Start with me" (they add themselves, then parents and grandparents) or "Start with our earliest ancestor" (they type that ancestor's name).
 6. **Privacy**: one simple choice, with a plain explanation:
@@ -160,11 +160,25 @@ A friendly step-by-step screen, one question per screen, with **Back**, **Skip f
 
 The whole wizard should take **under 10 minutes**.
 
+#### 5.2.1 Family logo templates (agreed 20 Nov 2026, designs to be finalised)
+
+- At launch, **4 to 6 templates** in different styles, for example a **Banyan Crest** (tree in a circle with a ribbon, like the Jaggi logo), a **Heritage Shield** (shield with the family's first initial and laurels), **Modern Roots** (simple line tree and clean lettering) and a **Family Seal** (round seal with the name around the edge).
+- The admin types: **family name** (for example "Mehta"), **place** the family comes from (optional, for example "Lahore"), and an optional **motto** (for example "Legacy · Family · Heritage"). The product builds the wording, such as "Mehtas of Lahore" or "The Mehta Family of Lahore", and the admin can edit the exact wording (for names where adding "s" is wrong, or for "The Mehta-Kapoor Family").
+- Long names shrink to fit automatically; the first letter of the family name is used where a template has an initial.
+- Each template comes in the family's chosen colours (wizard step 4), or in its own colours.
+- The finished logo is used everywhere the Jaggi logo is used today: the site header (with hover or tap to enlarge), the sign-in page, emails, the PDF family book cover and page headers, and the printed book (5.9). It is made as a sharp vector image, so it prints cleanly at any size.
+- The admin can change the template or wording any time in Family settings, or upload their own logo instead.
+- Hindi, Punjabi and other scripts for names can follow later (5.8).
+
+Sample mock-ups with two made-up families (final designs would be drawn by a designer or refined later; these show the idea):
+
+![Four family logo templates, each shown with the made-up families Mehta of Lahore and Johnson of Ohio](product/logo-templates.png)
+
 ### 5.3 Family settings (admin)
 
 Everything the wizard asked, plus:
 
-- **Branding:** name, tagline, logo, favicon, colours, footer text.
+- **Branding:** name, tagline, logo (change template or wording, or upload their own; see 5.2.1), favicon (made from the logo automatically), colours, footer text.
 - **Address:** subdomain; custom domain (with plain step-by-step instructions and a "check my domain" button).
 - **Privacy defaults:** site private or names public; default for new details and photos (Family branch only by default); rules for marriage dates and adoption labels (today's Jaggi rules as defaults).
 - **Branches:** which generation branches start at (default: the root's grandchildren), with a preview of the branches this makes.
@@ -430,6 +444,7 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
+| 20 Nov 2026 | Sunil: the setup wizard offers a few ready-made family logo templates that fill in the family's name automatically, like "Jaggis of Chakwal" (5.2.1). |
 | 20 Nov 2026 | Sunil: yes to the printed family book service (5.9); build and test it on the Jaggi family tree first. |
 | 20 Nov 2026 | Sunil approved the plan as written: free plan (4.4), private repository for the product (3.3), invitation emails and the four ways to invite (5.3.1). Only the brand name stays open. |
 | 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (details in 4.4). Launch for everyone, not only South Asian families. |
@@ -438,7 +453,8 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | Printed book service agreed, pilot on the Jaggi site first. |
+| 20 Nov 2026 | | Family logo templates in the setup wizard, with sample mock-ups (5.2.1). |
+| 20 Nov 2026 | #30 | Printed book service agreed, pilot on the Jaggi site first. |
 | 20 Nov 2026 | | Printed family book service proposal: automatic layout from templates, page editor, print-on-demand ordering (5.9). |
 | 20 Nov 2026 | | Sunil approved the plan; proposals marked agreed. |
 | 20 Nov 2026 | | Invitation options (5.3.1): Send from my own email, WhatsApp (carried over, works on desktop), Copy link; Google send-as left for later. |
