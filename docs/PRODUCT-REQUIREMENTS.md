@@ -1,6 +1,6 @@
 # Family Tree Product: Requirements (draft)
 
-**Status:** first draft, 20 November 2026. Nothing here is built yet. Items marked **Decision needed** are waiting for Sunil.
+**Status:** draft, 20 November 2026 (updated with Sunil's first answers the same day). Nothing here is built yet. Items marked **Decision needed** are waiting for Sunil.
 
 This document plans how the Jaggis of Chakwal family tree becomes a product that **any family** can sign up for, set up on their own, and use, with no technical help. The Jaggi site (https://familytree.sjaggi.com) keeps working exactly as it does today and becomes the product's first family ("tenant #1").
 
@@ -116,7 +116,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 
 Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin.
 
-**Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free closed beta** for 5 to 10 invited families before charging anyone.
+**Recommendation:** freemium per family with a yearly plan, members always free, printed books as the add-on. Start with a **free pilot** for 5 to 10 families Sunil invites (April to May 2027) before charging anyone.
 
 **Decision needed:** price levels; whether to sell under Quantum Nexus LLC.
 
@@ -209,53 +209,106 @@ Every feature in `REQUIREMENTS.md` sections 4 to 8 becomes available to every fa
 
 **Decision needed:** move the Jaggi site onto the product (recommended), or keep it as a separate site for good.
 
-## 7. Phases (rough)
+## 7. Phases and timeline
 
-| Phase | What | Rough time |
+Sunil (20 Nov 2026): spread the work over about six months, with the paid launch in **June 2027**. The coffee table book (first quarter of 2027) runs alongside.
+
+| Phase | What | When (target) |
 |---|---|---|
-| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | 2 to 3 weeks |
-| 1. Many families | Families table, family-aware security rules and tests, new hosting, email service, family addresses | 3 to 4 weeks |
-| 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | 3 to 4 weeks |
-| 3. Closed beta | 5 to 10 invited families, free; fix what confuses them; Jaggi site moves in | 4 to 6 weeks |
-| 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms, custom domains | 2 to 3 weeks |
-| 5. Later | App Store and Google Play apps, printed book ordering, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | ongoing |
+| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | December 2026 to mid-January 2027 |
+| 1. Many families | Families table, family-aware security rules and tests, new hosting, email service, family addresses | mid-January to February 2027 |
+| 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
+| 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; Jaggi site moves in (if decided) | April to May 2027 |
+| 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
+| 5. Later | App Store and Google Play apps, printed book ordering, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
-At this pace a closed beta could start around **February 2027** and a paid launch around **spring 2027**, after the coffee table book work in the first quarter. These are estimates, not promises.
+These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
-## 8. Running costs (estimate)
+## 8. Running costs
 
-| Item | Before paying families | With paying families |
+Sunil (20 Nov 2026): about $50 a month is fine. Prices below are the services' published list prices as of late 2026 and should be rechecked when each is signed up for.
+
+### 8.1 Monthly costs from the pilot onward
+
+Nothing needs to be paid while the product is being built (December 2026 to March 2027): the free plans are enough. Paid plans start with the pilot in April 2027, because real families' photos and stories need daily backups.
+
+| Item | What it is for | Plan | Cost a month |
+|---|---|---|---|
+| **Supabase** | The database for all families (people, relationships, members), sign-in, photo storage, and the small server programs that send emails | Pro: includes daily backups, 8 GB of data, 100 GB of photos, 100,000 members a month, no pausing | **$25** |
+| **Email service** (Resend or Postmark) | Sending invitations, sign-in codes, reminders and receipts from the product's own address, reliably and without landing in spam | Free up to 3,000 emails a month; the next plan (50,000 a month) | **$0 during the pilot, then $20** |
+| **Product domain** | The product's web address (for example `<brand>.com`) and its email address | One domain | **about $1.25** ($15 a year) |
+| **Website hosting** (Cloudflare Pages) | Serving the website itself, the families' own addresses (`smith.<brand>.com`) and custom domains | Free; the first 100 custom domains are free, then about 10 cents each a month | **$0** |
+| **Visitor counts** (GoatCounter) | Anonymous visit numbers, no cookies | Free for this size | **$0** |
+| **Code and tests** (GitHub, private repository) | Keeping the code and running the automatic tests | Free plan includes 2,000 test minutes a month | **$0** |
+| **Total** | | | **about $26 during the pilot, about $46 once launched** |
+
+### 8.2 Costs that only come with income or later
+
+| Item | When | Cost |
 |---|---|---|
-| Supabase | free | about $25 a month, more as photos grow |
-| Website hosting (Cloudflare Pages) | free | free |
-| Email service | free (up to a few thousand emails a month) | about $20 a month |
-| Product domain name | about $15 a year | same |
-| Stripe | none | about 3% of each payment |
-| Apple and Google developer accounts | none | $99 a year and $25 once, when the store apps come |
-| Lawyer review of Terms and Privacy Policy | none | a one-off fee, optional but recommended |
+| **Stripe** (card payments) | Each payment | 2.9% + 30 cents; on a $49 yearly plan about $1.72, so the family's $49 brings in about $47.28 |
+| **More photo space** | Only when all families together pass 100 GB of photos (roughly 150,000 photos) | about 2 cents per extra GB a month |
+| **Bigger email plan** | Only above 50,000 emails a month | about $35 to $90 a month |
+| **Apple developer account** | When the iPhone app comes (after June 2027) | $99 a year (about $8 a month) |
+| **Google Play developer account** | When the Android app comes | $25 once |
+| **Trademark for the brand name** | When the name is chosen | about $350 per class with the US Patent and Trademark Office, plus any lawyer fee |
+| **Lawyer help** | Before the paid launch | one-off; see section 9 |
 
-Roughly **$50 a month** once paying families start. About 15 families on the Family plan cover it.
+**Break-even:** at about $47 a family after Stripe fees, **one Family plan a month** (12 families a year) covers the running costs once launched.
 
-## 9. Open questions for Sunil
+### 8.3 What the Jaggi site costs today
 
-1. **Brand name.** The product needs a name that is not Jaggi. Ideas to start the discussion (availability not yet checked): *Vanshavali* (Hindi for family lineage), *Banyan* or *FamilyBanyan* (fits today's look), *KinKeeper*, *RootKeeper*. Do you have a name in mind?
-2. **Budget.** Is about $50 a month in running costs, once families pay, acceptable? Any budget for a lawyer, a designer or ads?
-3. **Pricing.** Are you comfortable with freemium and roughly $49 a year per family, members free? Or do you prefer one-time payments, or free with paid printed books only?
-4. **Timeline.** Is a closed beta around February 2027 and a paid launch in spring 2027 right, or do you want it sooner or later relative to the coffee table book?
-5. **Jaggi site.** Move it onto the product as family #1 when ready (recommended), or keep it separate?
-6. **Company.** Sell under Quantum Nexus LLC?
-7. **First audience.** Start with families of the South Asian diaspora, or everyone from day one?
-8. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public?
-9. **Beta families.** Do you have 5 to 10 families in mind for a free closed beta?
+Nothing: it runs on the free Supabase plan, GitHub Pages and Gmail. It keeps running this way until it moves onto the product (if decided).
 
-## 10. Decisions
+## 9. Legal help (Sunil has no lawyer yet)
+
+*This is a list of options to explore, not legal advice.* A lawyer is not needed to build the product, but should look at the documents below before families pay (June 2027), and ideally before the pilot.
+
+### 9.1 What the product needs a lawyer for
+
+| Need | Why |
+|---|---|
+| **Terms of Service** | The agreement every family admin accepts: what they may upload, who owns the family's content (the family), limits on our responsibility, cancellation and refunds |
+| **Privacy Policy** | Required by law for any site that collects names and emails; must cover information about **living people added by relatives**, children's information, and US state laws such as California's |
+| **Photo and copyright policy** | How to handle someone asking to remove a photo they own or that shows them |
+| **Brand name and trademark** | Check the chosen name is free to use, then register it |
+| **Company and insurance** | Whether selling under Quantum Nexus LLC is the right set-up (an Arizona LLC already gives personal protection), and whether to buy cyber liability insurance in case of a data breach |
+| **Overseas families** | If families in the EU or UK sign up, their privacy rules (GDPR) add a few requirements |
+
+### 9.2 Ways to get legal help, cheapest first
+
+| Option | What you get | Rough cost |
+|---|---|---|
+| **Policy generators** (Termly, iubenda, TermsFeed) | Fill in a questionnaire; they write the Privacy Policy and Terms and keep them updated as laws change. A good starting draft for a lawyer to review. | free to about $15 a month |
+| **SCORE** (score.org) | Free mentoring for small businesses from retired business people, some of them lawyers; good for "what do I need?" questions | free |
+| **State Bar of Arizona lawyer referral** (and the Maricopa County Bar referral service) | Introduces you to a local business or technology lawyer, usually with a low-cost first half-hour consultation | about $35 to $50 for the first consultation |
+| **Legal plans** (LegalZoom, Rocket Lawyer) | A monthly plan with short calls to an attorney and document reviews; trademark filing packages | about $40 a month, or a few hundred dollars for a trademark package |
+| **Flat-fee lawyer marketplaces** (UpCounsel, ContractsCounsel) | Post the job ("review Terms of Service and Privacy Policy for a family history website"); lawyers quote a fixed price | about $500 to $1,500 for both documents |
+| **Small-business or technology law firm** | Full review and ongoing advice | $250 to $450 an hour |
+
+**Suggested path:** a policy generator for the drafts (now, free), a referral-service consultation to confirm what is needed (before the pilot, about $50), then a flat-fee review of the final Terms and Privacy Policy plus the trademark (spring 2027, about $1,000 to $2,000 all together).
+
+## 10. Open questions for Sunil
+
+Answered on 20 Nov 2026: brand name (decide closer to development), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10). Still open:
+
+1. **Pricing.** Are you comfortable with freemium and roughly $49 a year per family, members free? Or do you prefer one-time payments, or free with paid printed books only?
+2. **Jaggi site.** Move it onto the product as family #1 when ready (recommended), or keep it separate?
+3. **Company.** Sell under Quantum Nexus LLC?
+4. **First audience.** Start with families of the South Asian diaspora, or everyone from day one?
+5. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public?
+6. **Brand name.** To decide closer to development; candidates so far (availability not checked): *Vanshavali*, *FamilyBanyan*, *KinKeeper*, *RootKeeper*.
+
+## 11. Decisions
 
 | Date | Decision |
 |---|---|
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
+| 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 
 ## Change log
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | First draft: Jaggi-specific inventory, build and commercial options with recommendations, product requirements, phases, costs, open questions. |
+| 20 Nov 2026 | | Sunil's first answers: timeline to June 2027, cost breakdown (section 8), legal help options (section 9), remaining open questions. |
+| 20 Nov 2026 | #26 | First draft: Jaggi-specific inventory, build and commercial options with recommendations, product requirements, phases, costs, open questions. |
