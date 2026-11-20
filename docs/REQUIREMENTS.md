@@ -295,7 +295,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
-| 19 Nov 2026 | #PR | Tree opens on the signed-in member's own line. |
+| 19 Nov 2026 | #21 | Tree opens on the signed-in member's own line. |
 | 18 Nov 2026 | #18 | Help and Ancestors pages show the same top bar as the tree (search, full role-aware menu, light/dark, Sign out, member chip). |
 | 18 Nov 2026 | #14 | Requirements brought up to date with everything shipped since 12 Nov and moved into the repository. |
 | 18 Nov 2026 | #15 | Privacy: marriage dates and adoption labels hidden from visitors; default Family branch only; warning when Public is chosen for a living person. |
