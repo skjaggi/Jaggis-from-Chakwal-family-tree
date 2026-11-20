@@ -24,6 +24,8 @@ export function navItems({ base = '', active = null, root = null, count = 0, onS
     tab('library', `${base}#/library`, 'Library', { title: 'Videos and articles about the family and Chakwal' }),
     tab('help', `${base}help.html`, 'Help'),
     tab('export', `${base}#/export`, 'Export', { title: 'Download the tree as a PDF or a GEDCOM file' }),
+    // Admins only while it is being tested.
+    store.isAdmin ? tab('book', `${base}#/book`, 'Book', { title: 'Make a printed family book from the tree' }) : null,
     // Admin only (and only on the tree pages): preview the site as a member.
     onViewAs && store.isRealAdmin ? h('button.linkish.viewas-btn', { type: 'button', title: 'See the site as a family member sees it (a preview: nothing is saved)', onclick: onViewAs }, '👁 View as') : null,
     themeButton(),

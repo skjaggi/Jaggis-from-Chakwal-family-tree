@@ -14,6 +14,7 @@ import { renderInvite } from './invite.js';
 import { renderDashboard } from './dashboard.js';
 import { renderBlessings, renderCorner, maybeShowBlessingsIntro, maybeShowHistorianCongrats, maybeShowFounderThanks } from './blessings.js';
 import { renderExport } from './export.js';
+import { renderBook } from './book.js';
 import { downloadGedcom } from './gedcom.js';
 import { countView } from './count.js';
 import { renderLibrary } from './library.js';
@@ -29,7 +30,7 @@ function parseHash() {
   if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
-  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings', 'library'].includes(view) ? view : 'tree';
+  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings', 'library', 'book'].includes(view) ? view : 'tree';
   state.root = root && store.fam.byId.has(root) ? root : store.fam.defaultRootId;
   const params = new URLSearchParams(query);
   state.query = params;
@@ -103,6 +104,7 @@ async function route() {
     if (state.view === 'mine') return renderMine(page);
     if (state.view === 'invite') return renderInvite(page);
     if (state.view === 'blessings') return renderBlessings(page);
+    if (state.view === 'book') return renderBook(page, state.query);
     return;
   }
 
