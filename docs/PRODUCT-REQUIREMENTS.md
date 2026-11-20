@@ -1,6 +1,6 @@
 # Family Tree Product: Requirements
 
-**Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. Open items: the brand name (section 11) and the printed book service proposal (5.9).
+**Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. The only open item is the brand name (section 11).
 
 This document plans how the Jaggis of Chakwal family tree becomes a product that **any family** can sign up for, set up on their own, and use, with no technical help. The Jaggi site (https://familytree.sjaggi.com) keeps working exactly as it does today and becomes the product's first family ("tenant #1").
 
@@ -228,7 +228,7 @@ Every feature in `REQUIREMENTS.md` sections 4 to 8 becomes available to every fa
 - English first; names accept any script. Hindi and Punjabi screens are a good later step for the first audience.
 - Accessible: large tap targets, readable font sizes, works with screen readers.
 
-### 5.9 Printed family book service (proposal, waiting for Sunil's OK)
+### 5.9 Printed family book service (agreed 20 Nov 2026)
 
 Sunil asked (20 Nov 2026): can the product build the book automatically from ready-made design templates, with no manual work, and then let families change the text, replace pictures and add or change stories? **Yes.** It works like the photo books from Shutterfly or Mixbook, but filled from the family tree.
 
@@ -260,7 +260,9 @@ Sunil asked (20 Nov 2026): can the product build the book automatically from rea
 
 **What it takes to build:** the book templates and automatic layout reuse the "Make the PDF" family book the Jaggi site already has, so the starting point exists. New work: two or three templates, the page editor, print-quality checks, the print partner's ordering connection, and payment through Stripe. About **6 to 8 weeks** of work.
 
-**When:** after the paid launch (from July 2027, as part of phase 5). The Jaggi coffee table book planned for early 2027 can serve as the model for the first "Heritage" template, so the design work is reused.
+**Pilot on the Jaggi site first** (Sunil, 20 Nov 2026): the book builder is built and tested on the Jaggi family tree before it goes into the product, the same way the rest of the product grew from the Jaggi site.
+
+**When in the product:** after the paid launch (from July 2027, as part of phase 5). The Jaggi coffee table book planned for early 2027 can serve as the model for the first "Heritage" template, so the design work is reused.
 
 ## 6. Keeping the Jaggi site working
 
@@ -417,10 +419,9 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 ## 11. Open questions for Sunil
 
-Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3) and invitation emails (5.3.1), all agreed. Still open:
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3), invitation emails (5.3.1) and the printed book service (5.9, piloted on the Jaggi site first), all agreed. Still open:
 
-1. **Printed book service.** OK with the proposal in 5.9 (automatic book from templates, families edit text, pictures and stories, print-on-demand ordering, from July 2027)?
-2. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+1. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
 
 ## 12. Decisions
 
@@ -429,6 +430,7 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
+| 20 Nov 2026 | Sunil: yes to the printed family book service (5.9); build and test it on the Jaggi family tree first. |
 | 20 Nov 2026 | Sunil approved the plan as written: free plan (4.4), private repository for the product (3.3), invitation emails and the four ways to invite (5.3.1). Only the brand name stays open. |
 | 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (details in 4.4). Launch for everyone, not only South Asian families. |
 
@@ -436,6 +438,7 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | Printed book service agreed, pilot on the Jaggi site first. |
 | 20 Nov 2026 | | Printed family book service proposal: automatic layout from templates, page editor, print-on-demand ordering (5.9). |
 | 20 Nov 2026 | | Sunil approved the plan; proposals marked agreed. |
 | 20 Nov 2026 | | Invitation options (5.3.1): Send from my own email, WhatsApp (carried over, works on desktop), Copy link; Google send-as left for later. |
