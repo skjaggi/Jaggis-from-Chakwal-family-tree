@@ -253,6 +253,8 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 
 - **Make a new book:** choose a design (**Heritage**, **Classic**, **Modern**), a page size (8 × 8, 10 × 10 or 12 × 12 in square; 8.5 × 11 in portrait; 11 × 8.5 in landscape), and where it starts (the whole tree or any person with children: that person, their descendants and spouses). Option to give pages only to people with a photo, story, spouse or children (on by default; everyone else is named on their parents' page and in the chart). Option to add 0.125 in printer's bleed.
 - **Built automatically from the tree:** cover (logo, "N generations from …", up to four early photos, optional family edition line), About this book, the family tree chart (indented, branch colours, split over pages as needed), then per generation a title page and one page per person or couple (photo, spouse photo, years, birthplace, place of passing, work, marriages, children, Notes / Story of both), and a back page (logo, copyright and Quantum Nexus mark).
+- **Variety (v2, Sunil 20 Nov 2026):** each generation title page shows a **picture tree**: a photo (or initials) and name for every blood descendant of that generation, grouped under their parent, in one of six styles that changes per generation (banyan with dark name tags, gold medallions, arched frames, tilted snapshots, leaves, gold ribbons); it shrinks itself to fit the page. Person pages rotate through five layouts (photo left, wide photo on top, photo right, round portrait, photo band). Both can be changed per page (**Layout**, **Tree**).
+- **More on a page (v2):** **+ Photo** and **+ Text** add extra photos (with captions) or paragraphs to any page; each can be removed.
 - **Heritage design** follows the coffee table book plan: cream pages, deep green and gold, faint banyan, classic serif for names and stories, clean sans for labels; Devanagari and Gurmukhi fonts for Hindi and Punjabi.
 - **Editing on screen:** every text on every page can be changed in place; every photo can be replaced (upload up to 15 MB, a tree photo, or none); story, photo and quote pages can be added; pages can be moved, hidden and reset to the tree. Changes are stored on top of the tree, so **Rebuild from the tree** brings in new people and details and keeps the changes. A book never changes the tree.
 - **Warnings:** photos under about 150 dots per inch at their printed size ("may print blurry"), text that does not fit its page, and an odd page count.
@@ -303,6 +305,7 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 | 20 Nov 2026 | Sunil: members (not visitors) get a "Start tree from" drop-down of people with children, with a generation badge and clickable ancestor path; married-in spouses still shown. The start line and the "you are here" bar share one line. |
 | 20 Nov 2026 | Sunil (later the same day): remember the member's last starting person and open the tree from it next time; picking Bhanna Mal Jaggi goes back to opening on their own line. |
 | 20 Nov 2026 | Sunil: pilot the automatic family book maker on this site, admins only while testing; book changes saved in the database. |
+| 20 Nov 2026 | Sunil: book pages should vary from page to page, allow more photos and text on a page, and each generation page should have a picture tree in a different style per generation. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -317,6 +320,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | **Book maker v2:** picture tree on every generation page (six styles), five rotating person page layouts, + Photo and + Text on any page. |
 | 20 Nov 2026 | #33 | The member's chosen starting person is remembered in their browser and used next time; picking the top ancestor clears it. |
 | 20 Nov 2026 | #25 | Help section 4: labelled pictures of the Start tree from line (desktop and phone); help pictures retaken with the new line. |
 | 20 Nov 2026 | | **Family book maker** (admins, pilot): Heritage, Classic and Modern designs, sizes up to 12 × 12 in, built from the tree, edited on screen, warnings, print-ready PDF; new `book_drafts` table and `book-photos` bucket. |

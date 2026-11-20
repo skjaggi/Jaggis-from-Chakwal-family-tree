@@ -38,6 +38,26 @@ const SITE = 'familytree.sjaggi.com';
 const FONTS = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital@0;1&family=Inter:wght@400;500;600;700&family=Lora:ital@0;1&family=Noto+Sans+Devanagari&family=Noto+Sans+Gurmukhi&display=swap';
 const BUCKET = 'book-photos';
 const EXTRA_TYPES = { story: 'Story page', photo: 'Photo page', quote: 'Quote page' };
+// Person and couple pages take turns between these layouts, so no two pages
+// in a row look the same. Any page can be switched to another one.
+export const FAMILY_LAYOUTS = [
+  { id: 'left', name: 'Photo left' },
+  { id: 'top', name: 'Wide photo on top' },
+  { id: 'right', name: 'Photo right' },
+  { id: 'portrait', name: 'Round portrait, centred' },
+  { id: 'band', name: 'Photo band with story beside' },
+];
+// Each generation's title page has a tree of photos: everyone in that
+// generation, grouped under their parent. The style changes from one
+// generation to the next; any page can be switched to another style.
+export const TREE_STYLES = [
+  { id: 'banyan', name: 'Banyan: round photos on a big tree' },
+  { id: 'medallion', name: 'Medallions with gold rings' },
+  { id: 'arch', name: 'Arched frames' },
+  { id: 'snapshot', name: 'Snapshots' },
+  { id: 'leaf', name: 'Leaves' },
+  { id: 'ribbon', name: 'Ribbons' },
+];
 
 // ------------------------------------------------------------------ storage
 // The book_drafts table (admins only). Without a database (the preview
@@ -161,16 +181,19 @@ function autoPages(fam, s) {
     pages.push({ key: `chart:${n}`, type: 'chart', label: `Family tree chart${rows.length > perPage ? ` (${n})` : ''}`, rows: rows.slice(i, i + perPage), cont: n > 1, cols });
   }
   const byGen = new Map();
+  const allByGen = new Map();
   for (const x of list) {
     const g = genOf(fam, rootId, x.id, x.depth);
+    (allByGen.get(g) || allByGen.set(g, []).get(g)).push(x.id);
     if (s.skipEmpty !== false && !hasOwnPage(fam, x.id, g)) continue;
     (byGen.get(g) || byGen.set(g, []).get(g)).push(x.id);
   }
-  for (const g of [...byGen.keys()].sort((a, b) => a - b)) {
-    const ids = byGen.get(g);
-    pages.push({ key: `gen:${g}`, type: 'gen', label: `Generation ${g}`, gen: g, ids });
-    for (const id of ids) pages.push({ key: `fam:${id}`, type: 'family', label: fullName(fam.byId.get(id), { title: false }), id, gen: g, blood });
-  }
+  let famIndex = 0;
+  [...allByGen.keys()].sort((a, b) => a - b).forEach((g, gi) => {
+    const ids = byGen.get(g) || [];
+    pages.push({ key: `gen:${g}`, type: 'gen', label: `Generation ${g}`, gen: g, ids, all: allByGen.get(g), gi, blood });
+    for (const id of ids) pages.push({ key: `fam:${id}`, type: 'family', label: fullName(fam.byId.get(id), { title: false }), id, gen: g, blood, layoutAuto: FAMILY_LAYOUTS[famIndex++ % FAMILY_LAYOUTS.length].id });
+  });
   pages.push({ key: 'end', type: 'end', label: 'Back page' });
   const gens = [...new Set(list.map((x) => genOf(fam, rootId, x.id, x.depth)))];
   return { pages, rootId, count: list.length + list.reduce((n, x) => n + fam.spouses(x.id).filter((sp) => !blood.has(sp.person.id)).length, 0), gens: gens.length };
@@ -225,6 +248,7 @@ const setEdit = (key, fn) => {
   if (Object.keys(e.f || {}).length === 0) delete e.f;
   if (Object.keys(e.ph || {}).length === 0) delete e.ph;
   if (!e.hidden) delete e.hidden;
+  if (e.adds && !e.adds.length) delete e.adds;
   if (Object.keys(e).length) B.data.edits[key] = e;
   else delete B.data.edits[key];
   queueSave();
@@ -330,13 +354,14 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
       })),
     ];
   } else if (page.type === 'gen') {
-    const names = page.ids.map((id) => fullName(fam.byId.get(id), { title: false }));
+    const style = edits(key).style || TREE_STYLES[page.gi % TREE_STYLES.length].id;
     body = [
-      h('div.bp-gen-num', String(page.gen)),
-      text(key, 'title', `Generation ${page.gen}`, { tag: 'h1', cls: 'bp-gen-title', edit }),
-      h('div.bp-rule.center'),
-      text(key, 'story', '', { cls: 'bp-gen-intro', edit, ph: 'Optional: a few words about this generation' }),
-      h('div.bp-gen-names.fit', names.map((x) => h('span', x))),
+      h('div.bp-gen-head',
+        h('div.bp-gen-num', String(page.gen)),
+        h('div',
+          text(key, 'title', `Generation ${page.gen}`, { tag: 'h1', cls: 'bp-gen-title', edit }),
+          text(key, 'story', '', { cls: 'bp-gen-intro', edit, ph: 'Optional: a few words about this generation' }))),
+      photoTree(page, style, { edit }),
     ];
   } else if (page.type === 'family') {
     body = familyPage(page, { edit });
@@ -371,7 +396,7 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
   }
   const showFoot = !['cover'].includes(page.type);
   const pageEl = h(`div.bp.t-${page.type}`, { 'data-key': key },
-    h('div.bp-inner', body, showFoot ? runFoot(n, edit) : null));
+    h('div.bp-inner', body, addedItems(key, { edit }), showFoot ? runFoot(n, edit) : null));
   if (page.type === 'family') {
     const br = branchesOf(fam).of.get(page.id);
     if (br?.slot) pageEl.dataset.branch = br.slot;
@@ -402,9 +427,10 @@ function familyPage(page, { edit }) {
   const factsEl = edit || own == null
     ? h('dl.bp-facts', facts.map(([k, v]) => [h('dt', k), h('dd', v)]))
     : null;
+  const layout = edits(key).layout || page.layoutAuto || 'left';
   return [
     h('div.bp-kicker', kicker),
-    h('div.bp-fam',
+    h(`div.bp-fam.lay-${layout}`,
       h('div.bp-fam-photos',
         photo(key, 'photo', page.id, { cls: 'bp-main-ph', edit, label: fullName(p), monogram: initials(p.given_name) }),
         text(key, 'caption', '', { cls: 'bp-caption', edit, ph: 'Optional: photo caption' }),
@@ -425,6 +451,90 @@ function familyPage(page, { edit }) {
   ];
 }
 
+// Photos and text boxes the admin added to a page ("+ Photo", "+ Text").
+// They sit below the page's own content: photos side by side with a caption
+// each, text boxes underneath.
+function addedItems(key, { edit }) {
+  const adds = edits(key).adds || [];
+  if (!adds.length) return null;
+  const remove = (id) => (e) => {
+    e.stopPropagation();
+    setEdit(key, (x) => {
+      x.adds = (x.adds || []).filter((a) => a.id !== id);
+      if (!x.adds.length) delete x.adds;
+      if (x.f) delete x.f[`a:${id}`];
+      if (x.ph) delete x.ph[`a:${id}`];
+    });
+    rerenderPage(key);
+  };
+  const del = (id) => (edit ? h('button.bp-del', { type: 'button', title: 'Remove this from the page', 'aria-label': 'Remove', onclick: remove(id) }, '×') : null);
+  const photos = adds.filter((a) => a.t === 'photo');
+  const texts = adds.filter((a) => a.t === 'text');
+  return h('div.bp-adds',
+    photos.length ? h(`div.bp-add-photos.n${Math.min(photos.length, 4)}`, photos.map((a) => h('figure.bp-add-ph',
+      photo(key, `a:${a.id}`, null, { cls: 'bp-add-frame', edit, label: 'Added photo' }),
+      text(key, `a:${a.id}`, '', { cls: 'bp-caption', edit, ph: 'Caption: names, place, year' }),
+      del(a.id)))) : null,
+    texts.map((a) => h('div.bp-add-text',
+      text(key, `a:${a.id}`, '', { cls: 'bp-add-ed', edit, ph: 'Write here: a memory, a saying, a note' }),
+      del(a.id))));
+}
+
+function addItem(key, t) {
+  const id = crypto.randomUUID().slice(0, 6);
+  setEdit(key, (x) => { x.adds = [...(x.adds || []), { id, t }]; });
+  rerenderPage(key);
+  if (t === 'photo') {
+    const page = view.byKey.get(key);
+    choosePhoto(key, `a:${id}`, null, page?.label || '');
+  } else {
+    setTimeout(() => document.querySelector(`.bk-page[data-key="${CSS.escape(key)}"] .bp-add-text:last-child .bp-ed`)?.focus(), 50);
+  }
+}
+
+// The photo tree on a generation's title page: everyone in the generation
+// (round photo or initials, and their name), grouped under their parent from
+// the generation before. Its size shrinks to fit the page (see fitTrees).
+function photoTree(page, style, { edit }) {
+  const fam = view.fam;
+  const groups = new Map();
+  for (const id of page.all) {
+    const par = fam.primaryParentLink(id)?.parent_id || '';
+    (groups.get(par) || groups.set(par, []).get(par)).push(id);
+  }
+  const short = (p) => fullName(p, { title: false }).replace(/\s+Jaggi$/, '');
+  const node = (id, cls = '') => {
+    const p = fam.byId.get(id);
+    const src = store.photoUrls.get(id);
+    return h(`div.pt-node${cls}`, { 'data-id': id },
+      h('div.pt-ph', src ? h('img', { src, alt: '' }) : h('span.pt-mono', initials(p.given_name))),
+      h('div.pt-name', short(p)));
+  };
+  const n = page.all.length;
+  const tree = h(`div.bp-ptree.pt-${style}.fit`, { style: `--n:${n}` },
+    h('div.pt-groups', [...groups.entries()].map(([par, kids]) => h('div.pt-group',
+      par ? node(par, '.pt-parent') : null,
+      par ? h('div.pt-stem') : null,
+      h('div.pt-kids', kids.map((id) => node(id)))))));
+  const size = SIZES[B.data.settings.size] || SIZES.sq12;
+  // A first guess at the photo size; fitTrees() shrinks it if needed.
+  const area = (size.w - 2 * margin(size)) * (size.h - 2 * margin(size) - 2.4);
+  const guess = Math.max(0.42, Math.min(2.4, Math.sqrt(area / ((n + groups.size * 0.5) * 1.6))));
+  tree.style.setProperty('--node', `${guess.toFixed(2)}in`);
+  return tree;
+}
+
+// Shrink each photo tree until it fits its page.
+function fitTrees(root) {
+  for (const t of root.querySelectorAll('.bp-ptree')) {
+    let size = parseFloat(t.style.getPropertyValue('--node')) || 1;
+    for (let i = 0; i < 16 && (t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1) && size > 0.3; i++) {
+      size *= 0.9;
+      t.style.setProperty('--node', `${size.toFixed(3)}in`);
+    }
+  }
+}
+
 // ------------------------------------------------------------------ warnings
 
 const issues = new Map(); // key -> [messages]
@@ -432,6 +542,7 @@ function checkPage(pageEl) {
   if (!pageEl) return;
   const key = pageEl.dataset.key;
   const list = [];
+  fitTrees(pageEl);
   const fits = [...pageEl.querySelectorAll('.fit'), pageEl.querySelector('.bp-inner')];
   if (fits.some((el) => el && el.scrollHeight > el.clientHeight + 2)) list.push('Text is too long for this page. Shorten it, or move part of it to a new story page.');
   for (const img of pageEl.querySelectorAll('.bp-photo img')) {
@@ -641,7 +752,7 @@ function pageCard(k) {
   const hidden = !!edits(k).hidden;
   const n = pageNumber(k);
   const i = view.order.indexOf(k);
-  const edited = !!(edits(k).f || edits(k).ph);
+  const edited = !!(edits(k).f || edits(k).ph || edits(k).adds || edits(k).layout || edits(k).style);
   const el = renderPage(page, { edit: !hidden, n });
   const box = h('div.bk-scale', h('div.bk-doc', el));
   sizeVars(box.firstElementChild);
@@ -656,9 +767,15 @@ function pageCard(k) {
         h('button.btn.small', { type: 'button', onclick: () => { setEdit(k, (e) => { e.hidden = !hidden; }); renderPages(); } }, hidden ? 'Show' : 'Hide'),
         edited && !page.extra ? h('button.btn.small', { type: 'button', title: 'Go back to what the tree says, for this page', onclick: async () => {
           if (!await confirmDialog(`Undo every change on "${labelOf(k)}" and go back to what the tree says?`, 'Undo changes')) return;
-          setEdit(k, (e) => { delete e.f; delete e.ph; });
+          setEdit(k, (e) => { delete e.f; delete e.ph; delete e.adds; delete e.layout; delete e.style; });
           rerenderPage(k);
         } }, 'Undo changes') : null,
+        hidden ? null : h('button.btn.small', { type: 'button', title: 'Add another photo to this page', onclick: () => addItem(k, 'photo') }, '+ Photo'),
+        hidden ? null : h('button.btn.small', { type: 'button', title: 'Add a text box to this page', onclick: () => addItem(k, 'text') }, '+ Text'),
+        page.type === 'family' && !hidden ? h('select.bk-mini-sel', { 'aria-label': 'Page layout', title: 'Page layout', onchange: (e) => { setEdit(k, (x) => { if (e.target.value === page.layoutAuto) delete x.layout; else x.layout = e.target.value; }); rerenderPage(k); } },
+          FAMILY_LAYOUTS.map((l) => h('option', { value: l.id, selected: l.id === (edits(k).layout || page.layoutAuto) }, `Layout: ${l.name}`))) : null,
+        page.type === 'gen' && !hidden ? h('select.bk-mini-sel', { 'aria-label': 'Photo tree style', title: 'Photo tree style', onchange: (e) => { setEdit(k, (x) => { x.style = e.target.value; }); rerenderPage(k); } },
+          TREE_STYLES.map((t) => h('option', { value: t.id, selected: t.id === (edits(k).style || TREE_STYLES[page.gi % TREE_STYLES.length].id) }, `Tree: ${t.name}`))) : null,
         h('button.btn.small', { type: 'button', onclick: () => addPageMenu(k) }, '+ Page after'),
         page.extra ? h('button.btn.small.danger', { type: 'button', onclick: () => removeExtra(k) }, 'Delete') : null)),
     hidden ? h('p.muted.small.bk-hidden-note', 'This page is hidden: it will not be in the PDF.') : null,
@@ -704,6 +821,7 @@ function printBook() {
   visibleOrder().forEach((k, i) => doc.append(renderPage(view.byKey.get(k), { edit: false, n: i + 1 })));
   const holder = h('div.bk-print', { id: 'bk-print' }, doc);
   document.body.append(holder);
+  fitTrees(holder);
   document.body.classList.add('printing-book');
   const imgs = [...holder.querySelectorAll('img')];
   const done = () => {
@@ -712,7 +830,7 @@ function printBook() {
   };
   window.addEventListener('afterprint', done, { once: true });
   Promise.all([document.fonts?.ready, ...imgs.map((im) => (im.complete ? null : new Promise((r) => { im.onload = r; im.onerror = r; })))])
-    .then(() => setTimeout(() => window.print(), 150));
+    .then(() => { fitTrees(holder); setTimeout(() => window.print(), 150); });
 }
 
 // ------------------------------------------------------------------ screens
