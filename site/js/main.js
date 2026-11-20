@@ -407,6 +407,11 @@ async function start() {
     history.replaceState(null, '', location.hash.replace(/[?&]signin=1\b/, ''));
     if (!store.signedIn && !store.preview) openSignIn();
   }
+  // "View as" on the Help and Ancestors pages lands here with ?viewas=1.
+  if (/[?&]viewas=1\b/.test(location.hash)) {
+    history.replaceState(null, '', location.hash.replace(/[?&]viewas=1\b/, ''));
+    if (store.isRealAdmin) pickViewAs();
+  }
   // Invitees whose invitation names their box land on it, ready to claim it.
   if (!store.viewAs) welcomeToLinkedBox((id) => go({ view: 'tree', root: store.fam.primaryParentLink(id)?.parent_id || id, selected: id }));
 }
