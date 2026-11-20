@@ -255,6 +255,8 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 - **Built automatically from the tree:** cover (logo, "N generations from …", up to four early photos, optional family edition line), About this book, the family tree chart (indented, branch colours; on one page with its type sized to fill the page, Sunil 20 Nov 2026; split over pages only if it would need type under 5.5 pt), then per generation a title page and one page per person or couple (photo, spouse photo, years, birthplace, place of passing, work, marriages, children, Notes / Story of both), and a back page (logo, copyright and Quantum Nexus mark).
 - **Variety (v2, Sunil 20 Nov 2026):** each generation title page shows a **picture tree**: a photo (or initials) and name for every blood descendant of that generation, grouped under their parents (the blood parent with their spouse beside them, Sunil 20 Nov 2026), in one of six styles that changes per generation (banyan with dark name tags, gold medallions, arched frames, tilted snapshots, leaves, gold ribbons); it shrinks itself to fit the page. Person pages rotate through five layouts (photo left, wide photo on top, photo right, round portrait, photo band). Both can be changed per page (**Layout**, **Tree**).
 - **More on a page (v2):** **+ Photo** and **+ Text** add extra photos (with captions) or paragraphs to any page; each can be removed.
+- **Free placement and deleting (Sunil 20 Nov 2026):** added photos and text boxes can be dragged anywhere within the page area (✥ handle) and resized (corner); their place is saved as fractions of the page area. Any text or photo on any page, the tree's own included, can be deleted with a Delete button that appears beside it; **Undo changes** restores the page.
+- **Preview as a book (Sunil 20 Nov 2026):** full-screen flip-through of the whole book as printed and bound: the cover alone, then facing pages side by side, turned with a page-turn animation (arrows, ← → keys, click, swipe, slider); one page at a time on phones.
 - **Heritage design** follows the coffee table book plan: cream pages, deep green and gold, faint banyan, classic serif for names and stories, clean sans for labels; Devanagari and Gurmukhi fonts for Hindi and Punjabi.
 - **Editing on screen:** every text on every page can be changed in place; every photo can be replaced (upload up to 15 MB, a tree photo, or none); story, photo and quote pages can be added; pages can be moved, hidden and reset to the tree. Changes are stored on top of the tree, so **Rebuild from the tree** brings in new people and details and keeps the changes. A book never changes the tree.
 - **Warnings:** photos under about 150 dots per inch at their printed size ("may print blurry"), text that does not fit its page, and an odd page count.
@@ -306,6 +308,7 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 | 20 Nov 2026 | Sunil (later the same day): remember the member's last starting person and open the tree from it next time; picking Bhanna Mal Jaggi goes back to opening on their own line. |
 | 20 Nov 2026 | Sunil: pilot the automatic family book maker on this site, admins only while testing; book changes saved in the database. |
 | 20 Nov 2026 | Sunil: book pages should vary from page to page, allow more photos and text on a page, and each generation page should have a picture tree in a different style per generation. |
+| 20 Nov 2026 | Sunil: added photos and text can be moved anywhere on the page; any text or photo in the book can be deleted; a full book preview with page turning. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -320,6 +323,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | Book maker: drag and resize added photos and text, delete any text or photo, and **Preview as a book** (flip through facing pages). |
 | 20 Nov 2026 | | Book maker: the tree chart fits on one page with its type sized to fill it; picture trees show both parents (the spouse beside the blood parent). |
 | 20 Nov 2026 | | **Book maker v2:** picture tree on every generation page (six styles), five rotating person page layouts, + Photo and + Text on any page. |
 | 20 Nov 2026 | #33 | The member's chosen starting person is remembered in their browser and used next time; picking the top ancestor clears it. |

@@ -95,6 +95,33 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     if (saved3 !== 2) fail(`${tpl}: added photo and text not saved (${saved3})`);
     if (!await pg.$(`.bk-page[data-key="${famPages[3]}"] .bp-add-ph img`)) fail(`${tpl}: added photo not on the page`);
     if (!/kindness/.test(await pg.textContent(`.bk-page[data-key="${famPages[3]}"] .bp-add-text`))) fail(`${tpl}: added text not on the page`);
+    // Drag the text box by its handle somewhere else on the page; it stays there.
+    const fp3 = `.bk-page[data-key="${famPages[3]}"]`;
+    await pg.locator(`${fp3} .bp-add-text`).scrollIntoViewIfNeeded();
+    const hb = await pg.locator(`${fp3} .bp-add-text .bp-move`).boundingBox();
+    await pg.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2);
+    await pg.mouse.down();
+    await pg.mouse.move(hb.x + 40, hb.y - 120, { steps: 8 });
+    await pg.mouse.up();
+    await pg.waitForTimeout(900);
+    const placed = await pg.evaluate((k) => window.__db.book_drafts[0].data.edits[k].adds.find((a) => a.t === 'text'), famPages[3]);
+    if (!(placed?.x >= 0 && placed?.y >= 0 && placed?.w > 0)) fail(`${tpl}: moved text box position not saved (${JSON.stringify(placed)})`);
+    if (!await pg.$(`${fp3} .bp-float .bp-add-text.placed`)) fail(`${tpl}: moved text box not placed on the page`);
+    if (OUT) { await pg.hover(`${fp3} .bp-add-text .bp-ed`); await pg.waitForTimeout(200); await pg.screenshot({ path: `${OUT}${tpl}-17-moved-text-and-delete.png` }); }
+    // Delete a piece of the page's own text with the floating Delete button; Undo brings it back.
+    const fp1 = `.bk-page[data-key="${famPages[1]}"]`;
+    await pg.locator(`${fp1} .bp-years`).scrollIntoViewIfNeeded();
+    await pg.hover(`${fp1} .bp-years`); await pg.waitForTimeout(150);
+    await pg.click('.bk-del-float.on'); await pg.waitForTimeout(900);
+    if (await pg.$(`${fp1} .bp-years`)) fail(`${tpl}: deleted years line still on the page`);
+    const gone = await pg.evaluate((k) => window.__db.book_drafts[0].data.edits[k]?.gone, famPages[1]);
+    if (!gone?.includes('f:years')) fail(`${tpl}: deletion not saved (${gone})`);
+    await pg.hover(`${fp1} .bp-main-ph`); await pg.waitForTimeout(150);
+    await pg.click('.bk-del-float.on'); await pg.waitForTimeout(400);
+    if (await pg.$(`${fp1} .bp-main-ph`)) fail(`${tpl}: deleted photo still on the page`);
+    await pg.click(`${fp1} button:has-text("Undo changes")`); await pg.waitForTimeout(200);
+    await pg.click('.modal button:has-text("Undo changes")'); await pg.waitForTimeout(400);
+    if (!await pg.$(`${fp1} .bp-years`) || !await pg.$(`${fp1} .bp-main-ph`)) fail(`${tpl}: Undo did not bring the deleted items back`);
     // Edit a story on the first ancestor's page.
     const first = famPages[0];
     const story = pg.locator(`.bk-page[data-key="${first}"] .bp-story`);
@@ -155,6 +182,22 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
       await card.scrollIntoViewIfNeeded(); await pg.waitForTimeout(200);
       await pg.screenshot({ path: `${OUT}${tpl}-12-editor-warning.png` });
     }
+    // Preview as a book: the cover alone, then two pages side by side, turned with the arrow keys.
+    await pg.click('#bk-preview-btn'); await pg.waitForTimeout(600);
+    const where0 = await pg.textContent('.bk-flip-where');
+    if (!/^Page 1 of \d+/.test(where0)) fail(`${tpl}: preview does not open on the cover (${where0})`);
+    if (OUT) await pg.screenshot({ path: `${OUT}${tpl}-14-preview-cover.png` });
+    await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(350);
+    if (OUT) await pg.screenshot({ path: `${OUT}${tpl}-15-preview-turning.png` });
+    await pg.waitForTimeout(1000);
+    if (!/^Pages 2–3 of/.test(await pg.textContent('.bk-flip-where'))) fail(`${tpl}: preview did not turn to pages 2–3`);
+    if ((await pg.$$('.bk-flip-spread > .bk-flip-page:not(.blank)')).length !== 2) fail(`${tpl}: preview spread is not two pages`);
+    await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(1300);
+    await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(1300);
+    if (OUT) await pg.screenshot({ path: `${OUT}${tpl}-16-preview-spread.png` });
+    if (await pg.$('.bk-flip [contenteditable]')) fail(`${tpl}: preview pages are editable`);
+    await pg.keyboard.press('Escape'); await pg.waitForTimeout(200);
+    if (await pg.$('.bk-flip')) fail(`${tpl}: Esc did not close the preview`);
     // Make the PDF: the print copy has one page per visible page at 12 x 12 in.
     await pg.click('button:has-text("Make the print-ready PDF")');
     await pg.waitForFunction(() => window.__printed, null, { timeout: 15000 });
