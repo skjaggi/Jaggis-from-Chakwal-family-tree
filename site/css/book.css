@@ -136,13 +136,67 @@ body[data-view="book"] .page { max-width: 1280px; }
 .bp-row[data-branch="5"], .bp[data-branch="5"] { --br: #e87ba4; } .bp-row[data-branch="6"], .bp[data-branch="6"] { --br: #008300; }
 .bp-row[data-branch="7"], .bp[data-branch="7"] { --br: #6250d6; } .bp-row[data-branch="8"], .bp[data-branch="8"] { --br: #e34948; }
 
-/* Generation divider */
-.t-gen .bp-inner { align-items: center; text-align: center; justify-content: center; }
-.bp-gen-num { font-family: "Cormorant Garamond", Georgia, serif; font-size: 9em; line-height: 0.9; color: var(--gold-b); opacity: 0.85; }
-.bp-gen-title { font-size: 3em; color: var(--green); }
-.bp-gen-intro { max-width: 75%; font-size: 1.1em; font-style: italic; }
-.bp-gen-names { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3em 1.2em; max-width: 85%; margin-top: 1.2em; max-height: 40%; overflow: hidden; font-family: Inter, system-ui, sans-serif; font-size: 0.8em; color: var(--soft); }
+/* Generation title page: number and title, then the photo tree */
+.bp-gen-head { flex: none; display: flex; align-items: center; gap: 0.25in; margin-bottom: 0.15in; }
+.bp-gen-num { font-family: "Cormorant Garamond", Georgia, serif; font-size: 6em; line-height: 0.85; color: var(--gold-b); opacity: 0.9; }
+.bp-gen-title { font-size: 2.8em; color: var(--green); }
+.bp-gen-intro { font-size: 1.05em; font-style: italic; margin-top: 0.2em; }
 .t-gen .bp-foot { width: 100%; }
+
+/* ---------- photo trees (one style per generation) */
+.bp-ptree { --node: 1in; --pt-line: #6b6457; --pt-lw: 2px; flex: 1 1 auto; min-height: 0; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+.pt-groups { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: calc(var(--node) * 0.4) calc(var(--node) * 0.32); max-width: 100%; }
+.pt-group { display: flex; flex-direction: column; align-items: center; }
+.pt-node { --s: 1; width: calc(var(--node) * 1.18 * var(--s) + 0.1in); display: flex; flex-direction: column; align-items: center; position: relative; }
+.pt-parent { --s: 0.62; }
+.pt-ph { width: calc(var(--node) * var(--s)); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #e9e2d2; box-sizing: border-box; }
+.pt-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pt-mono { width: 100%; height: 100%; display: grid; place-items: center; font-family: "Cormorant Garamond", Georgia, serif; font-size: calc(var(--node) * 0.36 * var(--s)); color: #8a7a55; background: radial-gradient(circle at 50% 40%, #f3ead6, #ddd0b2); }
+.pt-name { margin-top: calc(var(--node) * 0.07); font: 500 calc(var(--node) * 0.115 + 3pt) / 1.15 Inter, system-ui, sans-serif; text-align: center; color: var(--ink-b); overflow-wrap: anywhere; }
+.pt-parent .pt-name { font-size: calc(var(--node) * 0.1 + 3pt); color: var(--soft); }
+.pt-stem { width: var(--pt-lw); height: calc(var(--node) * 0.22); background: var(--pt-line); }
+.pt-kids { position: relative; display: flex; justify-content: center; gap: calc(var(--node) * 0.08); }
+.pt-group:has(.pt-parent) .pt-kids { padding-top: calc(var(--node) * 0.22); }
+.pt-group:has(.pt-parent) .pt-kids::before { content: ""; position: absolute; top: 0; left: calc(var(--node) * 0.59 + 0.05in); right: calc(var(--node) * 0.59 + 0.05in); height: var(--pt-lw); background: var(--pt-line); }
+.pt-group:has(.pt-parent) .pt-kids > .pt-node::before { content: ""; position: absolute; top: calc(var(--node) * -0.22); left: calc(50% - var(--pt-lw) / 2); width: var(--pt-lw); height: calc(var(--node) * 0.22); background: var(--pt-line); }
+
+/* Banyan: dark-ringed round photos and dark name tags over a big tree */
+.pt-banyan::before { content: ""; position: absolute; inset: 0; opacity: 0.22; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 420' fill='none' stroke='%235e8f80' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 190Q40 150 80 130Q80 90 130 85Q150 50 200 60Q230 30 280 45Q320 25 360 48Q410 35 435 70Q485 70 495 110Q545 120 535 160Q560 195 520 210Q500 235 460 225Q430 245 390 230Q350 250 310 232Q270 250 230 232Q190 248 160 228Q120 240 100 220Q55 225 60 190Z'/%3E%3Cpath d='M288 232C283 290 272 340 252 392M322 232C327 290 338 340 360 392M300 232C290 200 250 182 205 172M312 232C332 196 382 180 425 166M305 232L305 140'/%3E%3Cpath d='M130 222C127 280 134 340 130 392M165 230C168 290 160 340 166 392M200 238C197 300 204 350 200 392M232 236C236 300 228 350 232 392M382 234C379 300 386 350 382 392M415 232C418 290 410 350 416 392M448 228C445 290 452 345 448 392M482 222C485 285 478 345 482 392' stroke-width='2'/%3E%3Cpath d='M40 395Q300 383 560 395'/%3E%3C/svg%3E") no-repeat center 60% / 100% auto; }
+.tpl-heritage .pt-banyan::before { opacity: 0.32; }
+.pt-banyan { --pt-line: #3d403b; }
+.pt-banyan .pt-ph { border: calc(var(--node) * 0.045 + 1px) solid #3d403b; box-shadow: 0 0 0 calc(var(--node) * 0.02) #fff inset; }
+.pt-banyan .pt-name { background: #3d403b; color: #fff; padding: 0.15em 0.5em; margin-top: -0.2em; position: relative; z-index: 1; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; }
+.pt-banyan .pt-parent .pt-name { color: #e9e5da; }
+
+/* Medallions: gold double rings, names in italic serif */
+.pt-medallion { --pt-line: #c49a3a; }
+.pt-medallion .pt-ph { border: calc(var(--node) * 0.035 + 1px) solid #c49a3a; box-shadow: 0 0 0 calc(var(--node) * 0.03) #faf6ee, 0 0 0 calc(var(--node) * 0.05) #c49a3a, 0 0.03in 0.08in rgb(80 60 10 / 0.25); }
+.pt-medallion .pt-name { font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; font-weight: 600; font-size: calc(var(--node) * 0.14 + 3pt); color: var(--green); margin-top: calc(var(--node) * 0.1); }
+
+/* Arched frames, small capitals */
+.pt-arch { --pt-line: #17706b; }
+.pt-arch .pt-ph { aspect-ratio: 4 / 5; border-radius: 50% 50% 0.04in 0.04in / 40% 40% 0.04in 0.04in; border: calc(var(--node) * 0.03 + 1px) solid #17706b; outline: 1px solid #c49a3a; outline-offset: calc(var(--node) * 0.03); }
+.pt-arch .pt-name { text-transform: uppercase; letter-spacing: 0.12em; font-size: calc(var(--node) * 0.09 + 3pt); color: #17706b; margin-top: calc(var(--node) * 0.08); }
+
+/* Snapshots: white-bordered prints, gently tilted, dashed lines */
+.pt-snapshot { --pt-line: #9b8f78; }
+.pt-snapshot .pt-ph { border-radius: 0.02in; border: calc(var(--node) * 0.06) solid #fff; border-bottom-width: calc(var(--node) * 0.16); box-shadow: 0 0.03in 0.1in rgb(0 0 0 / 0.25); transform: rotate(-3deg); }
+.pt-snapshot .pt-node:nth-child(even) .pt-ph { transform: rotate(2.5deg); }
+.pt-snapshot .pt-name { font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; font-size: calc(var(--node) * 0.14 + 3pt); margin-top: calc(var(--node) * -0.13); position: relative; }
+.pt-snapshot .pt-stem, .pt-snapshot .pt-kids::before, .pt-snapshot .pt-kids > .pt-node::before { background: repeating-linear-gradient(90deg, var(--pt-line) 0 0.06in, transparent 0.06in 0.1in); }
+.pt-snapshot .pt-stem, .pt-snapshot .pt-kids > .pt-node::before { background: repeating-linear-gradient(180deg, var(--pt-line) 0 0.06in, transparent 0.06in 0.1in); }
+
+/* Leaves: leaf-shaped photos on green stems */
+.pt-leaf { --pt-line: #4f7d4a; --pt-lw: 3px; }
+.pt-leaf .pt-ph { border-radius: 0 60% 0 60%; border: calc(var(--node) * 0.035 + 1px) solid #4f7d4a; }
+.pt-leaf .pt-node:nth-child(even) .pt-ph { border-radius: 60% 0 60% 0; }
+.pt-leaf .pt-name { color: #2f5a2b; font-weight: 600; }
+.pt-leaf .pt-stem, .pt-leaf .pt-kids::before { border-radius: 999px; }
+
+/* Ribbons: round photos with the name on a gold ribbon */
+.pt-ribbon { --pt-line: #17706b; }
+.pt-ribbon .pt-ph { border: calc(var(--node) * 0.04 + 1px) solid #17706b; }
+.pt-ribbon .pt-name { background: #c49a3a; color: #fff; padding: 0.18em 0.9em; margin-top: -0.35em; position: relative; font-weight: 600; clip-path: polygon(0 0, 100% 0, 92% 50%, 100% 100%, 0 100%, 8% 50%); }
 
 /* Person or couple */
 .bp-fam { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 44% minmax(0, 1fr); gap: 0 0.45in; }
@@ -165,6 +219,41 @@ body[data-view="book"] .page { max-width: 1280px; }
 .bp-headline { font-size: 1.6em; color: var(--green); margin-bottom: 0.4em; font-style: italic; }
 .t-family .bp-story { font-size: 1.08em; }
 .t-family .bp-kicker { border-left: 0.06in solid var(--br, var(--gold-b)); padding-left: 0.12in; }
+
+/* The five person-page layouts (they take turns) */
+.bp-fam.lay-right { grid-template-columns: minmax(0, 1fr) 44%; }
+.bp-fam.lay-right .bp-fam-photos { order: 2; }
+.bp-fam.lay-top, .bp-fam.lay-portrait { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 0.25in; }
+.bp-fam.lay-top .bp-fam-photos { flex-direction: row; align-items: flex-end; gap: 0.2in; }
+.bp-fam.lay-top .bp-main-ph { width: 64%; aspect-ratio: 16 / 9; }
+.bp-fam.lay-top .bp-fam-photos > .bp-caption { display: none; }
+.bp-fam.lay-top .bp-spouse { flex-direction: column; align-items: flex-start; flex: 1; }
+.bp-fam.lay-top .bp-sp-ph { width: 55%; }
+.bp-fam.lay-top .bp-story { column-count: 2; column-gap: 0.35in; }
+.bp-fam.lay-portrait .bp-fam-photos { flex-direction: row; justify-content: center; align-items: center; gap: 0.3in; }
+.bp-fam.lay-portrait .bp-main-ph { width: 34%; aspect-ratio: 1; border-radius: 50%; }
+.bp-fam.lay-portrait .bp-fam-photos > .bp-caption { display: none; }
+.bp-fam.lay-portrait .bp-spouse { flex-direction: column; text-align: center; width: 18%; }
+.bp-fam.lay-portrait .bp-sp-ph { width: 100%; aspect-ratio: 1; border-radius: 50%; }
+.bp-fam.lay-portrait .bp-fam-text { align-items: center; text-align: center; }
+.bp-fam.lay-portrait .bp-facts { text-align: left; }
+.bp-fam.lay-portrait .bp-rule { margin-left: auto; margin-right: auto; }
+.bp-fam.lay-band { grid-template-columns: minmax(0, 1fr) 36%; }
+.bp-fam.lay-band .bp-fam-photos { order: 2; padding: 0.22in; background: rgb(196 154 58 / 0.13); border-radius: 0.06in; }
+.bp-fam.lay-band .bp-main-ph { aspect-ratio: 2 / 3; }
+.tpl-modern .bp-fam.lay-band .bp-fam-photos { background: #e8f3f1; }
+.tpl-classic .bp-fam.lay-band .bp-fam-photos { background: #f1f1ef; }
+
+/* Photos and text boxes added to a page */
+.bp-adds { flex: none; margin-top: 0.2in; display: grid; gap: 0.12in; }
+.bp-add-photos { display: grid; grid-template-columns: repeat(var(--c, 4), minmax(0, 2.6in)); justify-content: center; gap: 0.18in; }
+.bp-add-photos.n1 { --c: 1; } .bp-add-photos.n2 { --c: 2; } .bp-add-photos.n3 { --c: 3; }
+.bp-add-ph { position: relative; margin: 0; }
+.bp-add-frame { width: 100%; aspect-ratio: 4 / 3; }
+.bp-add-text { position: relative; }
+.bp-add-ed { font-size: 1em; }
+.bp-del { position: absolute; top: -0.12in; right: -0.12in; z-index: 4; width: 0.3in; height: 0.3in; border-radius: 50%; border: 1px solid #b9c4bd; background: #fff; color: #b3261e; font: 700 0.2in/1 Inter, system-ui, sans-serif; cursor: pointer; }
+.bk-mini-sel { font: inherit; font-size: 0.85rem; max-width: 220px; padding: 4px 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 
 /* Story, photo and quote pages */
 .bp-story-wrap { flex: none; margin-bottom: 0.8em; }
@@ -244,3 +333,8 @@ body[data-view="book"] .page { max-width: 1280px; }
   .bk-print .bp:last-child { break-after: auto; page-break-after: auto; }
   .bk-print * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Photo trees: a parent's name stays on one line above the branch. */
+.pt-parent .pt-name { white-space: nowrap; }
+/* The banyan tree style draws its own big tree, so the page's faint one steps back. */
+.tpl-heritage .t-gen:has(.pt-banyan)::before { display: none; }

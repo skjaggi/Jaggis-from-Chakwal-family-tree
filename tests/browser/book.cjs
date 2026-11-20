@@ -9,8 +9,9 @@ const seed = JSON.parse(fs.readFileSync(__dirname + '/../../site/data/seed.json'
 const sample = ['p1.jpg', 'p3.jpg', 'p2.jpg', 'p4.jpg'];
 let n = 0;
 for (const p of [...seed.people].sort((a, b) => (a.generation ?? 99) - (b.generation ?? 99))) {
-  if (p.photo_path || n >= 12) continue;
-  if ([1, 3, 4, 5].includes(p.generation)) p.photo_path = `img/test/${sample[n++ % 4]}`;
+  if (p.photo_path) continue;
+  // Most people get a sample portrait; a few stay without one (initials).
+  if (n++ % 5 !== 3) p.photo_path = `img/test/${sample[n % 4]}`;
 }
 async function open(b, opts, init, hash = '#/book') {
   const ctx = await b.newContext(opts);
@@ -61,6 +62,31 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     if (!/print blurry/.test(warn)) fail(`${tpl}: no low-resolution warning for the plaque photo (${warn})`);
     if (!/to check/.test(await pg.textContent('#bk-issue-sum'))) fail(`${tpl}: no warning summary`);
     if (OUT) await pg.screenshot({ path: `${OUT}${tpl}-2-editor.png` });
+    // Generation pages carry a photo tree with everyone in that generation,
+    // each generation in a different style.
+    const gen5 = seed.people.filter((p) => p.generation === 5 && seed.parent_child.some((l) => l.child_id === p.id)).length; // born into the family
+    const nodes = await pg.$$eval('.bk-page[data-key="gen:5"] .pt-kids .pt-node', (els) => els.length);
+    if (nodes !== gen5) fail(`${tpl}: Generation 5 photo tree has ${nodes} people, expected ${gen5}`);
+    const styles = await pg.$$eval('.bk-page[data-key^="gen:"] .bp-ptree', (els) => els.map((e) => [...e.classList].find((c) => c.startsWith('pt-'))));
+    if (new Set(styles).size !== styles.length) fail(`${tpl}: generation trees repeat a style (${styles})`);
+    if (await pg.$('.bk-page[data-key^="gen:"] .bp.has-issue')) fail(`${tpl}: a photo tree does not fit its page`);
+    // Person pages take turns between layouts: no two in a row look the same.
+    const lays = await pg.$$eval('.bk-page[data-key^="fam:"] .bp-fam', (els) => els.map((e) => [...e.classList].find((c) => c.startsWith('lay-'))));
+    if (lays.some((l, i) => i && l === lays[i - 1])) fail(`${tpl}: two person pages in a row share a layout`);
+    // Change one page's layout, and add a text box and a photo to a page.
+    await pg.selectOption(`.bk-page[data-key="${famPages[0]}"] .bk-mini-sel`, 'portrait'); await pg.waitForTimeout(300);
+    if (!await pg.$(`.bk-page[data-key="${famPages[0]}"] .bp-fam.lay-portrait`)) fail(`${tpl}: layout change did not apply`);
+    await pg.click(`.bk-page[data-key="${famPages[3]}"] button:has-text("+ Text")`); await pg.waitForTimeout(300);
+    await pg.keyboard.type('Remembered for his kindness to every guest. (sample)');
+    await pg.click('.bk-count'); await pg.waitForTimeout(300);
+    await pg.click(`.bk-page[data-key="${famPages[3]}"] button:has-text("+ Photo")`); await pg.waitForTimeout(300);
+    await pg.fill('.modal input[type="search"]', 'Bir'); await pg.waitForTimeout(200);
+    await pg.click('.bk-photo-pick'); await pg.waitForTimeout(400);
+    await pg.waitForTimeout(900);
+    const saved3 = await pg.evaluate((k) => window.__db.book_drafts[0].data.edits[k]?.adds?.length, famPages[3]);
+    if (saved3 !== 2) fail(`${tpl}: added photo and text not saved (${saved3})`);
+    if (!await pg.$(`.bk-page[data-key="${famPages[3]}"] .bp-add-ph img`)) fail(`${tpl}: added photo not on the page`);
+    if (!/kindness/.test(await pg.textContent(`.bk-page[data-key="${famPages[3]}"] .bp-add-text`))) fail(`${tpl}: added text not on the page`);
     // Edit a story on the first ancestor's page.
     const first = famPages[0];
     const story = pg.locator(`.bk-page[data-key="${first}"] .bp-story`);
@@ -108,7 +134,8 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
       await shot('cover', '3-cover');
       await shot('intro', '4-about');
       await shot('chart:1', '5-tree-chart');
-      await shot('gen:2', '6-generation');
+      for (const g of [1, 2, 3, 4, 5, 6]) await shot(`gen:${g}`, `6-generation-${g}`);
+      for (const [i, k] of famPages.slice(0, 6).entries()) await shot(k, `13-person-layout-${i + 1}`);
       await shot(`fam:${kesar.id}`, '7-person-low-res-warning');
       await shot(first, '8-person-edited-story');
       const withSpouse = famPages.find((k) => { const id = k.slice(4); return seed.unions.some((u) => u.partner_a === id || u.partner_b === id) && seed.people.find((p) => p.id === id).photo_path?.startsWith('img/test'); }) || famPages[5];
