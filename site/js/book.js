@@ -415,6 +415,14 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
   return pageEl;
 }
 
+// Two interlocked wedding rings, drawn in the page's accent colour.
+const RINGS = () => {
+  const el = document.createElement('span');
+  el.className = 'bp-rings';
+  el.innerHTML = '<svg viewBox="0 0 64 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2"><circle cx="24" cy="22" r="14"/><circle cx="40" cy="22" r="14"/><path d="M36 6l4-5 4 5" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+  return el;
+};
+
 function familyPage(page, { edit }) {
   const fam = view.fam;
   const key = page.key;
@@ -443,14 +451,27 @@ function familyPage(page, { edit }) {
   return [
     h('div.bp-kicker', kicker),
     h(`div.bp-fam.lay-${layout}`,
-      h('div.bp-fam-photos',
-        photo(key, 'photo', page.id, { cls: 'bp-main-ph', edit, label: fullName(p), monogram: initials(p.given_name) }),
-        text(key, 'caption', '', { cls: 'bp-caption', edit, ph: 'Optional: photo caption' }),
-        spouses.slice(0, 2).map((sp, i) => h('div.bp-spouse',
-          photo(key, `sp${i}`, sp.person.id, { cls: 'bp-sp-ph', edit, label: fullName(sp.person), monogram: initials(sp.person.given_name) }),
-          h('div.bp-sp-text',
-            text(key, `spname${i}`, fullName(sp.person), { cls: 'bp-sp-name', edit }),
-            text(key, `spline${i}`, [lifeLine(sp.person, fam.details.get(sp.person.id)), fam.details.get(sp.person.id)?.birth_place].filter(Boolean).join(' · '), { cls: 'bp-sp-line', edit, ph: 'Years and place' }))))),
+      // A married person's photo and their husband's or wife's photo, the
+      // same size, joined by a pair of wedding rings.
+      h(`div.bp-fam-photos${spouses.length ? `.bp-couple.n${Math.min(spouses.length, 2)}` : ''}`,
+        (spouses.length ? (...kids) => [h('div.bp-cp', kids)] : (...kids) => kids)(
+          photo(key, 'photo', page.id, { cls: 'bp-main-ph', edit, label: fullName(p), monogram: initials(p.given_name) }),
+          spouses.length ? text(key, 'mainname', fullName(p, { title: false }), { cls: 'bp-sp-name', edit }) : null,
+          text(key, 'caption', '', { cls: 'bp-caption', edit, ph: 'Optional: photo caption' })),
+        spouses.slice(0, 2).map((sp, i) => {
+          const u = sp.union || {};
+          const yr = /^(\d{4})/.exec(u.start_date || '')?.[1];
+          const word = u.status === 'divorced' ? 'Married (later divorced)' : u.status && !['married', 'widowed'].includes(u.status) ? 'Partners' : 'Married';
+          return [
+            isGone(key, `f:ring${i}`) ? null : h('div.bp-ring', edit ? { 'data-del-key': key, 'data-del': `f:ring${i}` } : {}, RINGS(),
+              text(key, `ring${i}`, yr ? `${word} ${yr}` : word, { cls: 'bp-ring-word', edit })),
+            h('div.bp-cp.bp-spouse',
+              photo(key, `sp${i}`, sp.person.id, { cls: 'bp-sp-ph', edit, label: fullName(sp.person), monogram: initials(sp.person.given_name) }),
+              h('div.bp-sp-text',
+                text(key, `spname${i}`, fullName(sp.person), { cls: 'bp-sp-name', edit }),
+                text(key, `spline${i}`, [lifeLine(sp.person, fam.details.get(sp.person.id)), fam.details.get(sp.person.id)?.birth_place].filter(Boolean).join(' · '), { cls: 'bp-sp-line', edit, ph: 'Years and place' }))),
+          ];
+        })),
       h('div.bp-fam-text',
         text(key, 'name', fullName(p), { tag: 'h1', cls: 'bp-name', edit }),
         text(key, 'years', lifeLine(p, d), { cls: 'bp-years', edit, ph: 'Years' }),

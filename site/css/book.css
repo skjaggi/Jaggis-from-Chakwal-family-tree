@@ -393,3 +393,28 @@ body.bk-flip-open { overflow: hidden; }
 .bk-leaf-face > .blank { background: transparent; }
 @media (max-width: 759px) { .bk-flip-arrow { width: 34px; height: 34px; font-size: 24px; } .bk-flip-top, .bk-flip-bottom { padding: 8px 10px; } }
 .bp-item > .bp-del { top: calc(-11px * var(--ui, 1)); right: calc(-11px * var(--ui, 1)); width: calc(24px * var(--ui, 1)); height: calc(24px * var(--ui, 1)); padding: 0; font-size: calc(16px * var(--ui, 1)); }
+
+/* ---------- a married couple: two photos the same size, joined by rings */
+.bp-couple { align-items: center; gap: 0.06in; }
+.bp-couple .bp-cp { display: flex; flex-direction: column; align-items: center; gap: 0.05in; width: 70%; min-height: 0; }
+.bp-couple.n2 .bp-cp { width: 46%; }
+.bp-couple .bp-cp > .bp-photo { width: 100%; aspect-ratio: 1; }
+.bp-couple .bp-spouse { flex-direction: column; text-align: center; }
+.bp-couple .bp-sp-text { text-align: center; }
+.bp-couple .bp-sp-name { text-align: center; }
+.bp-couple .bp-cp > .bp-caption { text-align: center; }
+.bp-ring { display: flex; flex-direction: column; align-items: center; color: var(--gold-b); line-height: 1.1; flex: none; }
+.bp-rings { display: block; width: 0.95in; height: 0.6in; }
+.bp-rings svg { width: 100%; height: 100%; display: block; }
+.bp-ring-word { font: italic 1em/1.2 "Cormorant Garamond", Georgia, serif; color: var(--gold-b); text-align: center; }
+.tpl-modern .bp-ring, .tpl-modern .bp-ring-word { color: var(--teal); }
+.tpl-classic .bp-ring, .tpl-classic .bp-ring-word { color: #555; }
+/* Side by side when the photos sit in a band across the top of the page. */
+.bp-fam.lay-top .bp-couple, .bp-fam.lay-portrait .bp-couple { flex-direction: row; justify-content: center; align-items: center; gap: 0.18in; }
+.bp-fam.lay-top .bp-couple .bp-cp, .bp-fam.lay-portrait .bp-couple .bp-cp { width: 30%; }
+.bp-fam.lay-top .bp-couple.n2 .bp-cp, .bp-fam.lay-portrait .bp-couple.n2 .bp-cp { width: 24%; }
+.bp-fam.lay-top .bp-couple .bp-main-ph { width: 100%; aspect-ratio: 1; }
+.bp-fam.lay-top .bp-couple .bp-cp > .bp-caption, .bp-fam.lay-portrait .bp-couple .bp-cp > .bp-caption { display: block; }
+.bp-fam.lay-portrait .bp-couple .bp-cp > .bp-photo { border-radius: 50%; }
+.bp-fam.lay-top .bp-couple .bp-spouse, .bp-fam.lay-portrait .bp-couple .bp-spouse { flex: none; align-items: center; }
+.bp-fam.lay-band .bp-couple .bp-cp { width: 88%; }
