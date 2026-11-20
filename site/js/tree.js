@@ -167,6 +167,65 @@ export class TreeView {
     this.fit();
   }
 
+  // A signed-in member's own view: from rootId, open only the line down to
+  // their box, and their box with everyone below it; every other branch stays
+  // closed. Someone who married in follows their partner's place. Returns
+  // false (and changes nothing) when the box isn't under rootId.
+  openLine(rootId, personId) {
+    const fam = store.fam;
+    let chain = fam.lineage(personId);
+    if (!chain.includes(rootId)) {
+      for (const { person: s } of fam.spouses(personId)) {
+        const c = fam.lineage(s.id);
+        if (c.includes(rootId)) { chain = c; break; }
+      }
+    }
+    if (!chain.includes(rootId)) return false;
+    this.rootId = rootId;
+    this.expanded = new Set(chain.slice(chain.indexOf(rootId), -1));
+    const seen = new Set();
+    const walk = (id) => {
+      if (seen.has(id)) return;
+      seen.add(id);
+      this.expanded.add(id);
+      for (const c of fam.treeChildren(id)) walk(c.id);
+    };
+    walk(chain[chain.length - 1]);
+    this.render();
+    this.frameLine(personId);
+    return true;
+  }
+
+  // Zoom out far enough to show the open line from the top down to the
+  // member's box (and what's below it, if it fits). On a phone, or when the
+  // line is too long to fit, keep the boxes readable and bring the member's
+  // own box into view instead; the "you are here" bar names the ancestors.
+  frameLine(personId) {
+    const n = this.nodes?.find((d) => d.data.id === personId || d.spouses.some((s) => s.person.id === personId));
+    if (!n) return this.fit();
+    const { width, height } = this.container.getBoundingClientRect();
+    const phone = width < 600;
+    const minX = Math.min(...this.nodes.map((d) => d.x - d.w / 2)) - 40;
+    const maxX = Math.max(...this.nodes.map((d) => d.x + d.w / 2)) + 20;
+    const minY = Math.min(...this.nodes.map((d) => d.y)) - H / 2 - 20;
+    const maxY = Math.max(...this.nodes.map((d) => d.bottom)) + 40;
+    const top = this.scrollMode ? 60 : 24;
+    // Small enough to show everything, but never so small the names can't be read.
+    let k = Math.min(width / (maxX - minX), (height - top) / (maxY - minY), 1);
+    k = Math.max(k, phone ? 0.75 : 0.5);
+    let x = (maxX - minX) * k <= width ? width / 2 - ((minX + maxX) / 2) * k : width / 2 - n.cx * k;
+    let y = top - minY * k;
+    // Still below the bottom edge? Scroll down until their box is in view.
+    const boxBottom = n.bottom * k + y;
+    if (boxBottom > height - 30) y -= boxBottom - (height - 30);
+    // A phone shows only a few boxes: put theirs in the middle, where the
+    // "you are here" bar looks, so the bar shows their own line.
+    if (phone) { x = width / 2 - n.cx * k; y = Math.min(y, height * 0.4 - n.y * k); }
+    this.limitPan();
+    this.trailId = null;
+    this.svg.transition().duration(300).call(this.zoom.transform, d3.zoomIdentity.translate(x, y).scale(k));
+  }
+
   expandAll() {
     const walk = (id) => {
       this.expanded.add(id);
