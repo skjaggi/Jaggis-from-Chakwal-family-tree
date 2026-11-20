@@ -6,7 +6,7 @@ import { store } from './data.js';
 import { currentTheme, toggleTheme } from './theme.js';
 import { h } from './ui.js';
 
-export function navItems({ base = '', active = null, root = null, count = 0, onSignIn, onSignOut }) {
+export function navItems({ base = '', active = null, root = null, count = 0, onSignIn, onSignOut, onViewAs = null }) {
   const signed = store.signedIn;
   const r = root || store.fam?.defaultRootId || '';
   const tab = (key, href, label, extra = {}, ...more) =>
@@ -24,6 +24,8 @@ export function navItems({ base = '', active = null, root = null, count = 0, onS
     tab('library', `${base}#/library`, 'Library', { title: 'Videos and articles about the family and Chakwal' }),
     tab('help', `${base}help.html`, 'Help'),
     tab('export', `${base}#/export`, 'Export', { title: 'Download the tree as a PDF or a GEDCOM file' }),
+    // Admin only (and only on the tree pages): preview the site as a member.
+    onViewAs && store.isRealAdmin ? h('button.linkish.viewas-btn', { type: 'button', title: 'See the site as a family member sees it (a preview: nothing is saved)', onclick: onViewAs }, '👁 View as') : null,
     themeButton(),
     signed
       ? h('button.linkish', { type: 'button', onclick: onSignOut }, 'Sign out')

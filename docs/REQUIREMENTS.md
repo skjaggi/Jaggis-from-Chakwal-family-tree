@@ -225,6 +225,9 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 - Invites list with signed-in status and inviter. **Remove** blocks that person's sign-in (signed out within the hour) but keeps what they added; **Restore** gives back the invite, login and, if unclaimed, their box.
 - Members list with role and box, editable by the admin.
 
+**View as (preview a member's view):** the admin's menu has **👁 View as**. Pick any member (search by name or email; each row says whether they are a branch admin and of whom, have no box yet, or have not signed in yet) and the whole site is shown as that member sees it: their menu (no Members page; Review only for branch admins), the tree view they land on after signing in, their claim reminder, their chip with blessings and badges, which buttons appear on each card and whether a change would go live or wait for approval, which Family branch only details, photos and marriage dates they can see, and the suggestions waiting on their Review page. A purple strip at the top names who is being viewed, with **Someone else** and **Back to my view**; it lasts until then (also after a reload in the same tab).
+It is a preview, not a sign-in as them: the admin's own login is used to read the data, their login is never touched, and the site works out what they may see and change with the same rules as the database. While viewing, every save, photo upload, approval, invite and email is refused with a message, and visits are not logged.
+
 **Emails:** all automatic emails go through Supabase with the family's Gmail sender. The weekly summary email (Mondays 8am Arizona) is paused; occasional reminder emails are used instead.
 
 ### 8.9 Ancestors pages and search engines
@@ -279,6 +282,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 | 16 Nov 2026 | Members must claim their box before making changes. |
 | 17 Nov 2026 | Sunil: new details and photos default to Family branch only for everyone, including the deceased (replaces the 12 Nov rule). Marriage dates public only when both spouses have passed away; adoption labels hidden from visitors for living children. |
 | 17 Nov 2026 | Family Library with admin approval. Missing details reminders per branch admin (core fields as in 8.8). Help page updated in every feature pull request. |
+| 19 Nov 2026 | Sunil: the admin can view the site as any member (a read-only preview) from the top of the site. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -293,6 +297,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 19 Nov 2026 | | Admin **View as**: preview the site as any member (menu, landing tree, buttons, edit rights, branch-only details); nothing is saved or sent while viewing. |
 | 18 Nov 2026 | #18 | Help and Ancestors pages show the same top bar as the tree (search, full role-aware menu, light/dark, Sign out, member chip). |
 | 18 Nov 2026 | #14 | Requirements brought up to date with everything shipped since 12 Nov and moved into the repository. |
 | 18 Nov 2026 | #15 | Privacy: marriage dates and adoption labels hidden from visitors; default Family branch only; warning when Public is chosen for a living person. |

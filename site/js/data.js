@@ -24,6 +24,14 @@ export const store = {
   get isAdmin() {
     return this.profile?.role === 'admin';
   },
+  // "View as" (admin only, see view-as.js): while the admin looks at the site
+  // as another member, profile/session/fam belong to that member and the real
+  // ones wait in `real`. Nothing can be saved or sent in that mode.
+  viewAs: null,
+  real: null,
+  get isRealAdmin() {
+    return (this.viewAs ? this.real.profile : this.profile)?.role === 'admin';
+  },
   // The box this account has claimed as "This is me" (approved), if any.
   get claimedId() {
     return this.profile?.claimed_person_id || null;
@@ -42,7 +50,7 @@ export function canManage(id, scope = 'person') {
   return scope === 'person' || !store.managed.get(id);
 }
 
-function predictManage(kind, payload) {
+export function predictManage(kind, payload) {
   // Claiming the box your invitation was linked to takes effect at once.
   if (kind === 'claim_person') return payload.person_id === store.profile?.person_id;
   if (['edit_person', 'set_photo', 'remove_photo'].includes(kind)) return canManage(payload.person_id, 'person');
@@ -65,7 +73,10 @@ export async function init() {
   store.session = data.session;
   await loadProfile();
   store.sb.auth.onAuthStateChange((event, session) => {
-    const changed = (session?.user?.id || null) !== (store.session?.user?.id || null);
+    const current = store.viewAs ? store.real.session : store.session;
+    const changed = (session?.user?.id || null) !== (current?.user?.id || null);
+    if (store.viewAs && !changed) { store.real.session = session; return; }
+    if (store.viewAs) restoreRealViewer();
     store.session = session;
     if (!changed) return;
     // Supabase holds its sign-in lock while this callback runs, so database
@@ -148,8 +159,20 @@ export async function loadData() {
     ]);
   }
   for (const p of people) p._order = p.birth_order ?? 1e6;
+  store.raw = { people, details, parentChild, unions };
   store.fam = buildFamily({ people, details, parentChild, unions });
   await loadPhotoUrls(people);
+  // Reloaded while viewing as a member: show only what they would see.
+  if (store.viewAs) store.viewAs.reapply();
+}
+
+// Leave "View as" and put the admin's own profile, session and data back.
+export function restoreRealViewer() {
+  if (!store.viewAs) return;
+  Object.assign(store, store.real);
+  store.viewAs = null;
+  store.real = null;
+  try { sessionStorage.removeItem('view-as'); } catch { /* ignore */ }
 }
 
 async function loadPhotoUrls(people) {
@@ -205,6 +228,7 @@ function friendlyAuthError(error) {
 }
 
 export async function signOut() {
+  restoreRealViewer();
   await store.sb.auth.signOut();
 }
 
@@ -302,6 +326,9 @@ export async function listRequests({ status = 'pending', mine = false } = {}) {
   if (mine) q = q.eq('submitted_by', store.session.user.id);
   const { data, error } = await q;
   if (error) throw error;
+  // Viewing as a member: the admin can read every request, so keep only the
+  // ones the database would show that member.
+  if (store.viewAs && !store.isAdmin) return data.filter((r) => r.submitted_by === store.session.user.id || (r.status === 'pending' && store.viewAs.canReview(r)));
   return data;
 }
 
@@ -313,6 +340,7 @@ export async function withdrawRequest(req) {
 
 export async function pendingCount() {
   if (!store.signedIn || store.preview) return 0;
+  if (store.viewAs && !store.isAdmin) return (await listRequests({ status: 'pending' })).filter((r) => r.submitted_by !== store.session.user.id).length;
   let q = store.sb.from('change_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
   // Owners review other people's suggestions, not their own.
   if (!store.isAdmin) q = q.neq('submitted_by', store.session.user.id);
@@ -489,7 +517,7 @@ export async function markNotDuplicate(a, b) {
 // Quietly does nothing if it fails (for example before the table exists).
 let lastView = { key: '', at: 0 };
 export function logView(view, personId) {
-  if (!store.signedIn || store.preview || !store.sb) return;
+  if (!store.signedIn || store.preview || !store.sb || store.viewAs) return;
   const key = `${view}|${personId || ''}`;
   const now = Date.now();
   if (key === lastView.key && now - lastView.at < 60000) return;
