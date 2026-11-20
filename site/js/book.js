@@ -1211,6 +1211,7 @@ async function openBook(container, id) {
     h('label.bk-tool', 'Design ', h('select', { onchange: (e) => setSetting('template', e.target.value) }, Object.entries(TEMPLATES).map(([k, t]) => h('option', { value: k, selected: k === s.template }, t.name)))),
     h('label.bk-tool', 'Size ', h('select', { onchange: (e) => setSetting('size', e.target.value) }, Object.entries(SIZES).map(([k, z]) => h('option', { value: k, selected: k === s.size }, z.name)))),
     h('label.bk-tool', 'Starts from ', h('select', { onchange: (e) => setSetting('rootId', e.target.value) }, startOptions(store.fam, view.rootId))),
+    h('label.bk-tool.check', { title: 'Untick to leave out the pages of people who have no photo, story, spouse or children yet (they are still in the picture trees and the chart)' }, h('input', { type: 'checkbox', id: 'bk-all-pages', checked: s.skipEmpty === false, onchange: (e) => setSetting('skipEmpty', !e.target.checked) }), ' A page for everyone'),
     h('label.bk-tool.check', h('input', { type: 'checkbox', checked: !!s.bleed, onchange: (e) => setSetting('bleed', e.target.checked) }), ' Bleed'),
     h('button.btn.small', { type: 'button', title: 'Add new people and details from the tree. Your changes stay.', onclick: async () => {
       toast('Rebuilding from the tree…');

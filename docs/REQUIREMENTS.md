@@ -323,6 +323,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | Book maker: **A page for everyone** switch in the book's top bar (the "only people with a photo, story, spouse or children" choice can now be changed after the book is made). |
 | 20 Nov 2026 | | Book maker: drag and resize added photos and text, delete any text or photo, and **Preview as a book** (flip through facing pages). |
 | 20 Nov 2026 | | Book maker: the tree chart fits on one page with its type sized to fill it; picture trees show both parents (the spouse beside the blood parent). |
 | 20 Nov 2026 | | **Book maker v2:** picture tree on every generation page (six styles), five rotating person page layouts, + Photo and + Text on any page. |
