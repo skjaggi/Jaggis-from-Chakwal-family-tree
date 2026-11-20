@@ -317,7 +317,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | #26 | The member's chosen starting person is remembered in their browser and used next time; picking the top ancestor clears it. |
+| 20 Nov 2026 | #33 | The member's chosen starting person is remembered in their browser and used next time; picking the top ancestor clears it. |
 | 20 Nov 2026 | #25 | Help section 4: labelled pictures of the Start tree from line (desktop and phone); help pictures retaken with the new line. |
 | 20 Nov 2026 | | **Family book maker** (admins, pilot): Heritage, Classic and Modern designs, sizes up to 12 × 12 in, built from the tree, edited on screen, warnings, print-ready PDF; new `book_drafts` table and `book-photos` bucket. |
 | 20 Nov 2026 | | Started the product requirements for a generic family tree product any family can set up ([PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md)). No change to this site. |
