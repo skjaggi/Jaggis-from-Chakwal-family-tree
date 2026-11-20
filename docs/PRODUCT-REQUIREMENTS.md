@@ -72,7 +72,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 - **Email:** Gmail cannot be used to send a product's emails. Use an email service such as Resend or Postmark (free for small volumes, then about $20 a month), sending from the product's own domain.
 - **Payments:** Stripe (no monthly fee; about 3% per payment). Stripe handles cards, receipts and cancellations.
 - **Supabase plan:** move to Supabase Pro (about $25 a month) before the first paying family, for daily backups and no pausing. One project serves all families.
-- **Code repository:** the current repository is **public**. A product's code should live in a **private** repository so others cannot copy it. **Decision needed.**
+- **Code repository:** the current repository is **public**, which means anyone on the internet can read and copy all of the site's code (not the family's data, which lives in Supabase and is protected). That was fine for one family's site. For a product that earns money, the code is the business, so it should live in a **private** repository: only Sunil (and anyone he invites) can see it. Websites run the same way from a private repository; GitHub's free plan allows private repositories. **Decision needed.**
 
 ## 4. Commercial options
 
@@ -86,7 +86,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 | Geni | One shared world tree | Free; Pro about $120 a year |
 | TribalPages and similar | Private family website with a tree | Free small sites; about $30 to $100 a year |
 
-**Where this product fits:** the big names sell **record searching and DNA**. Few offer what this site already does well: a **private, beautiful, family-run site** where relatives fill in their own branches, with approvals, branch admins, privacy per detail, stories, a library, Blessings to keep people adding, and a printed family book. A natural first audience is **families of the South Asian diaspora** (and other close-knit extended families), where oral history is strong, records are scarce, and family elders want something to pass on.
+**Where this product fits:** the big names sell **record searching and DNA**. Few offer what this site already does well: a **private, beautiful, family-run site** where relatives fill in their own branches, with approvals, branch admins, privacy per detail, stories, a library, Blessings to keep people adding, and a printed family book. **Audience: everyone from day one** (Sunil, 20 Nov 2026). The product is for any family, in any country. Families of the South Asian diaspora, where oral history is strong and records are scarce, are one good group to reach early, through Sunil's own network and the pilot families.
 
 ### 4.2 Ways to charge
 
@@ -98,12 +98,14 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 | Printed book upsell | The family orders the coffee table book printed from their tree | High value, ties in with Sunil's own book; added on top of any plan |
 | Custom domain add-on | Use their own address (like familytree.sjaggi.com) | Small yearly add-on |
 
-### 4.3 Suggested plans (starting point for discussion)
+### 4.3 Suggested plans
+
+Sunil (20 Nov 2026): about $49 a year looks right to start with.
 
 | | Free | Family | Heritage |
 |---|---|---|---|
 | Price | $0 | about $49 a year (or $5 a month) | about $99 a year |
-| People in the tree | up to 150 | unlimited | unlimited |
+| People in the tree | up to 3 generations or about 50 people (proposal, see 4.4) | unlimited | unlimited |
 | Photos | up to 100 | up to 5,000 | up to 25,000 |
 | Members | unlimited | unlimited | unlimited |
 | Logo and colours | colours only | yes | yes |
@@ -113,6 +115,16 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 | Own address (custom domain) | no | add-on | included |
 | Remove "Made with <product>" | no | no | yes |
 | Help | Help manual | email help | priority help, setup call |
+
+### 4.4 How the free plan ends (proposal, waiting for Sunil's OK)
+
+Sunil suggested free for about 1 month or 3 generations, with paid plans beyond that. Proposal:
+
+- **The Free plan has no time limit.** It stays free while the tree has **up to 3 generations or about 50 people**, whichever comes first. A strict 1-month limit would hurt families, because relatives join and fill in branches slowly, over months.
+- **Every new family site gets all features for its first 30 days** (Family plan features: logo, Blessings, Library, PDF book). This is the "1 month" part: families see everything the paid plan offers.
+- After 30 days, unless they upgrade, the site keeps working on the Free plan: nothing is deleted or hidden, and members can still look, search and suggest corrections. Only the extra features pause.
+- When the tree reaches the free limit (a 4th generation, or about 50 people), the admin is asked to upgrade before adding more. Adding is paused, never deleted. The admin gets a friendly email a week before the trial ends and when the limit is near.
+- **Members never pay.** Only the family admin chooses and pays for a plan.
 
 Printed books are ordered separately through a print-on-demand partner (for example Lulu or Blurb, which print and ship hardcover books), with the product adding a margin.
 
@@ -333,12 +345,11 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 ## 11. Open questions for Sunil
 
-Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered). Still open:
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). Still open:
 
-1. **Pricing.** Are you comfortable with freemium and roughly $49 a year per family, members free? Or do you prefer one-time payments, or free with paid printed books only?
-2. **First audience.** Start with families of the South Asian diaspora, or everyone from day one?
-3. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public?
-4. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+1. **Free plan.** OK with the proposal in 4.4 (free with no time limit up to 3 generations or about 50 people; all features for the first 30 days)?
+2. **Code.** OK to build the product in a new private repository (recommended), leaving the Jaggi repository public? See section 3.3.
+3. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
 
 ## 12. Decisions
 
@@ -347,11 +358,13 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: plan a generic, customizable product any family can set up without technical help; no Jaggi references in the product; the Jaggi site keeps working. |
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
+| 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (proposal in 4.4 waiting for his OK). Launch for everyone, not only South Asian families. |
 
 ## Change log
 
 | Date | Pull request | Change |
 |---|---|---|
-| 20 Nov 2026 | | Brand and domain name suggestions with availability and prices (section 10); Jaggi site move as a seamless test; Quantum Nexus LLC under consideration. |
+| 20 Nov 2026 | | Pricing agreed to start; free plan proposal (4.4); audience everyone; private repository explained (3.3). |
+| 20 Nov 2026 | #27 | Brand and domain name suggestions with availability and prices (section 10); Jaggi site move as a seamless test; Quantum Nexus LLC under consideration. |
 | 20 Nov 2026 | #27 | Sunil's first answers: timeline to June 2027, cost breakdown (section 8), legal help options (section 9), remaining open questions. |
 | 20 Nov 2026 | #26 | First draft: Jaggi-specific inventory, build and commercial options with recommendations, product requirements, phases, costs, open questions. |
