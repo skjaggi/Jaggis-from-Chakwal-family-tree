@@ -1,4 +1,4 @@
-# Family Tree Product: Requirements (draft)
+# Family Tree Product: Requirements
 
 **Status:** agreed plan, 20 November 2026. Sunil approved the plan as written on 20 Nov 2026. Nothing here is built yet. The only open item is the brand name (section 11).
 
@@ -28,7 +28,7 @@ The current site is about 6,000 lines of plain JavaScript plus a Supabase databa
 |---|---|---|
 | Name and logo | "Jaggis of Chakwal", the Jaggis logo images, page titles, Google site name | Family name, tagline and logo chosen in setup; a simple monogram logo is made automatically if they have none |
 | Colours | Banyan teal and gold | A few colour themes to pick from, plus a custom main colour |
-| Footer | "© 2026 Jaggi Family and Quantum Nexus LLC", Quantum Nexus mark | "© <year> <family name>" plus a small "Made with <product>" link |
+| Footer | "© 2026 Jaggi Family and Quantum Nexus LLC", Quantum Nexus mark | "© &lt;year&gt; &lt;family name&gt;" plus a small "Made with &lt;product&gt;" link |
 | Help manual | Written about the Jaggi family, with Jaggi screenshots | One general manual for all families, showing the family's own name, with neutral sample screenshots |
 | Founder and Creator badges | Hard-coded for Suraj and Sunil by account id | Admin can create their own special badges and give them to anyone |
 | Blessings | Generation 1 named as Bakhshi Bhanna Mal Jaggi; fixed point values | Root ancestor's name filled in automatically; admin can turn Blessings on or off and adjust points |
@@ -113,7 +113,7 @@ Sunil (20 Nov 2026): about $49 a year looks right to start with.
 | Blessings, Library, Dashboard | Dashboard only | yes | yes |
 | PDF family book and GEDCOM export | GEDCOM only | yes | yes, plus book design templates |
 | Own address (custom domain) | no | add-on | included |
-| Remove "Made with <product>" | no | no | yes |
+| Remove "Made with &lt;product&gt;" | no | no | yes |
 | Help | Help manual | email help | priority help, setup call |
 
 ### 4.4 How the free plan ends (agreed 20 Nov 2026)
@@ -183,7 +183,7 @@ Sunil asked (20 Nov 2026) whether invitations use the email of the admin who sta
 - **Reply-to is the inviter's own email address**, so when a relative presses Reply, the answer goes straight to the inviter, not to the product.
 - The same rule applies to reminders and Missing details emails sent by an admin. Automatic emails (sign-in codes, receipts) come from the product's name only.
 - **Ways to invite, all on the Invite screen:**
-  1. **Send invitation** (default): the product emails it as above ("<Inviter> via <Brand>", replies to the inviter).
+  1. **Send invitation** (default): the product emails it as above ("&lt;Inviter&gt; via &lt;Brand&gt;", replies to the inviter).
   2. **Send from my own email** (Sunil asked 20 Nov 2026 for the admin's own, familiar address): opens the inviter's own mail program or Gmail with the invitation already written (to, subject, text and sign-in link); they just press Send. It comes from their own address, so relatives recognise it, and the product never needs their password.
   3. **WhatsApp**: carried over from the Jaggi site, where it works today on phones and on the desktop (Sunil tested 20 Nov 2026); opens WhatsApp with the invitation message and link ready to send.
   4. **Copy link**: copies the invitation message and link to paste into a text message, Facebook, Signal or anywhere else.
