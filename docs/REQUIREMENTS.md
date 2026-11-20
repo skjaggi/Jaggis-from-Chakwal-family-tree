@@ -149,6 +149,7 @@ The tree launched with about 70 people transcribed from the two family tree PDFs
 ### 8.1 Tree view
 
 - One view: a vertical scrolling tree with the root centred at the top. Scroll with mouse wheel, two fingers or drag; pinch or **+ / −** to zoom. The bar at the top ("you are here") shows the generation and family being viewed; tap a name to go there.
+- **Opens on your own line:** a signed-in member with a claimed box first sees the tree from the top ancestor with only the path down to their own box open, their box and all their descendants open, and every other branch closed. On wider screens it zooms out to show that line (never below half size); on phones it starts at their box. It applies on the first look at the main tree and again right after signing in or having a claim approved; after that, what they open or close stays as they left it. Visitors and members without a claimed box see the first three generations.
 - **Show tree from here** redraws the tree from any person; the ancestor line at the top leads back up, or **Whole tree**.
 - Compact layout: children without children of their own are stacked in a column; a teal circle under a box shows the number of children and opens or closes that family.
 - Married-in spouses have their own smaller box with a dashed edge below their partner, joined by two gold rings.
@@ -279,6 +280,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 | 16 Nov 2026 | Members must claim their box before making changes. |
 | 17 Nov 2026 | Sunil: new details and photos default to Family branch only for everyone, including the deceased (replaces the 12 Nov rule). Marriage dates public only when both spouses have passed away; adoption labels hidden from visitors for living children. |
 | 17 Nov 2026 | Family Library with admin approval. Missing details reminders per branch admin (core fields as in 8.8). Help page updated in every feature pull request. |
+| 19 Nov 2026 | Sunil: the tree opens on the signed-in member's own line (path down to them, them and their descendants open, other branches closed). |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -293,6 +295,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 19 Nov 2026 | #PR | Tree opens on the signed-in member's own line. |
 | 18 Nov 2026 | #18 | Help and Ancestors pages show the same top bar as the tree (search, full role-aware menu, light/dark, Sign out, member chip). |
 | 18 Nov 2026 | #14 | Requirements brought up to date with everything shipped since 12 Nov and moved into the repository. |
 | 18 Nov 2026 | #15 | Privacy: marriage dates and adoption labels hidden from visitors; default Family branch only; warning when Public is chosen for a living person. |
