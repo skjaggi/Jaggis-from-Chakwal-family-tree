@@ -65,8 +65,42 @@ function myLineId() {
   const id = store.claimedId || store.profile?.person_id || null;
   return id && store.fam.byId.has(id) ? id : null;
 }
+// A member's chosen starting person is remembered in this browser (per
+// account) and used the next time they open the site. Picking the top
+// ancestor clears it. Never saved or used while the admin is "Viewing as".
+const startKey = () => {
+  const id = store.session?.user?.id;
+  return id && !store.viewAs && !store.preview ? `start-from:${id}` : null;
+};
+function savedStart() {
+  const k = startKey();
+  if (!k) return null;
+  let id = null;
+  try { id = localStorage.getItem(k); } catch { /* storage blocked */ }
+  return id && store.fam.byId.has(id) && id !== store.fam.defaultRootId ? id : null;
+}
+function chooseStart(id, extra = {}) {
+  const k = startKey();
+  try {
+    if (k && id === store.fam.defaultRootId) localStorage.removeItem(k);
+    else if (k) localStorage.setItem(k, id);
+  } catch { /* storage blocked */ }
+  go({ root: id, selected: null, ...extra });
+}
+let restoredFor = null;
 async function route() {
   parseHash();
+  // First look at the tree after signing in: start from their saved choice.
+  const who = store.signedIn ? startKey() : null;
+  if (who && who !== restoredFor) {
+    restoredFor = who;
+    const saved = savedStart();
+    if (saved && state.root === store.fam.defaultRootId && !state.selected && ['tree', 'outline'].includes(state.view)) {
+      history.replaceState(null, '', `#/${state.view}/${saved}`);
+      parseHash();
+      lineFor = myLineId(); // their saved start wins over opening their own line
+    }
+  }
   // "&edit=1" (from the Dashboard's missing-field lists): open the card and its edit form.
   if (/[?&]edit=1\b/.test(location.hash)) {
     history.replaceState(null, '', location.hash.replace(/&edit=1\b|\?edit=1&?/, (m) => (m.startsWith('?') && m.endsWith('&') ? '?' : '')));
@@ -154,7 +188,7 @@ function renderSide() {
   document.body.classList.add('panel-open');
   renderPanel(panel, state.selected, {
     onSelect: selectPerson,
-    onRoot: (id) => go({ root: id, selected: id }),
+    onRoot: (id) => chooseStart(id, { selected: id }),
     onClose: () => go({ selected: null }),
     onSignIn: openSignIn,
   });
@@ -190,7 +224,7 @@ function renderBreadcrumbs() {
   clear(crumbs,
     h('span.muted', 'Start tree from '),
     above > 0 ? h('span.start-path', chain.slice(0, -1).map((id, i) => [i ? h('span.sep', '›') : null,
-      h('button.link', { type: 'button', title: `Start the tree from ${shortName(fam.byId.get(id))}`, onclick: () => go({ root: id, selected: null }) }, first(id))]),
+      h('button.link', { type: 'button', title: `Start the tree from ${shortName(fam.byId.get(id))}`, onclick: () => chooseStart(id) }, first(id))]),
     h('span.sep', '›')) : null,
     startPicker(fam),
     h('span.start-gen', `Gen ${fam.byId.get(state.root)?.generation ?? chain.length}`,
@@ -238,7 +272,7 @@ function startPicker(fam) {
   return h('select', {
     id: 'start-from',
     'aria-label': 'Start the tree from',
-    onchange: (e) => go({ root: e.target.value, selected: null }),
+    onchange: (e) => chooseStart(e.target.value),
   }, gens.map((g) => {
     const list = people.filter((x) => x.gen === g).sort((a, b) => shortName(a.p).localeCompare(shortName(b.p)));
     return h('optgroup', { label: `Generation ${g}` },
@@ -492,7 +526,7 @@ async function start() {
   });
   parseHash();
   await renderHeader();
-  if (!location.hash || /^#(access_token|error)/.test(location.hash)) go({ view: 'tree', root: store.fam.defaultRootId, selected: null }, true);
+  if (!location.hash || /^#(access_token|error)/.test(location.hash)) go({ view: 'tree', root: savedStart() || store.fam.defaultRootId, selected: null }, true);
   else route();
   // "Sign in" on the Help and Ancestors pages lands here with ?signin=1.
   if (/[?&]signin=1\b/.test(location.hash)) {

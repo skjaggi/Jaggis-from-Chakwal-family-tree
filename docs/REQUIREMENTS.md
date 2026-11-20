@@ -29,7 +29,6 @@ The Jaggis of Chakwal family tree is a phone-friendly website where anyone can l
 
 | Release | Target | Status |
 |---|---|---|
-| 20 Nov 2026 | | Help section 4: labelled pictures of the Start tree from line (desktop and phone); help pictures retaken with the new line. |
 | Version 1 | Thanksgiving, 26 Nov 2026 | **Live** since 13 Nov 2026, at familytree.sjaggi.com since 14 Nov. Several items first planned for version 2 shipped early: branch admins, custom domain, source and uncertainty fields on screen, edit history. |
 | Version 2 | Early 2027 | Planned: linked documents (certificates, letters), GEDCOM import, "How are we related?" between any two people, automatic Library preview pictures. |
 | Future | Later | Open sign-up so any family can start its own tree, self-hosting, App Store and Play Store apps, more languages, prize draws for Blessings. Planned as a separate product: see [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). |
@@ -150,7 +149,7 @@ The tree launched with about 70 people transcribed from the two family tree PDFs
 ### 8.1 Tree view
 
 - One view: a vertical scrolling tree with the root centred at the top. Scroll with mouse wheel, two fingers or drag; pinch or **+ / −** to zoom. One line above the tree holds both where the tree starts and the "you are here" path (the generation and family in the middle of the screen; tap a name to go there). On phones it splits into a few short rows that scroll sideways instead of wrapping.
-- **Start tree from** (signed-in members only): a drop-down of everyone who has children, grouped by generation (alphabetical within each; same names in one generation show their parent). Picking someone redraws the tree from them and their descendants (married-in spouses still shown). The line shows their ancestors above as clickable names (to step back up), and a badge such as "Gen 4 · 3 generations above". Not remembered: each visit still opens on the member's own line. Visitors keep "Showing from" with the ancestor path and **Whole tree**.
+- **Start tree from** (signed-in members only): a drop-down of everyone who has children, grouped by generation (alphabetical within each; same names in one generation show their parent). Picking someone redraws the tree from them and their descendants (married-in spouses still shown). The line shows their ancestors above as clickable names (to step back up), and a badge such as "Gen 4 · 3 generations above". Remembered per account in that browser (also when set with an ancestor name or **Show tree from here**): the next visit opens from the same person instead of the member's own line. Picking the top ancestor clears it, and the tree opens on the member's own line again. Never saved or used while the admin is using **View as**. Visitors keep "Showing from" with the ancestor path and **Whole tree**.
 - **Opens on your own line:** a signed-in member with a claimed box (or, until they claim, the box their invitation is linked to) first sees the tree from the top ancestor with only the path down to their own box open, their box and all their descendants open, and every other branch closed. On wider screens it zooms out to show that line (never below half size); on phones it starts at their box. It applies on the first look at the main tree and again right after signing in or having a claim approved; after that, what they open or close stays as they left it. Visitors and members with no box at all see the first three generations. **View as** opens the viewed member's line the same way.
 - **Show tree from here** redraws the tree from any person; the ancestor line at the top leads back up, or **Whole tree**.
 - Compact layout: children without children of their own are stacked in a column; a teal circle under a box shows the number of children and opens or closes that family.
@@ -301,7 +300,8 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 | 17 Nov 2026 | Family Library with admin approval. Missing details reminders per branch admin (core fields as in 8.8). Help page updated in every feature pull request. |
 | 19 Nov 2026 | Sunil: the admin can view the site as any member (a read-only preview) from the top of the site. |
 | 19 Nov 2026 | Sunil: the tree opens on the signed-in member's own line (path down to them, them and their descendants open, other branches closed). |
-| 20 Nov 2026 | Sunil: members (not visitors) get a "Start tree from" drop-down of people with children, with a generation badge and clickable ancestor path; not remembered between visits; married-in spouses still shown. The start line and the "you are here" bar share one line. |
+| 20 Nov 2026 | Sunil: members (not visitors) get a "Start tree from" drop-down of people with children, with a generation badge and clickable ancestor path; married-in spouses still shown. The start line and the "you are here" bar share one line. |
+| 20 Nov 2026 | Sunil (later the same day): remember the member's last starting person and open the tree from it next time; picking Bhanna Mal Jaggi goes back to opening on their own line. |
 | 20 Nov 2026 | Sunil: pilot the automatic family book maker on this site, admins only while testing; book changes saved in the database. |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
@@ -317,6 +317,8 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | #33 | The member's chosen starting person is remembered in their browser and used next time; picking the top ancestor clears it. |
+| 20 Nov 2026 | #25 | Help section 4: labelled pictures of the Start tree from line (desktop and phone); help pictures retaken with the new line. |
 | 20 Nov 2026 | | **Family book maker** (admins, pilot): Heritage, Classic and Modern designs, sizes up to 12 × 12 in, built from the tree, edited on screen, warnings, print-ready PDF; new `book_drafts` table and `book-photos` bucket. |
 | 20 Nov 2026 | | Started the product requirements for a generic family tree product any family can set up ([PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md)). No change to this site. |
 | 20 Nov 2026 | | **Start tree from** drop-down for members, with "Gen N · N generations above" badge and ancestor path; start line and "you are here" bar combined into one line. |
