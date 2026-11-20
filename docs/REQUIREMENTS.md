@@ -149,7 +149,7 @@ The tree launched with about 70 people transcribed from the two family tree PDFs
 ### 8.1 Tree view
 
 - One view: a vertical scrolling tree with the root centred at the top. Scroll with mouse wheel, two fingers or drag; pinch or **+ / −** to zoom. The bar at the top ("you are here") shows the generation and family being viewed; tap a name to go there.
-- **Opens on your own line:** a signed-in member with a claimed box first sees the tree from the top ancestor with only the path down to their own box open, their box and all their descendants open, and every other branch closed. On wider screens it zooms out to show that line (never below half size); on phones it starts at their box. It applies on the first look at the main tree and again right after signing in or having a claim approved; after that, what they open or close stays as they left it. Visitors and members without a claimed box see the first three generations.
+- **Opens on your own line:** a signed-in member with a claimed box (or, until they claim, the box their invitation is linked to) first sees the tree from the top ancestor with only the path down to their own box open, their box and all their descendants open, and every other branch closed. On wider screens it zooms out to show that line (never below half size); on phones it starts at their box. It applies on the first look at the main tree and again right after signing in or having a claim approved; after that, what they open or close stays as they left it. Visitors and members with no box at all see the first three generations. **View as** opens the viewed member's line the same way.
 - **Show tree from here** redraws the tree from any person; the ancestor line at the top leads back up, or **Whole tree**.
 - Compact layout: children without children of their own are stacked in a column; a teal circle under a box shows the number of children and opens or closes that family.
 - Married-in spouses have their own smaller box with a dashed edge below their partner, joined by two gold rings.
@@ -299,6 +299,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 19 Nov 2026 | | View as opens on the viewed member's own line; members not yet claimed open on their invitation's box. |
 | 19 Nov 2026 | #22 | Admin **View as**: preview the site as any member (menu, landing tree, buttons, edit rights, branch-only details); nothing is saved or sent while viewing. |
 | 19 Nov 2026 | #21 | Tree opens on the signed-in member's own line. |
 | 18 Nov 2026 | #18 | Help and Ancestors pages show the same top bar as the tree (search, full role-aware menu, light/dark, Sign out, member chip). |
