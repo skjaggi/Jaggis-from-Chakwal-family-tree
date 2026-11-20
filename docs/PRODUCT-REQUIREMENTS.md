@@ -278,6 +278,36 @@ Sunil asked (20 Nov 2026): can the product build the book automatically from rea
 
 **When in the product:** after the paid launch (from July 2027, as part of phase 5). The Jaggi coffee table book planned for early 2027 can serve as the model for the first "Heritage" template, so the design work is reused.
 
+### 5.10 AI family helper (agreed 20 Nov 2026)
+
+Sunil said yes (20 Nov 2026) to an AI helper in three layers. It uses the Claude API from Anthropic. **It is being piloted on the Jaggi site first**, the same way as the book service.
+
+**Layer 1: Ask the tree.** A chat box where any signed-in member can ask questions in plain words, for example "How am I related to Kamla?", "Who in the family was born in Chakwal?" or "Tell me about my great-grandfather". It answers **only from the family's own data**: people, relationships, notes and stories, and the Family Library. It does not search the web and does not make things up; when the tree does not hold the answer, it says so. It respects privacy: each member's questions are answered only from what that member is already allowed to see (for example "Family branch only" details stay inside the branch), and visitors who are not signed in cannot use it. Answers name the people's boxes so the member can tap through to check.
+
+**Layer 2: Find more about this person.** A button on a person's card ("Find more about this person"). The helper searches the web, for example old newspapers, Partition and migration records, school and college plaques, obituaries and published family histories. It then writes a short summary with:
+- the **sources** (a link for each fact);
+- a **confidence level** for each finding (high, medium or low), with the reason, for example "same name, same town and same years" or "same name only";
+- facts it could not confirm, shown as open questions.
+
+Findings are **never added to the tree automatically**. They go to the family admin as suggestions (like Library links today); the admin accepts, edits or rejects each one, and accepted facts are recorded under Sources with the link. Research runs only for **people who have passed away**. The button is not shown for living people.
+
+**Layer 3: Fill the gaps.** The helper looks over the tree and points out missing pieces, for example "12 people have no birth year", "Grandfather Ram's parents are not recorded" or "No photo of the Gen 2 brothers". For each gap it suggests who in the family might know (the closest living relatives in that branch) and a question to ask them, or a place to look (records, the Library). These can feed the "Missing details" reminder emails admins already send.
+
+**Privacy rules for the AI helper**
+- **Living people's details are never sent for web searches.** Research (layer 2) is only for people who have passed away, and only their name, years, places and family names are used in the search.
+- Ask the tree (layer 1) sends only the details the asking member is allowed to see, and only for that question. Nothing is kept by the AI provider for training: under Anthropic's commercial API terms, customer data is not used to train models.
+- The Privacy Policy (section 9) says plainly that the AI helper exists, what it sends, and that a family admin can switch it off for the whole family.
+- Every AI answer or suggestion is labelled as AI-made.
+
+**Cost** (Claude API list prices, late 2026; to be rechecked when building)
+- **Ask the tree:** a fraction of a cent to about **2 cents per question** using a smaller, cheaper Claude model (Sonnet or Haiku), depending on how much of the tree the question needs.
+- **Find more about this person:** about **20 to 40 cents per research run** using the strongest model (Opus), plus the web searches (about $10 per 1,000 searches, to be confirmed; a run uses about 5 to 15).
+- **Fill the gaps:** a few cents per run; it can run once a week per family.
+- **Monthly allowance per plan**, so costs stay predictable: for example the Free plan gets a small taste (about 10 questions a month), the **Family plan** about 100 questions and 3 research runs a month, the **Heritage plan** about 300 questions and 10 research runs. Families who want more can buy an extra pack (for example $5 for 15 more research runs). A typical family (about 20 questions and 1 research run a month) costs under $1 a month in AI; a Family plan used to the full allowance every month costs about $3 a month, so the allowance is the safety limit.
+- The admin's Family settings page shows how much of this month's allowance is used.
+
+**When in the product:** Ask the tree and Fill the gaps can come with the paid launch (June 2027) if the Jaggi pilot goes well; Find more about this person follows in phase 5. About **3 to 4 weeks** of work, much of it proven in the Jaggi pilot.
+
 ## 6. Keeping the Jaggi site working
 
 - The Jaggi site keeps running unchanged on familytree.sjaggi.com while the product is built.
@@ -303,7 +333,7 @@ Sunil (20 Nov 2026): spread the work over about six months, with the paid launch
 | 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
 | 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; rehearse and then make the Jaggi site move (section 6) | April to May 2027 |
 | 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
-| 5. Later | Printed family book service (5.9, from July 2027), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
+| 5. Later | Printed family book service (5.9, from July 2027), AI "Find more about this person" research (5.10; Ask the tree may come at launch), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
 These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
@@ -358,6 +388,7 @@ Sunil (20 Nov 2026): keep all of these items in the budget.
 | Apple App Store developer account | Yearly, when the iPhone app comes | $99 a year |
 | Google Play developer account | One-time, when the Android app comes | $25 |
 | Business email address for Sunil (for example `sunil@<brand>.com`, Google Workspace or similar) | Optional, monthly | about $6 a month |
+| AI family helper (Claude API): Ask the tree, research, fill the gaps (5.10) | Monthly, by use | about $0 to $5 a month during the pilot; about $30 to $60 a month at 100 paying families (typical use), paid for by the plan price and kept in check by the allowances |
 | Printed family books | Per order | paid by the family per book; the product adds a margin |
 | More photo space or a bigger email plan | Only with growth | see 8.2 |
 
@@ -433,7 +464,7 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 ## 11. Open questions for Sunil
 
-Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3), invitation emails (5.3.1) and the printed book service (5.9, piloted on the Jaggi site first), all agreed. Still open:
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3), invitation emails (5.3.1) the printed book service (5.9) and the AI family helper (5.10), both piloted on the Jaggi site first, all agreed. Still open:
 
 1. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
 
@@ -445,6 +476,7 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
 | 20 Nov 2026 | Sunil: the setup wizard offers a few ready-made family logo templates that fill in the family's name automatically, like "Jaggis of Chakwal" (5.2.1). |
+| 20 Nov 2026 | Sunil: yes to the AI family helper (5.10): Ask the tree, Find more about this person, Fill the gaps. Living people are never sent for web searches; findings need admin approval; monthly allowance per plan. Piloted on the Jaggi site first. |
 | 20 Nov 2026 | Sunil: yes to the printed family book service (5.9); build and test it on the Jaggi family tree first. |
 | 20 Nov 2026 | Sunil approved the plan as written: free plan (4.4), private repository for the product (3.3), invitation emails and the four ways to invite (5.3.1). Only the brand name stays open. |
 | 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (details in 4.4). Launch for everyone, not only South Asian families. |
@@ -453,6 +485,7 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
+| 20 Nov 2026 | | AI family helper agreed, with privacy rules and costs (5.10, 8.3). |
 | 20 Nov 2026 | | Family logo templates in the setup wizard, with sample mock-ups (5.2.1). |
 | 20 Nov 2026 | #30 | Printed book service agreed, pilot on the Jaggi site first. |
 | 20 Nov 2026 | | Printed family book service proposal: automatic layout from templates, page editor, print-on-demand ordering (5.9). |
