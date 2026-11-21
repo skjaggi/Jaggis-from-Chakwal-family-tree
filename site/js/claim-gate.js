@@ -3,6 +3,7 @@
 // not in the tree yet can say so and carry on, so they can add themselves.
 // Admins, members who already claimed a box, and members whose claim is
 // waiting for confirmation are never asked.
+import { family } from './family.js';
 import { store, listRequests, claimPerson, personClaimedBy, refreshProfile } from './data.js';
 import { fullName, relationHint } from './model.js';
 import { h, clear, modal, toast } from './ui.js';
@@ -80,7 +81,7 @@ function askToClaim(linked, { welcome = false } = {}) {
 
     const content = h('div.claim-gate',
       welcome
-        ? h('p', h('strong', 'Welcome dear member of Jaggi Family!'), ' Here is your box in the family tree. Please confirm it is you, so your changes to your own family appear right away and the tree shows how everyone is related to you.')
+        ? h('p', h('strong', `Welcome dear member of ${family.familyName}!`), ' Here is your box in the family tree. Please confirm it is you, so your changes to your own family appear right away and the tree shows how everyone is related to you.')
         : h('p', 'Before you make changes, please claim your own box in the tree. It takes a moment, and then your changes to your own family appear right away and the tree shows how everyone is related to you.'),
       linked ? h('div.claim-linked',
         h('p', 'Your invitation is linked to ', h('strong', fullName(linked)), h('span.muted', ' ' + relationHint(store.fam, linked.id)), '.'),

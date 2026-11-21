@@ -1,6 +1,7 @@
 // Dashboard: the tree at a glance, what is missing, and open questions.
 // Everything is worked out from the data this visitor can already see, so it
 // follows the same privacy rules as the rest of the site.
+import { config } from './config.js';
 import {
   store, pendingCount, listProfiles, listInvites, listViews, visitorStats, sendWeeklySummary, listQuestions, addQuestion, listNotDuplicates, markNotDuplicate, updateQuestion, deleteQuestion, personLabel,
 } from './data.js';
@@ -344,7 +345,7 @@ async function publicVisitorsSection() {
       timeRows = [];
       for (let i = 0; i < perDay.length; i += 7) timeRows.push({ label: `Week of ${perDay[i].label}`, count: perDay.slice(i, i + 7).reduce((n, r) => n + r.count, 0) });
     }
-    const pages = (d.pages?.hits || []).map((x) => ({ label: x.title && !/^Jaggis of Chakwal$/.test(x.title) ? `${x.title}` : x.path, count: x.count || 0 }));
+    const pages = (d.pages?.hits || []).map((x) => ({ label: x.title && x.title !== config.siteTitle ? `${x.title}` : x.path, count: x.count || 0 }));
     const places = stats(d.locations).map((r) => ({ ...r, label: placeName(r.raw) }));
     const refs = stats(d.referrers).map((r) => ({ ...r, label: r.label === '' || r.label === '(unknown)' ? 'Typed in or bookmark' : r.label })).sort((a, b) => b.count - a.count);
     const unit = ['visitor', 'visitors'];
@@ -369,14 +370,14 @@ async function publicVisitorsSection() {
           h('h3', 'Browsers'), barChart(stats(d.browsers), 'Browsers', { unit }) || h('p.muted', '—'),
           h('h3', 'Systems'), barChart(stats(d.systems), 'Systems', { unit }) || h('p.muted', '—'))),
       d.errors ? h('p.muted.small', `Some parts could not be loaded from GoatCounter: ${Object.keys(d.errors).join(', ')}.`) : null,
-      h('p.muted.small', 'More detail: ', h('a', { href: 'https://jaggis-chakwal.goatcounter.com', target: '_blank', rel: 'noopener' }, 'open GoatCounter'), '.'));
+      h('p.muted.small', 'More detail: ', h('a', { href: `https://${config.goatcounter}.goatcounter.com`, target: '_blank', rel: 'noopener' }, 'open GoatCounter'), '.'));
   }).catch((e) => {
     const msg = /not_configured/.test(e.message)
       ? 'Not switched on yet: the GoatCounter token still needs to be saved as a secret in Supabase.'
       : /Failed to send a request/i.test(e.message) ? 'Could not reach the visitor-stats server function in Supabase.'
         : `Could not load visitor numbers: ${e.message}`;
     clear(box, h('h2', 'Public visitors'), h('p.muted', msg),
-      h('p.muted.small', 'You can still see the numbers directly on ', h('a', { href: 'https://jaggis-chakwal.goatcounter.com', target: '_blank', rel: 'noopener' }, 'GoatCounter'), '.'));
+      h('p.muted.small', 'You can still see the numbers directly on ', h('a', { href: `https://${config.goatcounter}.goatcounter.com`, target: '_blank', rel: 'noopener' }, 'GoatCounter'), '.'));
   });
   load();
   return box;

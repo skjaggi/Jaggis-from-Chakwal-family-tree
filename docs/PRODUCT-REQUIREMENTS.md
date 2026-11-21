@@ -342,7 +342,7 @@ Sunil (20 Nov 2026): spread the work over about six months, with the paid launch
 
 | Phase | What | When (target) |
 |---|---|---|
-| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | **Start Monday 7 December 2026** (recommended, after the Thanksgiving launch of the Jaggi site settles), to mid-January 2027 |
+| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | **Started 21 November 2026** (Sunil: move forward now), to mid-January 2027. First step: one family settings file (site/js/family.js) |
 | 1. Many families | Families table, family-aware security rules and tests, new hosting, email service, family addresses | mid-January to February 2027 |
 | 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
 | 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; rehearse and then make the Jaggi site move (section 6) | April to May 2027 |
@@ -442,6 +442,8 @@ Nothing: it runs on the free Supabase plan, GitHub Pages and Gmail. It keeps run
 
 Sunil (20 Nov 2026): suggest names that work for families in the US, India and other countries; the final choice comes closer to development.
 
+**Domain decision (21 Nov 2026):** build and pilot on sjaggi.com for now (6.1). Once the brand name is settled, buy its domain (for example banyankin.com), probably through Cloudflare, so its DNS is on Cloudflare from day one and family addresses can be created automatically.
+
 **What makes a good name here:** short and easy to spell in any accent; plain English words that Indian, American and other families all know; nothing tied to one religion, caste, language or country; a matching **.com** available at the normal price; ideally a picture behind it. The **banyan** tree is a good picture for all audiences: it is India's national tree, a symbol of long life and shelter, well known in the US, and its branches grow down into new roots, just like a family. It also matches the look the Jaggi site already has.
 
 ### 10.1 Suggested names with a .com that is free to register
@@ -485,7 +487,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 1. **Brand name and domain.** To be decided; not needed to start building (6.1). Suggestions in section 10.
 2. **Which company sells it** (Quantum Nexus LLC recommended). To be decided; needed before Stripe payments are set up (phase 4, spring 2027).
 3. **Heritage plan price** (about $99 a year suggested). To be decided before the paid launch.
-4. **Start date.** Sunil was not sure; recommended: start phase 0 on Monday 7 December 2026. Phase 0 changes nothing the Jaggi family sees, so it is safe to start any time.
+4. ~~Start date~~: answered 21 Nov 2026, start now.
 
 ## 12. Decisions
 
@@ -495,6 +497,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
 | 20 Nov 2026 | Sunil: the setup wizard offers a few ready-made family logo templates that fill in the family's name automatically, like "Jaggis of Chakwal" (5.2.1). |
+| 21 Nov 2026 | Sunil: move forward now on sjaggi.com; buy the brand domain later (probably through Cloudflare) once the name is settled. Phase 0 started. |
 | 21 Nov 2026 | Sunil: during building and the pilot, each family gets its own subdomain, familyname.sjaggi.com (6.1). |
 | 21 Nov 2026 | Sunil: build before buying a domain, using the existing GitHub, Supabase (separate project) and a sjaggi.com subdomain (6.1). No AI on the Free plan; show the paid AI features as locked previews. Legal first step agreed (section 9). Pilot families by March 2027. Company and Heritage price still to be decided. |
 | 20 Nov 2026 | Sunil: yes to the AI family helper (5.10): Ask the tree, Find more about this person, Fill the gaps. Living people are never sent for web searches; findings need admin approval; monthly allowance per plan. Piloted on the Jaggi site first. |
@@ -506,6 +509,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 
 | Date | Pull request | Change |
 |---|---|---|
+| 21 Nov 2026 | | Domain decision (10); phase 0 started with the family settings file (7). |
 | 21 Nov 2026 | | Each family on its own name.sjaggi.com subdomain during the pilot; one CNAME per family (6.1). |
 | 21 Nov 2026 | | Building before a domain (6.1), no AI on Free plan, recommended start date, open questions updated (11). |
 | 20 Nov 2026 | | AI family helper agreed, with privacy rules and costs (5.10, 8.3). |

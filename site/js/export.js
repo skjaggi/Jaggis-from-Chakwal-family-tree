@@ -3,6 +3,7 @@
 // person exporting is allowed to see.
 import { store } from './data.js';
 import { config } from './config.js';
+import { family } from './family.js';
 import { fullName, lifeLine, KIND_LABEL } from './model.js';
 import { h, clear, initials } from './ui.js';
 import { downloadGedcom } from './gedcom.js';
@@ -60,8 +61,8 @@ function directory(fam) {
     }))));
 }
 
-const COPYRIGHT = '© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved.';
-const qnMark = () => h('img.bk-qn', { src: 'img/brand/qn-mark-96.webp', alt: 'Quantum Nexus LLC logo' });
+const COPYRIGHT = family.copyright;
+const qnMark = () => h('img.bk-qn', { src: family.companyMark.src, alt: family.companyMark.alt });
 
 // Logo and copyright on every printed page. The running header and footer are
 // fixed in print (so the browser repeats them on each page), and the book sits
@@ -72,11 +73,11 @@ function book(fam, rootId) {
   const today = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   return h('div.book',
     h('div.bk-run-head',
-      h('img.bk-run-logo', { src: 'img/brand/jaggis-logo3-320.webp', alt: '' }),
+      h('img.bk-run-logo', { src: family.logo.small, alt: '' }),
       h('span.bk-run-title', title, h('span', ' · The family book'))),
     h('div.bk-run-foot', qnMark(), h('span', COPYRIGHT)),
     h('section.bk-cover',
-      h('img.bk-cover-logo', { src: 'img/brand/jaggis-logo3-800.webp', alt: 'Jaggis of Chakwal: Legacy, Family, Heritage' }),
+      h('img.bk-cover-logo', { src: family.logo.large, alt: family.logo.alt }),
       h('h1', title),
       h('p.bk-sub', `The descendants of ${fullName(root)}`),
       h('p.bk-meta', `${fam.byId.size} people · printed ${today}`),

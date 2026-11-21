@@ -4,6 +4,7 @@
 // personal reminder email naming what is missing. The admin can edit every
 // email and preview it before anything is sent. Emails go out through the
 // same send-reminder function as the general reminder, one person at a time.
+import { family } from './family.js';
 import { store, functionError } from './data.js';
 import { fullName } from './model.js';
 import { h, clear, toast, confirmDialog } from './ui.js';
@@ -79,7 +80,7 @@ export function draftMessage(r) {
   const branch = r.rootName && !PLACEHOLDER.test(r.rootName) ? `the ${r.rootName} family branch` : 'your family branch';
   const thanks = `Thank you for being the branch admin for ${branch} of our tree. ` + (r.complete > 0
     ? `${r.complete} of the ${r.total} people in your branch already ${r.complete === 1 ? 'has' : 'have'} all their key details, which is wonderful.`
-    : 'Every detail you add helps keep the story of the Jaggis of Chakwal alive for the generations after us.');
+    : `Every detail you add helps keep the story of ${family.peopleName} alive for the generations after us.`);
   const ask = onlyPhotos
     ? `The only thing missing now is a photo for ${r.gaps.length === 1 ? 'one person' : `${r.gaps.length} people`}. If you have ${r.gaps.length === 1 ? 'one' : 'any'}, could you please add ${r.gaps.length === 1 ? 'it' : 'them'} when you have a few minutes?`
     : 'A few details are still missing. If you know any of them, could you please add them when you have a few minutes?';

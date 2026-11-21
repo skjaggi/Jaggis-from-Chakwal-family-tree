@@ -3,7 +3,7 @@
 // message from their own email, WhatsApp or text. The admin sees every invite
 // and who sent it on the Members page.
 import { store, inviteRelative, listMyInvites, sendInviteEmail, personLabel } from './data.js';
-import { config } from './config.js';
+import { family } from './family.js';
 import { fullName } from './model.js';
 import { h, clear, toast, field, confirmDialog, formatWhen } from './ui.js';
 import { personPicker } from './forms.js';
@@ -22,7 +22,7 @@ export function inviteMessage({ email, display_name }, fromName) {
   return [
     hello,
     '',
-    `You're invited to the online family tree of the Jaggis of Chakwal, starting from Bakhshi Bhanna Mal Jaggi.`,
+    `You're invited to the online family tree of ${family.peopleName}, starting from ${family.rootName}.`,
     '',
     `Open the tree: ${site}`,
     '',
@@ -42,7 +42,7 @@ export function inviteMessage({ email, display_name }, fromName) {
   ].join('\n').trim();
 }
 
-const SUBJECT = "You're invited to the Jaggi family tree";
+const SUBJECT = `You're invited to the ${family.treeName}`;
 
 // Buttons to send the invitation message the inviter's own way.
 export function sendButtons(invite) {
