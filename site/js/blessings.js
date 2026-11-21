@@ -27,11 +27,9 @@ export const BADGES = [
 
 // Special badges given by hand, not earned, each tied to one account and to
 // that person's own box in the tree (so everyone sees it on the tree too).
-export const FOUNDER = { id: 'founder', name: 'Founder of the Jaggi Family Tree', short: 'Founder', how: 'Had the idea and made the first family trees this one grew from', card: 'He had the idea for this family tree and made the first two family trees it grew from.', color: '#17706b', icon: ICON.seed, special: true,
-  user: 'fb6fc331-a891-4756-8cfe-37a178b54fe4', person: '71296ea4-33fc-50e4-9924-8b156fdb27e9' }; // Suraj Parkash Jaggi
-export const CREATOR = { id: 'creator', name: 'Creator of the Jaggi Family Tree', short: 'Creator', how: 'Built this family tree, with the idea and blessing of the founder', card: 'He built this family tree, with the idea and blessing of the founder, Suraj Parkash Jaggi.', color: '#7a2e3a', icon: ICON.branch, special: true,
-  user: '80115979-6027-4f4a-939e-7fbad4c489a2', person: '143f144c-493b-5c9f-9996-9f7de3feafcc' }; // Sunil Kumar Jaggi
-const SPECIAL = [FOUNDER, CREATOR];
+// (They are set in family.js.) The founder gets a one-time thank-you pop-up.
+const SPECIAL = family.specialBadges.map((b) => ({ ...b, icon: ICON[b.icon], special: true }));
+export const FOUNDER = SPECIAL.find((b) => b.id === 'founder') || {};
 export const specialOf = (userId) => SPECIAL.filter((b) => b.user === userId);
 export const specialOfPerson = (personId) => SPECIAL.filter((b) => b.person === personId);
 const isFounder = (userId) => FOUNDER.user === userId;
@@ -143,7 +141,7 @@ export function maybeShowFounderThanks() {
   const m = modal('A special badge', h('div.historian-pop',
     medal(FOUNDER, 'medal big-medal founder-medal'),
     h('p.hp-title', `Thank you${first ? `, ${first}` : ''}!`),
-    h('p', 'You are the ', h('b', 'Founder of the Jaggi Family Tree'), '. This tree began with your idea and the first two family trees you put together.'),
+    h('p', 'You are the ', h('b', FOUNDER.name), '. This tree began with your idea and the first two family trees you put together.'),
     h('p', 'Everything the family adds here grows from that work. This badge is yours alone, and it shows next to your name for everyone to see.'),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => { m.close(); location.hash = '#/blessings'; } }, 'See the leaderboard'),
