@@ -28,6 +28,7 @@ node viewas.cjs
 node my-line.cjs
 node start-from.cjs
 node book.cjs
+node ai-shots.cjs
 # Help and Ancestors pages share the tree's top bar.
 (cd ../.. && node scripts/build-public-pages.mjs --from site/data/seed.json >/dev/null)
 node page-header-shots.cjs >/dev/null

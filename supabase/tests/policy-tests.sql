@@ -362,6 +362,42 @@ do $$ begin
 end $$;
 rollback;
 
+-- AI helper: admins only; findings come only from the edge functions
+begin;
+insert into public.ai_findings (person_id, status, result) values (pg_temp.pid('Bhanna Mal'), 'pending', '{"summary": "test"}');
+insert into public.ai_usage (kind, cost_usd) values ('ask', 0.03);
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+select pg_temp.expect((select daily_cap_usd from public.ai_settings) = 2.00, 'AI daily limit starts at $2');
+update public.ai_settings set daily_cap_usd = 5;
+select pg_temp.expect((select daily_cap_usd from public.ai_settings) = 5, 'admin changes the AI daily limit');
+select pg_temp.expect((select count(*) from public.ai_usage) = 1, 'admin sees AI spending');
+update public.ai_findings set status = 'used';
+select pg_temp.expect((select reviewed_by from public.ai_findings) = '00000000-0000-0000-0000-00000000000a', 'using a finding records the admin');
+do $$ begin
+  begin
+    insert into public.ai_findings (person_id) values (pg_temp.pid('Bhanna Mal'));
+    raise exception 'FAILED: browser made an AI finding';
+  exception when insufficient_privilege then raise notice 'ok: findings are only made by the AI function';
+  end;
+end $$;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect((select count(*) from public.ai_findings) = 0, 'members cannot see AI findings');
+select pg_temp.expect((select count(*) from public.ai_usage) = 0, 'members cannot see AI spending');
+select pg_temp.expect((select count(*) from public.ai_settings) = 0, 'members cannot see AI settings');
+update public.ai_settings set daily_cap_usd = 99;
+set local role anon;
+do $$ begin
+  begin
+    perform 1 from public.ai_findings;
+    raise exception 'FAILED: visitor read AI findings';
+  exception when insufficient_privilege then raise notice 'ok: visitors cannot read AI findings';
+  end;
+end $$;
+reset role;
+select pg_temp.expect((select daily_cap_usd from public.ai_settings) = 5, 'members cannot change the AI daily limit');
+rollback;
+
 -- Storage: branch photo readable only by branch
 insert into storage.objects (bucket_id, name) values ('photos-branch', pg_temp.pid('Sunil Kumar')::text || '/a.jpg');
 alter table storage.objects enable row level security;

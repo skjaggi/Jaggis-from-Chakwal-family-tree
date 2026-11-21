@@ -9,6 +9,7 @@ const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: window.__FAKE_UNLINKED__ ? null : SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' || window.__FAKE_CLAIMED__ ? SUNIL : null, created_at: new Date().toISOString() }],
   invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [], book_drafts: [],
+  ai_settings: [{ id: 1, daily_cap_usd: 2, model: 'claude-opus-5-5' }], ai_usage: [], ai_findings: [],
 };
 // Sample Library links (window.__FAKE_LIBRARY__): approved ones, plus one suggestion waiting.
 if (window.__FAKE_LIBRARY__) {
@@ -36,6 +37,45 @@ if (ADMIN) {
   db.invites.push({ email: 'came@example.com', display_name: 'Came Once', role: 'member', created_at: new Date().toISOString(), accepted_at: new Date().toISOString() });
   const someone = seed.people.find((p) => p.given_name === 'Tapashi Ram').id;
   for (let i = 0; i < 6; i++) db.page_views.push({ id: i, user_id: 'u-2', viewed_at: new Date(Date.now() - i * 3 * 864e5).toISOString(), view: 'tree', person_id: someone });
+}
+// AI helper (window.__FAKE_AI__ adds a sample finding waiting for review).
+const pidOf = (n) => seed.people.find((p) => p.given_name === n)?.id;
+const sampleFinding = (personId, status = 'pending') => ({
+  id: crypto.randomUUID(), person_id: personId, status, created_at: new Date(Date.now() - 36e5).toISOString(), created_by: uid, cost_usd: 0.31,
+  request: { names: ['Bakhshi Kesar Mal Jaggi'], gender: 'male', generation_from_bhanna_mal: 2, born: 'not recorded', died: 'not recorded', work: 'not recorded', relatives_who_have_passed_away: [{ relation: 'parent', name: 'Bakhshi Bhanna Mal Jaggi' }, { relation: 'child', name: 'Bakhshi Prabh Dyal Jaggi' }] },
+  result: {
+    summary: 'SAMPLE TEXT FOR THE PREVIEW (not a real search). A 1933 notice about the opening of Arya High School in **Chakwal** names Bakhshi Kesar Mal Jaggi as the grandfather in whose memory a school building was given by his grandsons Bir Chand and Gyan Prakash, timber merchants of Chakwal. A district gazetteer lists the Bakhshi family among the town\'s Khatri merchant families before 1947.',
+    confidence: 'medium', confidence_reason: 'The name, town and grandsons match the tree, but no source gives his own years.',
+    sources: [
+      { title: 'Sample: Arya High School, Chakwal, opening notice (1933)', url: 'https://example.com/sample-arya-school-1933', what_it_says: 'Names the building given in memory of Bakhshi Kesar Mal Jaggi.', match: 'strong' },
+      { title: 'Sample: Jhelum District Gazetteer, Chakwal tahsil', url: 'https://example.com/sample-gazetteer', what_it_says: 'Lists Bakhshi Khatri families of Chakwal.', match: 'possible' },
+    ],
+    suggested_details: [{ field: 'profession', value: 'Merchant', source_url: 'https://example.com/sample-gazetteer', why: 'The gazetteer lists the family as merchants.' }],
+    other_people: [{ name: 'Bir Chand', relation: 'grandson', source_url: 'https://example.com/sample-arya-school-1933' }],
+    next_steps: ['Ask the oldest relatives in the Prabh Dyal branch whether a family photo of him survives.', 'Look for Arya Samaj Chakwal records from the 1920s and 1930s.'],
+    model: 'claude-opus-5-5', searches: 5,
+  },
+});
+if (window.__FAKE_AI__) {
+  db.ai_findings.push(sampleFinding(pidOf('Kesar Mal')));
+  db.ai_usage.push({ kind: 'ask', cost_usd: 0.03, created_at: new Date().toISOString() }, { kind: 'research', cost_usd: 0.31, created_at: new Date().toISOString() }, { kind: 'ask', cost_usd: 0.01, created_at: new Date(Date.now() - 5 * 864e5).toISOString() });
+}
+function fakeAsk(question) {
+  const code = new Map(); let n = 0;
+  const ref = (id) => { if (!code.has(id)) code.set(id, `P${++n}`); return code.get(id); };
+  const name = (id) => { const p = db.people.find((x) => x.id === id); return [p.title, p.given_name, p.surname].filter(Boolean).join(' '); };
+  const kids = (id) => db.parent_child.filter((l) => l.parent_id === id).map((l) => l.child_id);
+  const km = pidOf('Kesar Mal');
+  let answer;
+  if (/grandchild/i.test(question)) {
+    const sons = kids(km);
+    answer = `[${name(km)}](#${ref(km)}) had ${sons.length} sons, and the tree records these grandchildren:\n` +
+      sons.map((s) => `- Through [${name(s)}](#${ref(s)}): ${kids(s).map((g) => `[${name(g)}](#${ref(g)})`).join(', ') || 'none recorded yet'}`).join('\n') +
+      '\n\nThe 1933 plaque at Arya High School was placed by two of them, **Bir Chand** and **Gyan Prakash**, in his memory.';
+  } else {
+    answer = `The tree doesn't record that yet. [${name(km)}](#${ref(km)})'s line is the best place to start; an older relative may know.`;
+  }
+  return { answer, people: Object.fromEntries([...code].map(([id, c]) => [c, id])), cost: 0.021, today: 0.36, cap: 2, model: 'claude-opus-5-5' };
 }
 window.__db = db;
 class Q {
@@ -103,6 +143,12 @@ export function createClient() {
       if (name === 'send-reminder') {
         if (body.preview) return { data: { html: `<p>Dear ${body.previewName},</p><p>${body.message}</p>`, subject: body.subject }, error: null };
         window.__reminder = body; return { data: { sent: body.emails, failed: [], skipped: [] }, error: null };
+      }
+      if (name === 'ask-tree') { await new Promise((r) => setTimeout(r, 400)); return { data: fakeAsk(body.question), error: null }; }
+      if (name === 'research-person') {
+        const f = sampleFinding(body.person_id, 'running'); f.created_at = new Date().toISOString(); db.ai_findings.push(f);
+        setTimeout(() => { f.status = 'pending'; }, window.__FAKE_AI_WAIT__ ?? 3000);
+        return { data: { id: f.id, today: 0.36, cap: 2 }, error: null };
       }
       if (name === 'weekly-summary') return { data: { sent: true, to: ['me@example.com'] }, error: null };
       return { data: { sent: true }, error: null };
