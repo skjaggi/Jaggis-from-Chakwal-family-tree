@@ -328,7 +328,10 @@ Sunil asked (21 Nov 2026) to build the product before buying a domain, using wha
 
 - **Code:** a new private repository on the same GitHub account (free).
 - **Database:** a **second, separate Supabase project** in the existing "Jaggi Organization", for example "family-tree-product". The live Jaggi data stays in its own project and cannot be touched by product work. Supabase's free plan allows two active projects, so this is free. One catch: a free project pauses after about a week with no use. During building it is used daily, and it is unpaused with one click if it does pause.
-- **Web address for now:** a subdomain of sjaggi.com, for example `app.sjaggi.com` (each test family as `smith.app.sjaggi.com` later if needed). Sunil adds one DNS record at Turbify, like he did for familytree.sjaggi.com. The email (MX) records are not touched.
+- **Web address for now:** each family gets its own subdomain of sjaggi.com, for example `smith.sjaggi.com` or `mehta.sjaggi.com` (Sunil, 21 Nov 2026), plus `app.sjaggi.com` for sign-up and the product home page. The email (MX) records are never touched.
+  - **How each family address is added:** Cloudflare Pages does not accept a "wildcard" address (`*.sjaggi.com`) for a domain whose DNS stays at Turbify, so each family is added once, in about two minutes: Claude adds `smith.sjaggi.com` to the product in Cloudflare, then Sunil adds one CNAME record at Turbify (name `smith`, pointing to the product's `pages.dev` address), the same kind of step he did for familytree.sjaggi.com. The free plan allows up to 100 family addresses, far more than the 5 to 10 pilot families.
+  - **Until a family's record is added**, the family's site already works at `app.sjaggi.com/smith`, so nobody waits on DNS.
+  - **Later, with the brand domain:** the brand's domain is set up on Cloudflare's own DNS from day one, where new family addresses are created automatically at sign-up with no manual step. sjaggi.com's DNS stays at Turbify, so Sunil's email is not put at risk by moving it.
 - **Hosting:** GitHub Pages cannot publish from a private repository on the free GitHub plan, so the product is hosted on **Cloudflare Pages** (free, already the plan in section 8), which works with private repositories.
 - **Email while building:** the existing Gmail sender, for test invitations only.
 - When the brand name is chosen, the domain is bought and the product moves to it. Nothing is rebuilt; only the address changes.
@@ -492,6 +495,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
 | 20 Nov 2026 | Sunil: the setup wizard offers a few ready-made family logo templates that fill in the family's name automatically, like "Jaggis of Chakwal" (5.2.1). |
+| 21 Nov 2026 | Sunil: during building and the pilot, each family gets its own subdomain, familyname.sjaggi.com (6.1). |
 | 21 Nov 2026 | Sunil: build before buying a domain, using the existing GitHub, Supabase (separate project) and a sjaggi.com subdomain (6.1). No AI on the Free plan; show the paid AI features as locked previews. Legal first step agreed (section 9). Pilot families by March 2027. Company and Heritage price still to be decided. |
 | 20 Nov 2026 | Sunil: yes to the AI family helper (5.10): Ask the tree, Find more about this person, Fill the gaps. Living people are never sent for web searches; findings need admin approval; monthly allowance per plan. Piloted on the Jaggi site first. |
 | 20 Nov 2026 | Sunil: yes to the printed family book service (5.9); build and test it on the Jaggi family tree first. |
@@ -502,6 +506,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 
 | Date | Pull request | Change |
 |---|---|---|
+| 21 Nov 2026 | | Each family on its own name.sjaggi.com subdomain during the pilot; one CNAME per family (6.1). |
 | 21 Nov 2026 | | Building before a domain (6.1), no AI on Free plan, recommended start date, open questions updated (11). |
 | 20 Nov 2026 | | AI family helper agreed, with privacy rules and costs (5.10, 8.3). |
 | 20 Nov 2026 | | Family logo templates in the setup wizard, with sample mock-ups (5.2.1). |
