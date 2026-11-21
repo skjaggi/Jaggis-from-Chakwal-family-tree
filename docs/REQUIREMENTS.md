@@ -138,7 +138,7 @@ From a person's card (or the pencil on any tree box): **Suggest an edit**, **Add
 
 ### 7.3 Database tables (Supabase)
 
-`people`, `person_details`, `parent_child`, `unions` (the tree); `change_requests` (suggestions and history); `invites`, `profiles`, `removed_members` (members); `blessing_adjustments` (manual blessings; points themselves come from the `blessings_ledger` view); `library_links`; `research_questions` (open questions); `not_duplicates`; `page_views` (member visits); `book_drafts` (family books, admins only) and the private storage bucket `book-photos` (photos uploaded for a book).
+`people`, `person_details`, `parent_child`, `unions` (the tree); `change_requests` (suggestions and history); `invites`, `profiles`, `removed_members` (members); `blessing_adjustments` (manual blessings; points themselves come from the `blessings_ledger` view); `library_links`; `research_questions` (open questions); `not_duplicates`; `page_views` (member visits); `book_drafts` (family books, admins only) and the private storage bucket `book-photos` (photos uploaded for a book); `book_shares` (read-only copies of books shared by link, admins only, opened through `shared_book()`) and the public bucket `book-shared` (their photos).
 
 ### 7.4 Seed data
 
@@ -258,6 +258,7 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 - **Free placement and deleting (Sunil 20 Nov 2026):** added photos and text boxes can be dragged anywhere within the page area (✥ handle) and resized (corner); their place is saved as fractions of the page area. Any text or photo on any page, the tree's own included, can be deleted with a Delete button that appears beside it; **Undo changes** restores the page.
 - **Couples (Sunil 20 Nov 2026):** on a married person's page their photo and their spouse's photo are about the same size, joined by a wedding-rings symbol and "Married" (with the year when known; editable, deletable).
 - **Preview as a book (Sunil 20 Nov 2026):** full-screen flip-through of the whole book as printed and bound: the cover alone, then facing pages side by side, turned with a page-turn animation (arrows, ← → keys, click, swipe, slider); one page at a time on phones.
+- **Share by link (Sunil 21 Nov 2026, chose "anyone who has the link" over signed-in members only):** 🔗 Share makes a read-only copy of every page as it looks now (finished HTML, photos copied to the public bucket `book-shared` under the link's folder) with a secret link `#/book?view=<token>`; WhatsApp, Email, Copy link and the phone's Share sheet. Anyone with the link turns the pages in the same flipbook, signed in or not; nothing on it can be changed. The share box warns that the copy includes Family branch only details and photos of living people. **Update the shared copy** keeps the link; **Stop sharing** deletes the copy and its photos so the link stops working. Table `book_shares` (admins only); everyone else opens a copy only by its exact token through the `shared_book()` function, so shared books cannot be listed.
 - **Heritage design** follows the coffee table book plan: cream pages, deep green and gold, faint banyan, classic serif for names and stories, clean sans for labels; Devanagari and Gurmukhi fonts for Hindi and Punjabi.
 - **Editing on screen:** every text on every page can be changed in place; every photo can be replaced (upload up to 15 MB, a tree photo, or none); story, photo and quote pages can be added; pages can be moved, hidden and reset to the tree. Changes are stored on top of the tree, so **Rebuild from the tree** brings in new people and details and keeps the changes. A book never changes the tree.
 - **Warnings:** photos under about 150 dots per inch at their printed size ("may print blurry"), text that does not fit its page, and an odd page count.
@@ -311,6 +312,7 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 | 20 Nov 2026 | Sunil: book pages should vary from page to page, allow more photos and text on a page, and each generation page should have a picture tree in a different style per generation. |
 | 20 Nov 2026 | Sunil: added photos and text can be moved anywhere on the page; any text or photo in the book can be deleted; a full book preview with page turning. |
 | 20 Nov 2026 | Sunil: on a married person's book page, the spouse's photo is about the same size, with a ring symbol showing they are married. |
+| 21 Nov 2026 | Sunil: a finished book can be shared by WhatsApp or email as a read-only link; anyone who has the link can open it (not only signed-in members). |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 
 ## 11. Open questions
@@ -325,6 +327,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 21 Nov 2026 | | Book maker: **Share** a book by a secret link (WhatsApp, Email, Copy link); anyone with the link turns the pages read-only; Update the shared copy and Stop sharing. New `book_shares` table, `shared_book()` function and `book-shared` bucket. |
 | 20 Nov 2026 | | Book maker: couple pages show both photos the same size joined by wedding rings and "Married". |
 | 20 Nov 2026 | | Book maker: **A page for everyone** switch in the book's top bar (the "only people with a photo, story, spouse or children" choice can now be changed after the book is made). |
 | 20 Nov 2026 | | Book maker: drag and resize added photos and text, delete any text or photo, and **Preview as a book** (flip through facing pages). |

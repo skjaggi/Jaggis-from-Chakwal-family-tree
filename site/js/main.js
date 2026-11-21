@@ -129,6 +129,8 @@ async function route() {
     if (state.view === 'dashboard') return renderDashboard(page);
     if (state.view === 'export') return renderExport(page);
     if (state.view === 'library') return renderLibrary(page, { person: state.query.get('person'), onSignIn: openSignIn });
+    // A shared family book link opens for anyone who has it.
+    if (state.view === 'book' && state.query.get('view')) return renderBook(page, state.query);
     if (!store.signedIn) {
       clear(page, h('h1', 'Please sign in'), h('p', 'This page is for family members.'), h('button.btn.primary', { type: 'button', onclick: openSignIn }, 'Sign in'));
       return;
