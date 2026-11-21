@@ -94,7 +94,7 @@ export function renderAnswer(text, ids = {}) {
     let last = 0;
     for (const m of s.matchAll(re)) {
       if (m.index > last) out.push(s.slice(last, m.index));
-      if (m[1]) out.push(h('strong', m[1]));
+      if (m[1]) out.push(h('strong', inline(m[1]))); // names can be links inside bold
       else if (m[2]) out.push(ids[m[3]] && store.fam.byId.has(ids[m[3]]) ? h('a.ai-person', { href: personHref(ids[m[3]]), title: 'Show in the tree' }, m[2]) : m[2]);
       else out.push(h('a', { href: m[5], target: '_blank', rel: 'noopener' }, m[4]));
       last = m.index + m[0].length;

@@ -70,7 +70,7 @@ function fakeAsk(question) {
   if (/grandchild/i.test(question)) {
     const sons = kids(km);
     answer = `[${name(km)}](#${ref(km)}) had ${sons.length} sons, and the tree records these grandchildren:\n` +
-      sons.map((s) => `- Through [${name(s)}](#${ref(s)}): ${kids(s).map((g) => `[${name(g)}](#${ref(g)})`).join(', ') || 'none recorded yet'}`).join('\n') +
+      sons.map((s) => `**Through [${name(s)}](#${ref(s)}):**\n- ${kids(s).map((g) => `[${name(g)}](#${ref(g)})`).join(', ') || 'none recorded yet'}`).join('\n') +
       '\n\nThe 1933 plaque at Arya High School was placed by two of them, **Bir Chand** and **Gyan Prakash**, in his memory.';
   } else {
     answer = `The tree doesn't record that yet. [${name(km)}](#${ref(km)})'s line is the best place to start; an older relative may know.`;
