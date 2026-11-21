@@ -349,6 +349,8 @@ Sunil (20 Nov 2026): spread the work over about six months, with the paid launch
 | 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
 | 5. Later | Printed family book service (5.9, from July 2027), AI "Find more about this person" research (5.10; Ask the tree may come at launch), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
+**Before the pilot:** Sunil tests the product himself with the [owner test plan](product/OWNER-TEST-PLAN.md) (sign-up, setup, invites, claiming, approvals, privacy as a visitor, photos, book, AI shown as a paid feature, phone and desktop) before inviting the pilot families.
+
 These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
 ## 8. Running costs
@@ -509,6 +511,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 
 | Date | Pull request | Change |
 |---|---|---|
+| 21 Nov 2026 | | Owner test plan for Sunil before the pilot (docs/product/OWNER-TEST-PLAN.md, section 7). |
 | 21 Nov 2026 | | Domain decision (10); phase 0 started with the family settings file (7). |
 | 21 Nov 2026 | | Each family on its own name.sjaggi.com subdomain during the pilot; one CNAME per family (6.1). |
 | 21 Nov 2026 | | Building before a domain (6.1), no AI on Free plan, recommended start date, open questions updated (11). |
