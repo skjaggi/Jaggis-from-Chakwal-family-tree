@@ -12,11 +12,12 @@
 // Deployed with verify_jwt off because it checks the caller itself.
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 import nodemailer from 'npm:nodemailer@6.9.16';
+import { FAMILY } from '../_shared/family.ts';
 
 const SENDER = 'helloquantumnexus@gmail.com';
-const SITE = 'https://familytree.sjaggi.com/';
-const GOAT = 'https://jaggis-chakwal.goatcounter.com/api/v0';
-const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
+const SITE = FAMILY.site;
+const GOAT = `https://${FAMILY.goatcounter}.goatcounter.com/api/v0`;
+const ALLOWED_ORIGINS = FAMILY.origins;
 const GAP = 30 * 60 * 1000; // a visit = views with no gap over 30 minutes
 
 function cors(req: Request) {
@@ -127,7 +128,7 @@ Deno.serve(async (req) => {
   const li = (items: string[], empty: string) => items.length ? `<ul style="margin:4px 0 12px;padding-left:20px">${items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p style="color:#5b6b61;margin:4px 0 12px">${esc(empty)}</p>`;
   const h2 = (t: string) => `<h2 style="font-size:16px;margin:20px 0 6px;color:#17706b">${esc(t)}</h2>`;
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.5;color:#1d2a22;max-width:600px">
-<h1 style="font-size:20px;margin:0 0 4px">Jaggi family tree: your week</h1>
+<h1 style="font-size:20px;margin:0 0 4px">${esc(FAMILY.senderName)}: your week</h1>
 <p style="color:#5b6b61;margin:0 0 16px">${fmt(start)} to ${fmt(end)}</p>
 <p><strong>${memberRows.length}</strong> family ${memberRows.length === 1 ? 'member' : 'members'} visited${pub ? `, and <strong>${pub.total}</strong> public ${pub.total === 1 ? 'visitor' : 'visitors'} (not signed in)` : ''}. <strong>${(approved || []).length}</strong> ${(approved || []).length === 1 ? 'change was' : 'changes were'} added to the tree, and <strong>${pending ?? 0}</strong> ${pending === 1 ? 'is' : 'are'} waiting for approval.</p>
 ${h2('Family members who visited')}
@@ -146,9 +147,9 @@ ${notYet.length ? h2('Invited but not signed in yet') + li(notYet.slice(0, 15), 
   try {
     const mail = nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user: SENDER, pass } });
     await mail.sendMail({
-      from: `"Jaggi family tree" <${SENDER}>`,
+      from: `"${FAMILY.senderName}" <${SENDER}>`,
       to: recipients.join(', '),
-      subject: `Jaggi family tree: your week (${fmt(start)} to ${fmt(end)})`,
+      subject: `${FAMILY.senderName}: your week (${fmt(start)} to ${fmt(end)})`,
       html,
     });
   } catch (e) {

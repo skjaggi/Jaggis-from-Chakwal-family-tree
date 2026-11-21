@@ -7,10 +7,11 @@
 // weekly-summary). Deployed with verify_jwt off because it checks the caller.
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 import nodemailer from 'npm:nodemailer@6.9.16';
+import { FAMILY } from '../_shared/family.ts';
 
 const SENDER = 'helloquantumnexus@gmail.com';
-const SITE = 'https://familytree.sjaggi.com/';
-const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
+const SITE = FAMILY.site;
+const ALLOWED_ORIGINS = FAMILY.origins;
 const MAX = 150;
 
 function cors(req: Request) {
@@ -32,7 +33,7 @@ function emailHtml(name: string, message: string, from: string) {
 ${paras}
 <p style="margin:20px 0"><a href="${SITE}" style="background:#17706b;color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:bold;display:inline-block">Open the family tree</a></p>
 <p style="margin:0 0 14px">With love,<br>${esc(from)}</p>
-<p style="color:#5b6b61;font-size:12px;margin-top:24px;border-top:1px solid #cdd9cb;padding-top:10px">Jaggis of Chakwal family tree · ${SITE}<br>You are receiving this because you were invited to the family tree.</p>
+<p style="color:#5b6b61;font-size:12px;margin-top:24px;border-top:1px solid #cdd9cb;padding-top:10px">${FAMILY.footerName} · ${SITE}<br>You are receiving this because you were invited to the family tree.</p>
 </div>`;
 }
 
@@ -86,7 +87,7 @@ Deno.serve(async (req) => {
   for (const email of to) {
     const name = (names.get(email) || '').trim().split(/\s+/)[0] || 'family member';
     try {
-      await mail.sendMail({ from: `"Jaggi family tree" <${SENDER}>`, replyTo: me.email || undefined, to: email, subject, html: emailHtml(name, message, from), text: `Dear ${name},\n\n${message}\n\nOpen the family tree: ${SITE}\n\nWith love,\n${from}` });
+      await mail.sendMail({ from: `"${FAMILY.senderName}" <${SENDER}>`, replyTo: me.email || undefined, to: email, subject, html: emailHtml(name, message, from), text: `Dear ${name},\n\n${message}\n\nOpen the family tree: ${SITE}\n\nWith love,\n${from}` });
       sent.push(email);
     } catch (e) {
       failed.push({ email, error: (e as Error).message });
