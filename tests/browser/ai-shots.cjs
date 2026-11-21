@@ -35,6 +35,7 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
   await pg.waitForSelector('.ai-msg.ai .ai-person');
   ok(await pg.locator('.ai-msg.me').count() === 1, 'question shows in the chat');
   ok(await pg.locator('.ai-msg.ai a.ai-person').count() >= 3, 'answer links people to the tree');
+  ok(await pg.locator('.ai-msg.ai strong a.ai-person').count() >= 1 && !(await pg.textContent('.ai-msg.ai')).includes('](#P'), 'names inside bold headings are links too');
   ok((await pg.textContent('.ai-msg.ai .ai-cost')).includes('cost'), 'answer shows its cost');
   await pg.locator('.ai-ask').screenshot({ path: OUT + 'ai-ask-desktop.png' });
   const href = await pg.getAttribute('.ai-msg.ai a.ai-person >> nth=0', 'href');

@@ -51,8 +51,16 @@ export function addUsage(total: Usage, model: string, u: Anthropic.Beta.Messages
   return total;
 }
 
+// The key as pasted into Supabase, without stray spaces, line breaks or quotes.
+export function apiKeyValue() {
+  return (Deno.env.get('ANTHROPIC_API_KEY') || '').replace(/[\s"'`]/g, '');
+}
+
+// Describes the key's shape (never the key itself) for the function logs.
+export const keyShape = (k: string) => `length ${k.length}, starts ${k.slice(0, 10)}…`;
+
 export function claude() {
-  const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
+  const apiKey = apiKeyValue();
   return apiKey ? new Anthropic({ apiKey }) : null;
 }
 
@@ -169,6 +177,7 @@ export function year(v: string | null | undefined) {
 export function errorText(e: unknown) {
   if (e instanceof Anthropic.APIConnectionError) return 'Could not reach Claude. Please try again in a minute.';
   if (e instanceof Anthropic.APIError) {
+    if (e.status === 401) console.error('Claude key rejected; key', keyShape(apiKeyValue()));
     if (e.status === 401) return 'The Claude API key was not accepted. Please check the ANTHROPIC_API_KEY secret in Supabase.';
     if (e.status === 429) return 'Claude is busy right now (rate limit). Please try again in a minute.';
     if (e.status === 400 && /credit|billing/i.test(e.message)) return 'The Claude account has run out of credit. Please add credit in the Claude Console (Billing).';
