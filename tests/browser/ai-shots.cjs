@@ -30,6 +30,13 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
   ok((await pg.textContent('.ai-spend')).includes('of the $2.00 daily limit'), 'today\'s spending and limit shown');
   await pg.setViewportSize({ width: 1280, height: 2300 }); await pg.waitForTimeout(300);
   await pg.screenshot({ path: OUT + 'ai-page-desktop.png' });
+  await pg.locator('.ai-settings').screenshot({ path: OUT + 'ai-settings-models.png' });
+  ok(await pg.locator('.ai-settings input[name=model]:checked').getAttribute('value') === 'claude-haiku-5-5'
+    && await pg.locator('.ai-settings input[name=research_model]:checked').getAttribute('value') === 'claude-haiku-5-5', 'both models start on Haiku');
+  await pg.check('.ai-settings input[name=research_model][value=claude-sonnet-5-5]');
+  await pg.click('.ai-settings button[type=submit]');
+  await pg.waitForFunction(() => window.__db.ai_settings[0].research_model === 'claude-sonnet-5-5');
+  ok(await pg.evaluate(() => window.__db.ai_settings[0].model) === 'claude-haiku-5-5', 'web search model saved on its own');
   await pg.setViewportSize({ width: 1280, height: 900 });
   await pg.click('.ai-ask .chip >> nth=0');
   await pg.waitForSelector('.ai-msg.ai .ai-person');

@@ -102,13 +102,16 @@ export function dayStartUtc(now = new Date()) {
 
 export async function budget(admin: SupabaseClient) {
   const [{ data: s }, { data: rows }] = await Promise.all([
-    admin.from('ai_settings').select('daily_cap_usd, model').eq('id', 1).maybeSingle(),
+    admin.from('ai_settings').select('*').eq('id', 1).maybeSingle(),
     admin.from('ai_usage').select('cost_usd').gte('created_at', dayStartUtc().toISOString()),
   ]);
   const cap = Number(s?.daily_cap_usd ?? 2);
-  const model = MODELS.includes(s?.model) ? s!.model : 'claude-opus-5-5';
+  // One model answers questions about the tree, the other does web research.
+  const pick = (m: unknown) => (MODELS as readonly unknown[]).includes(m) ? m as string : 'claude-haiku-5-5';
+  const model = pick(s?.model);
+  const researchModel = pick(s?.research_model ?? s?.model);
   const today = (rows || []).reduce((n: number, r: { cost_usd: number }) => n + Number(r.cost_usd || 0), 0);
-  return { cap, model, today, left: Math.max(0, cap - today) };
+  return { cap, model, researchModel, today, left: Math.max(0, cap - today) };
 }
 
 export async function logUsage(admin: SupabaseClient, row: { user_id: string; kind: 'ask' | 'research'; person_id?: string | null; model: string }, u: Usage) {

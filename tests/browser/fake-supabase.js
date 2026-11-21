@@ -9,7 +9,7 @@ const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: window.__FAKE_UNLINKED__ ? null : SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' || window.__FAKE_CLAIMED__ ? SUNIL : null, created_at: new Date().toISOString() }],
   invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [], book_drafts: [],
-  ai_settings: [{ id: 1, daily_cap_usd: 2, model: 'claude-opus-5-5' }], ai_usage: [], ai_findings: [],
+  ai_settings: [{ id: 1, daily_cap_usd: 2, model: 'claude-haiku-5-5', research_model: 'claude-haiku-5-5' }], ai_usage: [], ai_findings: [],
 };
 // Sample Library links (window.__FAKE_LIBRARY__): approved ones, plus one suggestion waiting.
 if (window.__FAKE_LIBRARY__) {
