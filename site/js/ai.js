@@ -13,10 +13,13 @@ import { personPicker } from './forms.js';
 import { fullName, shortName, birthYear } from './model.js';
 import { h, clear, toast, modal, field, formatWhen, confirmDialog } from './ui.js';
 
+// [model, name, what it is like, cost of a question, cost of a web search].
+// Costs measured on the live site (Nov 2026): the first question in a while
+// pays to read the family's records; later ones within 5 minutes reuse them.
 export const MODEL_CHOICES = [
-  ['claude-opus-5-5', 'Claude Opus 5.5', 'Best answers. About 1–4¢ a question and 20–50¢ a web search.'],
-  ['claude-sonnet-5-5', 'Claude Sonnet 5.5', 'Very good, about half the cost of Opus.'],
-  ['claude-haiku-5-5', 'Claude Haiku 5.5', 'Cheapest (a fraction of a cent a question), simpler answers.'],
+  ['claude-opus-5-5', 'Claude Opus 5.5', 'Best answers.', 'About 10¢ for a first question, 2–3¢ for the next ones.', 'About 40¢ a search.'],
+  ['claude-sonnet-5-5', 'Claude Sonnet 5.5', 'Very good, about half the cost of Opus.', 'About 5¢ for a first question, 1–2¢ for the next ones.', 'About 25¢ a search.'],
+  ['claude-haiku-5-5', 'Claude Haiku 5.5', 'Cheapest; simpler answers and may slip on tricky relationships or name matches.', 'Well under 1¢ a question.', 'About 6¢ a search.'],
 ];
 const modelName = (m) => MODEL_CHOICES.find(([k]) => k === m)?.[1] || m || 'Claude';
 const FIELD_LABEL = { birth_date: 'Year of birth', birth_place: 'Birthplace', death_date: 'Year of passing', death_place: 'Place of passing', profession: 'Profession' };
@@ -32,7 +35,7 @@ export const money = (usd) => {
 async function settings() {
   const { data, error } = await store.sb.from('ai_settings').select('*').eq('id', 1).maybeSingle();
   if (error) throw error;
-  return data || { daily_cap_usd: 2, model: 'claude-opus-5-5' };
+  return data || { daily_cap_usd: 2, model: 'claude-haiku-5-5', research_model: 'claude-haiku-5-5' };
 }
 
 // The family's day runs on Arizona time (UTC-7, no daylight saving).
@@ -135,7 +138,7 @@ export async function renderAi(page, query) {
   const refreshSpend = async () => {
     try {
       const [s, sp] = await Promise.all([settings(), spending()]);
-      clear(spendLine, `Today: ${money(sp.today)} of the ${money(s.daily_cap_usd)} daily limit · Model: ${modelName(s.model)}`);
+      clear(spendLine, `Today: ${money(sp.today)} of the ${money(s.daily_cap_usd)} daily limit · Questions: ${modelName(s.model)} · Web search: ${modelName(s.research_model || s.model)}`);
       drawSettings(s, sp);
     } catch (e) {
       clear(spendLine, h('span.form-error', `Could not load the AI settings: ${e.message}. The AI tables may not be set up yet.`));
@@ -145,22 +148,23 @@ export async function renderAi(page, query) {
 
   function drawSettings(s, sp) {
     const cap = h('input', { type: 'number', name: 'cap', min: 0, max: 100, step: 0.5, value: Number(s.daily_cap_usd).toFixed(2) });
-    const model = h('div.ai-models', MODEL_CHOICES.map(([k, label, note]) =>
-      h('label.check', h('input', { type: 'radio', name: 'model', value: k, checked: s.model === k }), ' ', h('b', label), h('span.muted', ` ${note}`))));
+    const choices = (name, current, costAt) => h('div.ai-models', MODEL_CHOICES.map((c) =>
+      h('label.check', h('input', { type: 'radio', name, value: c[0], checked: current === c[0] }), ' ', h('b', c[1]), h('span.muted.ai-note', `${c[costAt]} ${c[2]}`))));
     const form = h('form.ai-settings-form',
       h('div.ai-stats',
         h('div', h('b', money(sp.today)), h('small', 'today')),
         h('div', h('b', money(sp.month)), h('small', 'last 30 days')),
         h('div', h('b', String(sp.asks)), h('small', 'questions (30 days)')),
         h('div', h('b', String(sp.searches)), h('small', 'web searches (30 days)'))),
-      field('Daily spending limit (US dollars)', cap, 'The AI stops for the day when this is reached and starts again at midnight Arizona time. Questions cost about 1–4¢ and web searches about 20–50¢ with Opus.'),
-      h('fieldset.ai-fs', h('legend', 'Claude model'), model),
+      field('Daily spending limit (US dollars)', cap, 'The AI stops for the day when this is reached and starts again at midnight Arizona time. What each choice costs is shown below.'),
+      h('fieldset.ai-fs', h('legend', 'Model for “Ask the family tree”'), choices('model', s.model, 3)),
+      h('fieldset.ai-fs', h('legend', 'Model for web search (“Find more about a person”)'), choices('research_model', s.research_model || s.model, 4)),
       h('div.form-actions.left', h('button.btn.primary', { type: 'submit' }, 'Save settings')));
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const f = new FormData(form);
       try {
-        const { error } = await store.sb.from('ai_settings').update({ daily_cap_usd: Number(f.get('cap')), model: f.get('model') }).eq('id', 1);
+        const { error } = await store.sb.from('ai_settings').update({ daily_cap_usd: Number(f.get('cap')), model: f.get('model'), research_model: f.get('research_model') }).eq('id', 1);
         if (error) throw error;
         toast('Saved.', 'ok');
         refreshSpend();
@@ -308,7 +312,7 @@ export function openResearch(p, { onDone } = {}) {
   drawSent();
   const body = h('div.ai-run');
   const form = h('form',
-    h('p', 'Claude will search the web for records about ', h('strong', fullName(p)), ' and write a short summary with links and how sure it is. It usually takes about a minute and costs about 20–50¢.'),
+    h('p', 'Claude will search the web for records about ', h('strong', fullName(p)), ' and write a short summary with links and how sure it is. It usually takes about a minute and costs a few cents (about 6¢ with Haiku, up to 40¢ with Opus).'),
     h('details.ai-sent-box', { open: true }, h('summary', 'What will be sent for the search'), sent,
       h('p.muted.small', 'Living relatives are never included.')),
     married ? h('label.check', maiden, ' Also search her name before marriage (not shown to visitors)') : null,

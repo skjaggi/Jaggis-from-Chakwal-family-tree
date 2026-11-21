@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
   if (error) return reply(500, { error: error.message });
 
   const work = (async () => {
-    const model = money.model;
+    const model = money.researchModel;
     try {
       const { res, content, usage, served } = await research(client, model, request);
       await logUsage(who.admin, { user_id: who.userId, kind: 'research', person_id: p.id, model: served }, usage);
@@ -213,5 +213,5 @@ Deno.serve(async (req) => {
     }
   })();
   EdgeRuntime.waitUntil(work);
-  return reply(202, { id: row.id, today: money.today, cap: money.cap, model: money.model });
+  return reply(202, { id: row.id, today: money.today, cap: money.cap, model: money.researchModel });
 });

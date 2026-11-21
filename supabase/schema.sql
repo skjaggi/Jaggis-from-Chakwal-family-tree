@@ -1194,8 +1194,12 @@ create policy "admin manages book photos" on storage.objects for all to authenti
 create table if not exists public.ai_settings (
   id int primary key default 1 check (id = 1),
   daily_cap_usd numeric(8, 2) not null default 2.00 check (daily_cap_usd between 0 and 100),
-  model text not null default 'claude-opus-5-5'
+  -- model answers "Ask the family tree"; research_model does the web research.
+  model text not null default 'claude-haiku-5-5'
     check (model in ('claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5')),
+  research_model text not null default 'claude-haiku-5-5'
+    constraint ai_settings_research_model_check
+    check (research_model in ('claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5')),
   updated_by uuid default auth.uid() references auth.users (id) on delete set null,
   updated_at timestamptz not null default now()
 );
