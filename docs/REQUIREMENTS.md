@@ -337,6 +337,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 21 Nov 2026 | | Behind the scenes, no visible change: the Jaggi-specific words, logo, copyright, Library topics and email wording now come from one family settings file, site/js/family.js (first step of the commercial product plan, phase 0). |
 | 21 Nov 2026 | #42 | AI helper: separate model choices for Ask the family tree and web search, both Claude Haiku 5.5 by default; cost notes updated from real use; names in bold headings are links. |
 | 20 Nov 2026 | | **AI helper pilot** (admins): Ask the family tree (answers from the tree only) and Find more about this person (web search, people who have passed away only, findings wait for the admin), with a daily spending limit and cost shown. |
 | 20 Nov 2026 | | Book maker: couple pages show both photos the same size joined by wedding rings and "Married". |

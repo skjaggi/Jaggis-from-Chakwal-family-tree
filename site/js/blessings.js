@@ -2,6 +2,7 @@
 // the badges they unlock, the leaderboard page and the corner chip at the top.
 // The database works out the points (public.blessings_ledger); the scoring
 // here only predicts them for the thank-you message after saving.
+import { family } from './family.js';
 import { store } from './data.js';
 import { fullName } from './model.js';
 import { branchesOf } from './branches.js';
@@ -300,7 +301,7 @@ function rulesTable() {
 }
 function multTable() {
   return h('table.rules.mult', h('thead', h('tr', h('th', 'Details about'), h('th.n', 'Earn'))), h('tbody',
-    rule('Generation 1 (Bakhshi Bhanna Mal Jaggi)', '5×'), rule('Generation 2', '4×'), rule('Generation 3', '3×'), rule('Generation 4', '2×'),
+    rule(`Generation 1 (${family.rootName})`, '5×'), rule('Generation 2', '4×'), rule('Generation 3', '3×'), rule('Generation 4', '2×'),
     rule('Everyone else', '1×')));
 }
 

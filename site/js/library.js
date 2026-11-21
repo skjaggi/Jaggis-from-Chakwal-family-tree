@@ -2,13 +2,15 @@
 // Jaggis of Chakwal, in one place. Any signed-in family member can suggest a
 // link; it shows once the admin approves it (the admin's own go live at once).
 // A link can be tagged with people in the tree, so it also shows on their card.
+import { family } from './family.js';
 import { store } from './data.js';
 import { fullName, shortName } from './model.js';
 import { h, clear, toast, modal, field, select, confirmDialog, formatWhen } from './ui.js';
 import { personPicker } from './forms.js';
 import { forgetBlessings } from './blessings.js';
 
-export const TOPICS = ['Chakwal history', 'Partition 1947', 'Arya High School', 'Family members', 'Places today', 'Other'];
+const LIB = family.library;
+export const TOPICS = LIB.topics;
 export const LIBRARY_BLESSINGS = 3;
 const NEW_TOPIC = '__new';
 
@@ -25,11 +27,9 @@ export function guessTopic(text, { tagged = false } = {}) {
   const custom = allTopics().filter((x) => !TOPICS.includes(x));
   const hit = custom.find((x) => x.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 3).some((w) => t.includes(w)));
   if (hit) return hit;
-  if (/partition|1947|refugee|riot|migrat|set (them|it) on fire/.test(t)) return 'Partition 1947';
-  if (/arya|school|plaque|college|student|teacher/.test(t)) return 'Arya High School';
-  if (tagged || /jaggi|bakhshi|our family|grandfather|grandmother|dada|nana/.test(t)) return 'Family members';
-  if (/village|today|visit|travel|tour|walk|drone|vahali|bhoun|dhudial|salt range/.test(t)) return 'Places today';
-  if (/chakwal|history|gurdwara|temple|mandir|haveli|punjab|heritage|british|colonial|gazetteer/.test(t)) return 'Chakwal history';
+  for (const [topic, words, opts = {}] of LIB.hints) {
+    if ((opts.tagged && tagged) || new RegExp(words).test(t)) return topic;
+  }
   return null;
 }
 
@@ -157,11 +157,11 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   if (!store.signedIn || store.preview) return toast('Please sign in first. Only family members can add links.', 'error');
   const v = { ...prefill, ...(link || {}) };
   const url = h('input', { name: 'url', type: 'url', required: true, inputmode: 'url', placeholder: 'https://www.youtube.com/watch?v=…', value: v.url || '' });
-  const title = h('input', { name: 'title', type: 'text', required: true, maxlength: 200, placeholder: 'e.g. Chakwal before Partition', value: v.title || '' });
+  const title = h('input', { name: 'title', type: 'text', required: true, maxlength: 200, placeholder: LIB.titleExample, value: v.title || '' });
   const source = h('input', { name: 'source', type: 'text', maxlength: 120, placeholder: 'e.g. YouTube, Dawn newspaper, a family member', value: v.source || '' });
   const topics = allTopics();
   if (v.topic && !topics.includes(v.topic)) topics.splice(-1, 0, v.topic);
-  const topic = select('topic', [...topics.map((t) => [t, t]), [NEW_TOPIC, '+ New topic…']], v.topic || 'Chakwal history');
+  const topic = select('topic', [...topics.map((t) => [t, t]), [NEW_TOPIC, '+ New topic…']], v.topic || LIB.defaultTopic);
   const newTopic = h('input', { name: 'new_topic', type: 'text', maxlength: 60, placeholder: 'e.g. Moti Mahal and butter chicken' });
   const newTopicBox = h('div', { hidden: true }, field('Name of the new topic', newTopic, 'It becomes a new button on the Library page.'));
   const topicHint = h('span.field-hint', { hidden: true }, 'Suggested from the title. Change it if it fits better elsewhere.');
@@ -397,7 +397,7 @@ export async function renderLibrary(page, { person = null, onSignIn } = {}) {
   clear(page,
     h('div.lib-head',
       h('div', h('h1', 'Family Library'),
-        h('p.muted', 'Videos, articles and other writing about the Jaggis of Chakwal and the places our family comes from, collected by the family. ',
+        h('p.muted', LIB.blurb,
           h('a', { href: 'help.html#library' }, 'How to add a link'))),
       addBtn),
     waitingForAdmin ? h('p.notice.lib-notice', `${waitingForAdmin} suggested link${waitingForAdmin > 1 ? 's are' : ' is'} waiting for your approval. `, h('a', { href: '#/review' }, 'Review them')) : null,

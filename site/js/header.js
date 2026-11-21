@@ -2,6 +2,7 @@
 // Help page and the Ancestors pages. `base` is the way back to the site's
 // top folder ('' on the tree and Help, '../' on an Ancestors page), so every
 // link works from wherever the page is. `active` names the highlighted item.
+import { family } from './family.js';
 import { store } from './data.js';
 import { currentTheme, toggleTheme } from './theme.js';
 import { h } from './ui.js';
@@ -21,7 +22,7 @@ export function navItems({ base = '', active = null, root = null, count = 0, onS
     store.isAdmin || store.claimedId || count ? tab('review', `${base}#/review`, 'Review', {}, count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? tab('members', `${base}#/members`, 'Members') : null,
     tab('ancestors', `${base}people/`, 'Ancestors', { title: 'Family members who have passed away, one page each' }),
-    tab('library', `${base}#/library`, 'Library', { title: 'Videos and articles about the family and Chakwal' }),
+    tab('library', `${base}#/library`, 'Library', { title: family.library.menuTitle }),
     tab('help', `${base}help.html`, 'Help'),
     tab('export', `${base}#/export`, 'Export', { title: 'Download the tree as a PDF or a GEDCOM file' }),
     // Admins only while it is being tested.

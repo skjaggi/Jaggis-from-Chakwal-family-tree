@@ -2,6 +2,7 @@
 // Exports what the current viewer is allowed to see.
 import { store } from './data.js';
 import { config } from './config.js';
+import { family } from './family.js';
 import { birthYear } from './model.js';
 
 export function buildGedcom() {
@@ -19,7 +20,7 @@ export function buildGedcom() {
   const today = new Date();
   const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
   L(0, 'HEAD');
-  L(1, 'SOUR', 'JAGGI_FAMILY_TREE');
+  L(1, 'SOUR', family.gedcomSource);
   L(2, 'NAME', config.siteTitle);
   L(1, 'DATE', `${today.getDate()} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`);
   L(1, 'GEDC');
@@ -121,7 +122,7 @@ export function downloadGedcom() {
   const blob = new Blob([buildGedcom()], { type: 'text/plain;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `jaggi-family-tree-${new Date().toISOString().slice(0, 10)}.ged`;
+  a.download = `${family.fileName}-${new Date().toISOString().slice(0, 10)}.ged`;
   document.body.append(a);
   a.click();
   a.remove();
