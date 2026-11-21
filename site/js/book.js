@@ -16,12 +16,13 @@
 // PDF" in the print window.
 import { store } from './data.js';
 import { config } from './config.js';
+import { family } from './family.js';
 import { fullName, lifeLine, KIND_LABEL } from './model.js';
 import { h, clear, toast, modal, confirmDialog, initials, formatWhen } from './ui.js';
 import { branchesOf } from './branches.js';
 
 export const TEMPLATES = {
-  heritage: { name: 'Heritage', blurb: 'Cream pages, deep green and gold, the banyan tree faintly behind. Made for the Jaggis of Chakwal coffee table book.' },
+  heritage: { name: 'Heritage', blurb: family.bookHeritageBlurb },
   classic: { name: 'Classic', blurb: 'White pages, black serif type and fine rules. Quiet and timeless.' },
   modern: { name: 'Modern', blurb: 'Clean type, large photos and bold teal bands.' },
 };
@@ -33,8 +34,8 @@ export const SIZES = {
   land: { name: '11 × 8.5 in, landscape', w: 11, h: 8.5 },
 };
 const BLEED = 0.125; // inches the printer trims off each edge
-const COPYRIGHT = '© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved.';
-const SITE = 'familytree.sjaggi.com';
+const COPYRIGHT = family.copyright;
+const SITE = family.siteAddress;
 const FONTS = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital@0;1&family=Inter:wght@400;500;600;700&family=Lora:ital@0;1&family=Noto+Sans+Devanagari&family=Noto+Sans+Gurmukhi&display=swap';
 const BUCKET = 'book-photos';
 const EXTRA_TYPES = { story: 'Story page', photo: 'Photo page', quote: 'Quote page' };
@@ -378,7 +379,7 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
       .filter((el) => el && (edit || !el.classList.contains('empty')));
     body = [
       h('div.bp-cover-frame'),
-      h('img.bp-cover-logo', { src: 'img/brand/jaggis-logo3-800.webp', alt: 'Jaggis of Chakwal: Legacy, Family, Heritage' }),
+      h('img.bp-cover-logo', { src: family.logo.large, alt: family.logo.alt }),
       text(key, 'title', config.siteTitle || 'Our family', { tag: 'h1', cls: 'bp-cover-title', edit, ph: 'Book title' }),
       text(key, 'sub', `${countWord(view.gens)} generations from ${fullName(root)}`, { cls: 'bp-cover-sub', edit, ph: 'Subtitle' }),
       strip.length ? h('div.bp-cover-strip', strip) : null,
@@ -421,9 +422,9 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
     body = familyPage(page, { edit });
   } else if (page.type === 'end') {
     body = [
-      h('img.bp-end-logo', { src: 'img/brand/jaggis-logo3-320.webp', alt: '' }),
+      h('img.bp-end-logo', { src: family.logo.small, alt: '' }),
       text(key, 'story', `Made with love from the family tree at ${SITE}.\nAdd your stories and photos there, so the next edition has them too.`, { cls: 'bp-end-text', edit }),
-      h('div.bp-end-copy', h('img', { src: 'img/brand/qn-mark-96.webp', alt: 'Quantum Nexus LLC logo' }), h('span', COPYRIGHT)),
+      h('div.bp-end-copy', h('img', { src: family.companyMark.src, alt: family.companyMark.alt }), h('span', COPYRIGHT)),
     ];
   } else if (page.type === 'story') {
     body = [
@@ -700,7 +701,7 @@ function photoTree(page, style, { edit }) {
     const k = `${par}|${other}`;
     (groups.get(k) || groups.set(k, []).get(k)).push(id);
   }
-  const short = (p) => fullName(p, { title: false }).replace(/\s+Jaggi$/, '');
+  const short = (p) => fullName(p, { title: false }).replace(new RegExp(`\\s+${family.surname}$`), '');
   const node = (id, cls = '') => {
     const p = fam.byId.get(id);
     const src = store.photoUrls.get(id);

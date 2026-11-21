@@ -1,11 +1,13 @@
 // Members page: send a reminder email to all or some family members asking
 // them to visit and update the tree. The admin sees the exact email (preview)
 // before anything is sent.
+import { family } from './family.js';
 import { store, functionError } from './data.js';
 import { h, clear, toast, field, confirmDialog } from './ui.js';
 
-const DEFAULT_SUBJECT = 'Please help us complete the Jaggi family tree';
-const DEFAULT_MESSAGE = `We are building our family tree so the stories of the Jaggis of Chakwal are not lost. Thanksgiving is coming up, and it would mean a lot if you could spend a few minutes on it this week.
+const F = family;
+const DEFAULT_SUBJECT = `Please help us complete the ${F.treeName}`;
+const DEFAULT_MESSAGE = `We are building our family tree so the stories of ${F.peopleName} are not lost. Thanksgiving is coming up, and it would mean a lot if you could spend a few minutes on it this week.
 
 Please sign in, find your own box and tap "This is me", then add or correct anything you know: names, birth years, places, photos and stories. Every addition earns you blessings on the family leaderboard.
 

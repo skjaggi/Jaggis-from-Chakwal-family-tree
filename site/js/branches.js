@@ -2,7 +2,9 @@
 // plus their spouses (the same level the privacy rules use). Each of the eight
 // largest branches gets a colour (CSS --branch-1 … --branch-8), used on the
 // tree cards and in the dashboard; smaller branches share a neutral colour.
-export const BRANCH_GEN = 4;
+import { family } from './family.js';
+
+export const BRANCH_GEN = family.branchLevel;
 const COLOURS = 8;
 
 export function branchesOf(fam) {

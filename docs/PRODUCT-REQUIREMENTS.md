@@ -278,6 +278,36 @@ Sunil asked (20 Nov 2026): can the product build the book automatically from rea
 
 **When in the product:** after the paid launch (from July 2027, as part of phase 5). The Jaggi coffee table book planned for early 2027 can serve as the model for the first "Heritage" template, so the design work is reused.
 
+### 5.10 AI family helper (agreed 20 Nov 2026)
+
+Sunil said yes (20 Nov 2026) to an AI helper in three layers. It uses the Claude API from Anthropic. **It is being piloted on the Jaggi site first**, the same way as the book service.
+
+**Layer 1: Ask the tree.** A chat box where any signed-in member can ask questions in plain words, for example "How am I related to Kamla?", "Who in the family was born in Chakwal?" or "Tell me about my great-grandfather". It answers **only from the family's own data**: people, relationships, notes and stories, and the Family Library. It does not search the web and does not make things up; when the tree does not hold the answer, it says so. It respects privacy: each member's questions are answered only from what that member is already allowed to see (for example "Family branch only" details stay inside the branch), and visitors who are not signed in cannot use it. Answers name the people's boxes so the member can tap through to check.
+
+**Layer 2: Find more about this person.** A button on a person's card ("Find more about this person"). The helper searches the web, for example old newspapers, Partition and migration records, school and college plaques, obituaries and published family histories. It then writes a short summary with:
+- the **sources** (a link for each fact);
+- a **confidence level** for each finding (high, medium or low), with the reason, for example "same name, same town and same years" or "same name only";
+- facts it could not confirm, shown as open questions.
+
+Findings are **never added to the tree automatically**. They go to the family admin as suggestions (like Library links today); the admin accepts, edits or rejects each one, and accepted facts are recorded under Sources with the link. Research runs only for **people who have passed away**. The button is not shown for living people.
+
+**Layer 3: Fill the gaps.** The helper looks over the tree and points out missing pieces, for example "12 people have no birth year", "Grandfather Ram's parents are not recorded" or "No photo of the Gen 2 brothers". For each gap it suggests who in the family might know (the closest living relatives in that branch) and a question to ask them, or a place to look (records, the Library). These can feed the "Missing details" reminder emails admins already send.
+
+**Privacy rules for the AI helper**
+- **Living people's details are never sent for web searches.** Research (layer 2) is only for people who have passed away, and only their name, years, places and family names are used in the search.
+- Ask the tree (layer 1) sends only the details the asking member is allowed to see, and only for that question. Nothing is kept by the AI provider for training: under Anthropic's commercial API terms, customer data is not used to train models.
+- The Privacy Policy (section 9) says plainly that the AI helper exists, what it sends, and that a family admin can switch it off for the whole family.
+- Every AI answer or suggestion is labelled as AI-made.
+
+**Cost** (Claude API list prices, late 2026; to be rechecked when building)
+- **Ask the tree:** a fraction of a cent to about **2 cents per question** using a smaller, cheaper Claude model (Sonnet or Haiku), depending on how much of the tree the question needs.
+- **Find more about this person:** about **20 to 40 cents per research run** using the strongest model (Opus), plus the web searches (about $10 per 1,000 searches, to be confirmed; a run uses about 5 to 15).
+- **Fill the gaps:** a few cents per run; it can run once a week per family.
+- **Monthly allowance per plan**, so costs stay predictable: **no AI on the Free plan** (Sunil, 21 Nov 2026): free families see the AI buttons with a small lock and a short "Available on the Family plan" note and a sample answer, so they know what they would get; the **Family plan** about 100 questions and 3 research runs a month, the **Heritage plan** about 300 questions and 10 research runs. Families who want more can buy an extra pack (for example $5 for 15 more research runs). A typical family (about 20 questions and 1 research run a month) costs under $1 a month in AI; a Family plan used to the full allowance every month costs about $3 a month, so the allowance is the safety limit.
+- The admin's Family settings page shows how much of this month's allowance is used.
+
+**When in the product:** Ask the tree and Fill the gaps can come with the paid launch (June 2027) if the Jaggi pilot goes well; Find more about this person follows in phase 5. About **3 to 4 weeks** of work, much of it proven in the Jaggi pilot.
+
 ## 6. Keeping the Jaggi site working
 
 - The Jaggi site keeps running unchanged on familytree.sjaggi.com while the product is built.
@@ -292,18 +322,32 @@ Sunil asked (20 Nov 2026): can the product build the book automatically from rea
 - No visible downtime: the move is rehearsed first on a copy of the Jaggi data on a test address, Sunil and a few relatives try it, and only then does the real address switch over (late evening Arizona time, a few minutes at most).
 - If anything is wrong, the address switches straight back to today's site, which stays untouched until the move has run well for a month.
 
+### 6.1 Building before buying a domain (agreed 21 Nov 2026)
+
+Sunil asked (21 Nov 2026) to build the product before buying a domain, using what he already has. **Yes, at no extra cost.**
+
+- **Code:** a new private repository on the same GitHub account (free).
+- **Database:** a **second, separate Supabase project** in the existing "Jaggi Organization", for example "family-tree-product". The live Jaggi data stays in its own project and cannot be touched by product work. Supabase's free plan allows two active projects, so this is free. One catch: a free project pauses after about a week with no use. During building it is used daily, and it is unpaused with one click if it does pause.
+- **Web address for now:** each family gets its own subdomain of sjaggi.com, for example `smith.sjaggi.com` or `mehta.sjaggi.com` (Sunil, 21 Nov 2026), plus `app.sjaggi.com` for sign-up and the product home page. The email (MX) records are never touched.
+  - **How each family address is added:** Cloudflare Pages does not accept a "wildcard" address (`*.sjaggi.com`) for a domain whose DNS stays at Turbify, so each family is added once, in about two minutes: Claude adds `smith.sjaggi.com` to the product in Cloudflare, then Sunil adds one CNAME record at Turbify (name `smith`, pointing to the product's `pages.dev` address), the same kind of step he did for familytree.sjaggi.com. The free plan allows up to 100 family addresses, far more than the 5 to 10 pilot families.
+  - **Until a family's record is added**, the family's site already works at `app.sjaggi.com/smith`, so nobody waits on DNS.
+  - **Later, with the brand domain:** the brand's domain is set up on Cloudflare's own DNS from day one, where new family addresses are created automatically at sign-up with no manual step. sjaggi.com's DNS stays at Turbify, so Sunil's email is not put at risk by moving it.
+- **Hosting:** GitHub Pages cannot publish from a private repository on the free GitHub plan, so the product is hosted on **Cloudflare Pages** (free, already the plan in section 8), which works with private repositories.
+- **Email while building:** the existing Gmail sender, for test invitations only.
+- When the brand name is chosen, the domain is bought and the product moves to it. Nothing is rebuilt; only the address changes.
+
 ## 7. Phases and timeline
 
 Sunil (20 Nov 2026): spread the work over about six months, with the paid launch in **June 2027**. The coffee table book (first quarter of 2027) runs alongside.
 
 | Phase | What | When (target) |
 |---|---|---|
-| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | December 2026 to mid-January 2027 |
+| 0. Settings first | Move every Jaggi-specific item in section 2 into settings, in the current code, with Jaggi values. The Jaggi site looks the same. | **Started 21 November 2026** (Sunil: move forward now), to mid-January 2027. First step: one family settings file (site/js/family.js) |
 | 1. Many families | Families table, family-aware security rules and tests, new hosting, email service, family addresses | mid-January to February 2027 |
 | 2. Sign-up and wizard | Home page, sign-up, setup wizard, Family settings, general Help manual, product dashboard | March 2027 |
 | 3. Pilot | 5 to 10 families Sunil invites, free; fix what confuses them; rehearse and then make the Jaggi site move (section 6) | April to May 2027 |
 | 4. Paid launch | Plans and Stripe billing, Privacy Policy and Terms (reviewed, see section 9), custom domains | **June 2027** |
-| 5. Later | Printed family book service (5.9, from July 2027), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
+| 5. Later | Printed family book service (5.9, from July 2027), AI "Find more about this person" research (5.10; Ask the tree may come at launch), App Store and Google Play apps, GEDCOM import improvements, read a photo of a hand-drawn tree, Hindi and Punjabi | after June 2027 |
 
 These are targets, not promises; the pace leaves room for the book work and for what the pilot families teach us.
 
@@ -358,6 +402,7 @@ Sunil (20 Nov 2026): keep all of these items in the budget.
 | Apple App Store developer account | Yearly, when the iPhone app comes | $99 a year |
 | Google Play developer account | One-time, when the Android app comes | $25 |
 | Business email address for Sunil (for example `sunil@<brand>.com`, Google Workspace or similar) | Optional, monthly | about $6 a month |
+| AI family helper (Claude API): Ask the tree, research, fill the gaps (5.10) | Monthly, by use | about $0 to $5 a month during the pilot; about $30 to $60 a month at 100 paying families (typical use), paid for by the plan price and kept in check by the allowances |
 | Printed family books | Per order | paid by the family per book; the product adds a margin |
 | More photo space or a bigger email plan | Only with growth | see 8.2 |
 
@@ -397,6 +442,8 @@ Nothing: it runs on the free Supabase plan, GitHub Pages and Gmail. It keeps run
 
 Sunil (20 Nov 2026): suggest names that work for families in the US, India and other countries; the final choice comes closer to development.
 
+**Domain decision (21 Nov 2026):** build and pilot on sjaggi.com for now (6.1). Once the brand name is settled, buy its domain (for example banyankin.com), probably through Cloudflare, so its DNS is on Cloudflare from day one and family addresses can be created automatically.
+
 **What makes a good name here:** short and easy to spell in any accent; plain English words that Indian, American and other families all know; nothing tied to one religion, caste, language or country; a matching **.com** available at the normal price; ideally a picture behind it. The **banyan** tree is a good picture for all audiences: it is India's national tree, a symbol of long life and shelter, well known in the US, and its branches grow down into new roots, just like a family. It also matches the look the Jaggi site already has.
 
 ### 10.1 Suggested names with a .com that is free to register
@@ -433,9 +480,14 @@ Checked on 20 Nov 2026 in the .com registry (not registered) and at Porkbun (pri
 
 ## 11. Open questions for Sunil
 
-Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3), invitation emails (5.3.1) and the printed book service (5.9, piloted on the Jaggi site first), all agreed. Still open:
+Answered on 20 Nov 2026: brand name (decide closer to development; suggestions in section 10), running costs (about $50 a month is fine; no designer for now), timeline (launch June 2027), pilot families (Sunil will find 5 to 10), Jaggi site (test moving it over, as long as it is seamless for the family), company (selling under Quantum Nexus LLC is being considered), pricing (about $49 a year is right to start with), audience (everyone from day one). free plan (4.4), private repository (3.3), invitation emails (5.3.1) the printed book service (5.9) and the AI family helper (5.10), both piloted on the Jaggi site first, all agreed. Still open:
 
-1. **Brand name.** Any favourites from section 10, so the .com can be registered before someone else takes it (about $12)?
+Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub, a separate Supabase project and a sjaggi.com subdomain (6.1); no AI on the Free plan, shown as locked previews (5.10); legal first step agreed (free policy-generator drafts now, Arizona bar referral consultation before the pilot, section 9); pilot family names lined up by March 2027.
+
+1. **Brand name and domain.** To be decided; not needed to start building (6.1). Suggestions in section 10.
+2. **Which company sells it** (Quantum Nexus LLC recommended). To be decided; needed before Stripe payments are set up (phase 4, spring 2027).
+3. **Heritage plan price** (about $99 a year suggested). To be decided before the paid launch.
+4. ~~Start date~~: answered 21 Nov 2026, start now.
 
 ## 12. Decisions
 
@@ -445,6 +497,10 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 | 20 Nov 2026 | Sunil: brand name decided closer to development. About $50 a month running cost is fine. No designer for now; no lawyer yet (options in section 9). Spread the work over about six months, paid launch June 2027. Sunil will find 5 to 10 pilot families. |
 | 20 Nov 2026 | Sunil: the Jaggi site can be moved onto the product as a test, as long as it is seamless for the Jaggi family (see section 6). Selling under Quantum Nexus LLC is under consideration. Names should suit families in the US, India and other countries. |
 | 20 Nov 2026 | Sunil: the setup wizard offers a few ready-made family logo templates that fill in the family's name automatically, like "Jaggis of Chakwal" (5.2.1). |
+| 21 Nov 2026 | Sunil: move forward now on sjaggi.com; buy the brand domain later (probably through Cloudflare) once the name is settled. Phase 0 started. |
+| 21 Nov 2026 | Sunil: during building and the pilot, each family gets its own subdomain, familyname.sjaggi.com (6.1). |
+| 21 Nov 2026 | Sunil: build before buying a domain, using the existing GitHub, Supabase (separate project) and a sjaggi.com subdomain (6.1). No AI on the Free plan; show the paid AI features as locked previews. Legal first step agreed (section 9). Pilot families by March 2027. Company and Heritage price still to be decided. |
+| 20 Nov 2026 | Sunil: yes to the AI family helper (5.10): Ask the tree, Find more about this person, Fill the gaps. Living people are never sent for web searches; findings need admin approval; monthly allowance per plan. Piloted on the Jaggi site first. |
 | 20 Nov 2026 | Sunil: yes to the printed family book service (5.9); build and test it on the Jaggi family tree first. |
 | 20 Nov 2026 | Sunil approved the plan as written: free plan (4.4), private repository for the product (3.3), invitation emails and the four ways to invite (5.3.1). Only the brand name stays open. |
 | 20 Nov 2026 | Sunil: about $49 a year per family looks right to start with; free plan for about a month or 3 generations, paid beyond (details in 4.4). Launch for everyone, not only South Asian families. |
@@ -453,6 +509,10 @@ Answered on 20 Nov 2026: brand name (decide closer to development; suggestions i
 
 | Date | Pull request | Change |
 |---|---|---|
+| 21 Nov 2026 | | Domain decision (10); phase 0 started with the family settings file (7). |
+| 21 Nov 2026 | | Each family on its own name.sjaggi.com subdomain during the pilot; one CNAME per family (6.1). |
+| 21 Nov 2026 | | Building before a domain (6.1), no AI on Free plan, recommended start date, open questions updated (11). |
+| 20 Nov 2026 | | AI family helper agreed, with privacy rules and costs (5.10, 8.3). |
 | 20 Nov 2026 | | Family logo templates in the setup wizard, with sample mock-ups (5.2.1). |
 | 20 Nov 2026 | #30 | Printed book service agreed, pilot on the Jaggi site first. |
 | 20 Nov 2026 | | Printed family book service proposal: automatic layout from templates, page editor, print-on-demand ordering (5.9). |

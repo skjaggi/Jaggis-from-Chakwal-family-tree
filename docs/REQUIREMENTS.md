@@ -138,7 +138,7 @@ From a person's card (or the pencil on any tree box): **Suggest an edit**, **Add
 
 ### 7.3 Database tables (Supabase)
 
-`people`, `person_details`, `parent_child`, `unions` (the tree); `change_requests` (suggestions and history); `invites`, `profiles`, `removed_members` (members); `blessing_adjustments` (manual blessings; points themselves come from the `blessings_ledger` view); `library_links`; `research_questions` (open questions); `not_duplicates`; `page_views` (member visits); `book_drafts` (family books, admins only) and the private storage bucket `book-photos` (photos uploaded for a book); `book_shares` (read-only copies of books shared by link, admins only, opened through `shared_book()`) and the public bucket `book-shared` (their photos).
+`people`, `person_details`, `parent_child`, `unions` (the tree); `change_requests` (suggestions and history); `invites`, `profiles`, `removed_members` (members); `blessing_adjustments` (manual blessings; points themselves come from the `blessings_ledger` view); `library_links`; `research_questions` (open questions); `not_duplicates`; `page_views` (member visits); `book_drafts` (family books, admins only) and the private storage bucket `book-photos` (photos uploaded for a book); `ai_settings`, `ai_usage` and `ai_findings` (AI helper, admins only); `book_shares` (read-only copies of books shared by link, admins only, opened through `shared_book()`) and the public bucket `book-shared` (their photos).
 
 ### 7.4 Seed data
 
@@ -240,7 +240,7 @@ It is a preview, not a sign-in as them: the admin's own login is used to read th
 ### 8.10 Look and branding
 
 - Banyan theme: teal and gold, pastel branch colours; **light / dark** switch in the menu (remembered per device; follows the device until chosen).
-- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review, Members and Book for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
+- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review, Members, Book and Ask AI for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
 - Footer on every page: "© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved." with the Quantum Nexus mark.
 
 ### 8.11 Help
@@ -267,13 +267,25 @@ Pilot on this site of the printed book service planned in [PRODUCT-REQUIREMENTS.
 - **Privacy:** a book contains what the admin can see, including Family branch only details; the screen says to keep the PDF within the family. The coffee table book's own approval and opt-out steps are separate (later).
 - **Later:** ordering printed copies through a print partner (Lulu, Blurb or Peecho) and payment; opening the book maker to members; per-family editions; more page types (branch chapters, world map, index, QR codes).
 
+### 8.13 AI helper (admins, pilot)
+
+Pilot on this site of the AI search planned for the product (Sunil approved 20 Nov 2026). Menu item **Ask AI** (`#/ai`), admins only while it is tested. Uses the Claude API from Supabase edge functions (`ask-tree`, `research-person`); the API key is the Supabase secret `ANTHROPIC_API_KEY` and never reaches the browser.
+
+- **Ask the family tree:** a chat that answers questions from the family's own records only (people, details, Notes / Story, sources, approved Library links, open questions). No web search. Records are read with the asker's own sign-in, so the AI sees exactly what they may see (Family branch only details, maiden names). Names in answers link to the person in the tree. Follow-up questions keep the last few turns. If the records don't say, the answer says so.
+- **Find more about this person:** web search (Claude's web search tool, up to 5 searches) about one person **marked as passed away** (blank "Living?" counts as living). Only details of people who have passed away are sent: name, years, places, work, and names of parents, grandparents, spouses and children who have passed away. A married woman's maiden name only if the admin ticks it. Optional admin hint. Exactly what was sent is saved with the finding and shown.
+- **Findings:** a summary, confidence (high, medium, low) with a reason, sources with links (strong or possible match), suggested details (birth/death year and place, profession), other people mentioned, next steps. Saved in `ai_findings` as **waiting**; the tree is never changed by the AI. The admin ticks what to use (details, the summary into Notes / Story, source links into Sources), which goes in as a normal edit with history, or declines it. Sources can be added to the Library from the finding.
+- **Cost limits:** every call is logged with its tokens, searches and cost in `ai_usage`. A daily spending limit (default $2.00, Arizona day) stops the AI when reached. Each answer and finding shows its cost; the page shows today's and 30-day spending. Two model settings (Nov 21): one for Ask the family tree (`model`) and one for web research (`research_model`), each Claude Opus 5.5, Sonnet 5.5 or Haiku 5.5; both default to Haiku 5.5 (Sunil's choice). Measured costs: Opus first question about 10¢ (loading the records), follow-ups 2–3¢, search about 40¢; Haiku well under 1¢ a question, about 6¢ a search. If a model declines a request, Claude's server-side fallback model answers instead.
+- **Settings and data:** `ai_settings` (daily limit, model, research_model), `ai_usage`, `ai_findings`; all admins only by row-level security; usage and findings are written only by the edge functions. Rollback in `supabase/updates/2026-11-20-ai-search.rollback.sql` (and `2026-11-21-ai-research-model.rollback.sql` for the second model setting).
+- **Later:** open to members (answers already respect each member's own privacy), suggestions to fill gaps (missing spouse or birth year: who to ask, where to look), monthly allowance and charging for heavy use in the product.
+
 ## 9. Hosting and technical requirements
 
 | Part | Service | Cost |
 |---|---|---|
 | Website | GitHub Pages from the public repository `skjaggi/Jaggis-from-Chakwal-family-tree`, deployed by GitHub Actions; plain HTML, CSS and JavaScript, no build step | Free |
 | Address | familytree.sjaggi.com (sjaggi.com forwards there). The sjaggi.com email (Turbify) must not be disturbed: never change MX records. | Domain already owned |
-| Sign-in, database, photos, emails | Supabase free tier: Postgres with row level security, storage buckets, edge functions (`send-invite`, `send-reminder`, `remove-member`, `visitor-stats`, `weekly-summary`) | Free |
+| Sign-in, database, photos, emails | Supabase free tier: Postgres with row level security, storage buckets, edge functions (`send-invite`, `send-reminder`, `remove-member`, `visitor-stats`, `weekly-summary`, `ask-tree`, `research-person`) | Free |
+| AI helper (pilot) | Claude API (Anthropic), pay as you go, key in the Supabase secret `ANTHROPIC_API_KEY`; daily spending limit set on the Ask AI page | About 1–4¢ a question, 20–50¢ a web search |
 | Email sender | A separate family Gmail account through Gmail SMTP and an app password. Sending from an @sjaggi.com address is a later option. | Free |
 | Visitor count | GoatCounter (`jaggis-chakwal`) | Free |
 
@@ -328,6 +340,10 @@ Newest first. Each feature pull request adds a line.
 | Date | Pull request | Change |
 |---|---|---|
 | 21 Nov 2026 | | Book maker: **Share** a book by a secret link (WhatsApp, Email, Copy link); anyone with the link turns the pages read-only; Update the shared copy and Stop sharing. New `book_shares` table, `shared_book()` function and `book-shared` bucket. |
+| 21 Nov 2026 | | Behind the scenes, no visible change: the Founder and Creator badges and the branch level (generation 4) also come from site/js/family.js. The database keeps its own branch level in public.branch_level(), also 4. |
+| 21 Nov 2026 | | Behind the scenes, no visible change: the Jaggi-specific words, logo, copyright, Library topics and email wording now come from one family settings file, site/js/family.js (first step of the commercial product plan, phase 0). |
+| 21 Nov 2026 | #42 | AI helper: separate model choices for Ask the family tree and web search, both Claude Haiku 5.5 by default; cost notes updated from real use; names in bold headings are links. |
+| 20 Nov 2026 | | **AI helper pilot** (admins): Ask the family tree (answers from the tree only) and Find more about this person (web search, people who have passed away only, findings wait for the admin), with a daily spending limit and cost shown. |
 | 20 Nov 2026 | | Book maker: couple pages show both photos the same size joined by wedding rings and "Married". |
 | 20 Nov 2026 | | Book maker: **A page for everyone** switch in the book's top bar (the "only people with a photo, story, spouse or children" choice can now be changed after the book is made). |
 | 20 Nov 2026 | | Book maker: drag and resize added photos and text, delete any text or photo, and **Preview as a book** (flip through facing pages). |
