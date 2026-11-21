@@ -3,6 +3,7 @@ import { medal, specialOfPerson } from './blessings.js';
 import { store, listRequests, canManage, claimPerson, personClaimedBy, refreshProfile } from './data.js';
 import { describe } from './admin.js';
 import { personLibrary } from './library.js';
+import { personAi } from './ai.js';
 import { config } from './config.js';
 import { fullName, shortName, KIND_LABEL, relationHint, birthYear } from './model.js';
 import { h, clear, initials, toast, confirmDialog } from './ui.js';
@@ -160,6 +161,7 @@ export function renderPanel(container, id, { onSelect, onRoot, onClose, onSignIn
 
     sourcesBox,
     personLibrary(id),
+    personAi(p),
 
     canEdit ? h('div.panel-actions.panel-more',
       h('button.btn.small.ghost', { type: 'button', onclick: () => openLinkForm(p) }, 'Link to someone already in the tree'),
