@@ -13,7 +13,7 @@ for (const p of [...seed.people].sort((a, b) => (a.generation ?? 99) - (b.genera
   // Most people get a sample portrait; a few stay without one (initials).
   if (n++ % 5 !== 3) p.photo_path = `img/test/${sample[n % 4]}`;
 }
-async function open(b, opts, init, hash = '#/book') {
+async function open(b, opts, init, hash = '#/book', arg) {
   const ctx = await b.newContext(opts);
   await ctx.route('https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/.vendor/d3.esm.js') }));
   await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', r => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
@@ -22,7 +22,7 @@ async function open(b, opts, init, hash = '#/book') {
   await ctx.route('**/img/test/*', r => r.fulfill({ contentType: 'image/jpeg', body: fs.readFileSync(__dirname + '/book-photos/' + r.request().url().split('/').pop()) }));
   // Without the internet (CI) the web fonts fall back to the built-in ones.
   if (!process.env.BOOK_FONTS) await ctx.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: '' }));
-  await ctx.addInitScript(init);
+  await ctx.addInitScript(init, arg);
   await ctx.addInitScript(() => { try { for (const k of ['blessings-intro', 'blessingsIntro', 'founder-thanks']) localStorage.setItem(k, '1'); } catch {} window.print = () => { window.__printed = true; }; });
   const pg = await ctx.newPage();
   pg.on('pageerror', e => fail(e.message)); pg.on('console', m => { if (m.type() === 'error') console.log('console:', m.text()); });
@@ -212,6 +212,47 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     if (await pg.$('.bk-flip [contenteditable]')) fail(`${tpl}: preview pages are editable`);
     await pg.keyboard.press('Escape'); await pg.waitForTimeout(200);
     if (await pg.$('.bk-flip')) fail(`${tpl}: Esc did not close the preview`);
+    // Share by link: a read-only copy of every page that anyone with the link can open.
+    await pg.click('#bk-share-btn'); await pg.waitForSelector('#bk-share-make');
+    if (!/Anyone who has the link/.test(await pg.textContent('.bk-share'))) fail(`${tpl}: share box has no warning`);
+    await pg.click('#bk-share-make');
+    await pg.waitForSelector('#bk-share-url', { timeout: 30000 });
+    const shareUrl = await pg.inputValue('#bk-share-url');
+    const shareRow = await pg.evaluate(() => JSON.parse(JSON.stringify(window.__db.book_shares[0] || null)));
+    const shownPages = await pg.$$eval('.bk-page:not(.is-hidden)', (els) => els.length);
+    if (!shareRow || shareRow.snapshot.pages.length !== shownPages) fail(`${tpl}: shared copy has ${shareRow?.snapshot.pages.length} pages, ${shownPages} in the book`);
+    if (!shareUrl.endsWith(`#/book?view=${shareRow?.token}`)) fail(`${tpl}: share link is ${shareUrl}`);
+    if (!(await pg.getAttribute('#bk-share-wa', 'href')).includes(encodeURIComponent(shareUrl))) fail(`${tpl}: WhatsApp message has no link`);
+    if (!(await pg.getAttribute('#bk-share-mail', 'href')).startsWith('mailto:?subject=')) fail(`${tpl}: no email button`);
+    if (shareRow.snapshot.pages.some((p) => /contenteditable|<script/i.test(p))) fail(`${tpl}: shared copy is editable`);
+    if (OUT) await pg.screenshot({ path: `${OUT}${tpl}-17-share-box.png` });
+    await pg.click('.modal .icon-btn[aria-label="Close"]');
+    if ((await pg.textContent('#bk-share-btn')).trim() !== '🔗 Shared') fail(`${tpl}: Share button does not say Shared`);
+    // A visitor who is not signed in opens the link and turns the pages.
+    {
+      const v = await open(b, { viewport: { width: 1440, height: 900 }, deviceScaleFactor: OUT ? 2 : 1 }, (row) => { window.__FAKE_ROLE__ = 'anon'; window.__FAKE_SHARES__ = [row]; }, `#/book?view=${shareRow.token}`, shareRow);
+      await v.pg.click('#bk-shared-open'); await v.pg.waitForTimeout(800);
+      const w = await v.pg.textContent('.bk-flip-where');
+      if (w !== `Page 1 of ${shownPages}`) fail(`${tpl}: visitor's book opens at "${w}"`);
+      if (OUT) await v.pg.screenshot({ path: `${OUT}${tpl}-18-visitor-cover.png` });
+      await v.pg.keyboard.press('ArrowRight'); await v.pg.waitForTimeout(1400);
+      await v.pg.keyboard.press('ArrowRight'); await v.pg.waitForTimeout(1400);
+      if (!/^Pages 4–5 of/.test(await v.pg.textContent('.bk-flip-where'))) fail(`${tpl}: visitor could not turn pages`);
+      if (OUT) await v.pg.screenshot({ path: `${OUT}${tpl}-19-visitor-spread.png` });
+      if (await v.pg.$('.bk-flip [contenteditable], .bk-toolbar, .bk-flip .bp-grip')) fail(`${tpl}: visitor can edit the shared book`);
+      if (await v.pg.$$eval('.bk-flip img', (els) => els.filter((e) => e.complete && !e.naturalWidth).length)) fail(`${tpl}: visitor sees broken photos`);
+      await v.pg.keyboard.press('Escape'); await v.pg.waitForTimeout(200);
+      if (!await v.pg.$('#bk-shared-open')) fail(`${tpl}: no way back into the book after closing`);
+      await v.pg.goto('http://localhost:8765/#/book?view=00000000-0000-0000-0000-000000000000'); await v.pg.waitForTimeout(800);
+      if (!/not shared/.test(await v.pg.textContent('#page'))) fail(`${tpl}: a wrong link does not say the book is not shared`);
+      if (OUT && tpl === templates[0]) await v.pg.screenshot({ path: `${OUT}20-link-not-shared.png` });
+      await v.ctx.close();
+    }
+    // Stop sharing: the copy is gone.
+    await pg.click('#bk-share-btn'); await pg.waitForSelector('#bk-share-stop');
+    await pg.click('#bk-share-stop'); await pg.click('.modal:last-of-type .form-actions button:has-text("Stop sharing")'); await pg.waitForSelector('#bk-share-make');
+    if (await pg.evaluate(() => window.__db.book_shares.length)) fail(`${tpl}: stop sharing left the copy`);
+    await pg.click('.modal .icon-btn[aria-label="Close"]');
     // Make the PDF: the print copy has one page per visible page at 12 x 12 in.
     await pg.click('button:has-text("Make the print-ready PDF")');
     await pg.waitForFunction(() => window.__printed, null, { timeout: 15000 });

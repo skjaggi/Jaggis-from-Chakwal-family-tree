@@ -396,6 +396,36 @@ do $$ begin
 end $$;
 reset role;
 select pg_temp.expect((select daily_cap_usd from public.ai_settings) = 5, 'members cannot change the AI daily limit');
+
+-- Shared book links: a copy opens only with its exact token, for anyone
+begin;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+insert into public.book_drafts (id, title) values ('00000000-0000-0000-0000-0000000000b1', 'Family book');
+insert into public.book_shares (token, book_id, title, snapshot)
+  values ('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000b1', 'Family book', '{"pages":["<p>1</p>"]}');
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+select pg_temp.expect((select count(*) from public.book_shares) = 0, 'members cannot list shared books');
+select pg_temp.expect((select count(*) from public.shared_book('00000000-0000-0000-0000-0000000000c1')) = 1, 'members open a shared book by its link');
+do $$ begin
+  begin
+    insert into public.book_shares (book_id, title, snapshot) values ('00000000-0000-0000-0000-0000000000b1', 'x', '{}');
+    raise exception 'FAILED: member shared a book';
+  exception when insufficient_privilege then raise notice 'ok: members cannot share books';
+  end;
+end $$;
+update public.book_shares set title = 'Changed';
+delete from public.book_shares;
+set local role anon;
+select pg_temp.expect((select title from public.shared_book('00000000-0000-0000-0000-0000000000c1')) = 'Family book', 'visitors open a shared book by its link, unchanged');
+select pg_temp.expect((select count(*) from public.shared_book('00000000-0000-0000-0000-0000000000c9')) = 0, 'a wrong link opens nothing');
+do $$ begin
+  begin
+    perform 1 from public.book_shares;
+    raise exception 'FAILED: visitor listed shared books';
+  exception when insufficient_privilege then raise notice 'ok: visitors cannot list shared books';
+  end;
+end $$;
 rollback;
 
 -- Storage: branch photo readable only by branch

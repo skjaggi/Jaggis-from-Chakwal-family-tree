@@ -8,7 +8,7 @@ if (!window.__FAKE_INTRO__) try { localStorage.setItem('blessings-intro-seen:' +
 const db = {
   people: seed.people, person_details: seed.person_details, parent_child: seed.parent_child, unions: seed.unions,
   profiles: [{ id: uid, email: 'me@example.com', display_name: window.__FAKE_NAME__ || 'Tester', role: ADMIN ? 'admin' : 'member', person_id: window.__FAKE_UNLINKED__ ? null : SUNIL, claimed_person_id: window.__FAKE_ROLE__ === 'owner' || window.__FAKE_CLAIMED__ ? SUNIL : null, created_at: new Date().toISOString() }],
-  invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [], book_drafts: [],
+  invites: [], change_requests: [], research_questions: [], not_duplicates: [], page_views: [], removed_members: [], library_links: [], book_drafts: [], book_shares: window.__FAKE_SHARES__ || [],
   ai_settings: [{ id: 1, daily_cap_usd: 2, model: 'claude-haiku-5-5', research_model: 'claude-haiku-5-5' }], ai_usage: [], ai_findings: [],
 };
 // Sample Library links (window.__FAKE_LIBRARY__): approved ones, plus one suggestion waiting.
@@ -100,7 +100,7 @@ class Q {
     }
     if (this.op === 'insert' || this.op === 'upsert') {
       const r = { id: crypto.randomUUID(), status: this.t === 'research_questions' ? 'open' : 'pending', submitted_at: new Date().toISOString(), created_at: new Date().toISOString(), ...this.row };
-      if (this.op === 'upsert') { const i = T.findIndex(x => x.email === r.email); if (i >= 0) T.splice(i, 1); }
+      if (this.op === 'upsert') { const k = r.token ? 'token' : 'email'; const i = T.findIndex(x => x[k] === r[k]); if (i >= 0) T.splice(i, 1); }
       T.push(r); data = [r];
     } else if (this.op === 'update') { data = T.filter(match); data.forEach(r => Object.assign(r, this.row)); }
     else if (this.op === 'delete') { data = T.filter(match); db[this.t] = T.filter(r => !match(r)); }
@@ -185,6 +185,8 @@ export function createClient() {
         rows.push({ user_id: 'u-9', name: 'Cousin Neha', person_id: null, role: 'member', at: new Date().toISOString(), points: 12, kind: 'add_person', story: true, reason: 'Add someone' });
         return { data: rows, error: null };
       }
+      // A shared book opens by its token, for anyone (no listing).
+      if (name === 'shared_book') { const r = db.book_shares.find((x) => x.token === args.t); return { data: r ? [{ title: r.title, snapshot: r.snapshot, updated_at: r.updated_at }] : [], error: null }; }
       if (name === 'member_name') return { data: 'Cousin Neha', error: null };
       if (name === 'undo_change_request') { const r = db.change_requests.find(x => x.id === args.request_id); r.status = 'undone'; return { data: null, error: null }; }
       if (name === 'person_history') {

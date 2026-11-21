@@ -418,3 +418,10 @@ body.bk-flip-open { overflow: hidden; }
 .bp-fam.lay-portrait .bp-couple .bp-cp > .bp-photo { border-radius: 50%; }
 .bp-fam.lay-top .bp-couple .bp-spouse, .bp-fam.lay-portrait .bp-couple .bp-spouse { flex: none; align-items: center; }
 .bp-fam.lay-band .bp-couple .bp-cp { width: 88%; }
+
+/* ---------- sharing a book by link */
+.bk-share-link input { width: 100%; font: inherit; font-size: 0.9rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.bk-share-btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.bk-share-warn { background: color-mix(in srgb, #e0a100 14%, transparent); border-left: 3px solid #c58a00; padding: 8px 12px; border-radius: 6px; font-size: 0.92rem; }
+.bk-share-on { font-weight: 600; }
+.bk-shared { max-width: 640px; margin: 24px auto; text-align: center; }

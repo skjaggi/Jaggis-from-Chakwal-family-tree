@@ -100,6 +100,49 @@ const db = {
   },
 };
 
+// Share links (book_shares): a finished, read-only copy of a book that
+// anyone with its secret link can open (#/book?view=<token>). Admins make,
+// refresh and delete them; everyone else can only open one by its token,
+// through the shared_book() function. In the preview site they stay in this
+// browser.
+const SHARE_BUCKET = 'book-shared';
+const localShares = {
+  all() { try { return JSON.parse(localStorage.getItem('book-shares') || '[]'); } catch { return []; } },
+  put(list) { try { localStorage.setItem('book-shares', JSON.stringify(list)); } catch { /* full or blocked */ } },
+};
+const shares = {
+  // The share link of a book, if it has one: { token, updated_at, snapshot }.
+  async of(bookId) {
+    if (store.preview) return localShares.all().find((r) => r.book_id === bookId) || null;
+    const { data, error } = await store.sb.from('book_shares').select('token,updated_at,snapshot').eq('book_id', bookId).order('created_at', { ascending: false }).limit(1);
+    if (error) throw error;
+    return data?.[0] || null;
+  },
+  async save(bookId, token, title, snapshot) {
+    const at = new Date().toISOString();
+    if (store.preview) {
+      const rest = localShares.all().filter((r) => r.token !== token);
+      localShares.put([...rest, { token, book_id: bookId, title, snapshot, updated_at: at }]);
+      return;
+    }
+    const { error } = await store.sb.from('book_shares').upsert({ token, book_id: bookId, title, snapshot, updated_at: at });
+    if (error) throw error;
+  },
+  async remove(token, photos = []) {
+    if (store.preview) return localShares.put(localShares.all().filter((r) => r.token !== token));
+    if (photos.length) await store.sb.storage.from(SHARE_BUCKET).remove(photos).catch(() => {});
+    const { error } = await store.sb.from('book_shares').delete().eq('token', token);
+    if (error) throw error;
+  },
+  async open(token) {
+    if (store.preview) return localShares.all().find((r) => r.token === token) || null;
+    const { data, error } = await store.sb.rpc('shared_book', { t: token });
+    if (error) throw error;
+    return (Array.isArray(data) ? data[0] : data) || null;
+  },
+};
+const shareLink = (token) => `${location.origin}${location.pathname}#/book?view=${token}`;
+
 // Photos uploaded for a book (never shown on the website itself).
 const photoUrlCache = new Map();
 async function uploadPhoto(bookId, file) {
@@ -784,6 +827,7 @@ function computeView() {
 }
 
 function queueSave() {
+  if (B?.readOnly) return;
   const st = document.getElementById('bk-saved');
   if (st) st.textContent = 'Saving…';
   clearTimeout(saveTimer);
@@ -795,16 +839,16 @@ function queueSave() {
   }, 700);
 }
 
-function sizeVars(el) {
-  const size = SIZES[B.data.settings.size] || SIZES.sq12;
-  const bleed = B.data.settings.bleed ? BLEED : 0;
+function sizeVars(el, settings = B.data.settings) {
+  const size = SIZES[settings.size] || SIZES.sq12;
+  const bleed = settings.bleed ? BLEED : 0;
   el.style.setProperty('--pw', `${size.w}in`);
   el.style.setProperty('--ph', `${size.h}in`);
   el.style.setProperty('--bleed', `${bleed}in`);
   el.style.setProperty('--m', `${margin(size)}in`);
   el.style.setProperty('--base', `${base(size)}pt`);
   el.classList.remove(...[...el.classList].filter((c) => c.startsWith('tpl-') || c.startsWith('shape-')));
-  el.classList.add(`tpl-${B.data.settings.template}`, `shape-${size.w === size.h ? 'square' : size.w > size.h ? 'land' : 'portrait'}`);
+  el.classList.add(`tpl-${settings.template}`, `shape-${size.w === size.h ? 'square' : size.w > size.h ? 'land' : 'portrait'}`);
   el.classList.toggle('has-bleed', !!bleed);
   return { size, bleed };
 }
@@ -999,12 +1043,18 @@ function afterRender() {
 // side as they will face each other once printed and bound, turned with a
 // page-turn (arrows, the keyboard, a click on a page, or a swipe). One page
 // at a time on a phone.
-function openFlipbook(startIndex = 0) {
+// `src` (a shared copy) gives the pages instead of the open book:
+// { title, settings, count, page(i), shared: true }.
+function openFlipbook(startIndex = 0, src = null) {
   document.querySelector('.bk-flip')?.remove();
-  const keys = visibleOrder();
+  if (!src) {
+    const order = visibleOrder();
+    src = { title: B.title, settings: B.data.settings, count: order.length, page: (i) => renderPage(view.byKey.get(order[i]), { edit: false, n: i + 1 }) };
+  }
+  const keys = Array.from({ length: src.count }, (_, i) => i);
   if (!keys.length) return;
-  const size = SIZES[B.data.settings.size] || SIZES.sq12;
-  const bleed = B.data.settings.bleed ? BLEED : 0;
+  const size = SIZES[src.settings.size] || SIZES.sq12;
+  const bleed = src.settings.bleed ? BLEED : 0;
   const pw = (size.w + 2 * bleed) * 96;
   const ph = (size.h + 2 * bleed) * 96;
   const single = () => innerWidth < 760;
@@ -1025,11 +1075,11 @@ function openFlipbook(startIndex = 0) {
   const nextBtn = h('button.bk-flip-arrow.next', { type: 'button', 'aria-label': 'Next pages', title: 'Next (→)', onclick: () => go(1) }, '›');
   const slider = h('input.bk-flip-slider', { type: 'range', min: 0, max: list.length - 1, value: at, 'aria-label': 'Go to page', oninput: (e) => { at = +e.target.value; draw(); } });
   const close = () => { overlay.remove(); removeEventListener('keydown', onKey); removeEventListener('resize', onResize); document.body.classList.remove('bk-flip-open'); };
-  const overlay = h('div.bk-flip', { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Book preview' },
+  const overlay = h('div.bk-flip', { role: 'dialog', 'aria-modal': 'true', 'aria-label': src.shared ? src.title : 'Book preview' },
     h('div.bk-flip-top',
-      h('strong.bk-flip-title', B.title),
+      h('strong.bk-flip-title', src.title),
       where,
-      h('button.btn.small', { type: 'button', onclick: close }, '✕ Close preview')),
+      h('button.btn.small', { type: 'button', onclick: close }, src.shared ? '✕ Close' : '✕ Close preview')),
     h('div.bk-flip-main', prevBtn, stage, nextBtn),
     h('div.bk-flip-bottom', slider, h('span.muted.small', 'Click a page or use ← → to turn pages. Esc closes.')));
   const scale = () => {
@@ -1041,13 +1091,14 @@ function openFlipbook(startIndex = 0) {
   const pageBox = (i, s, side) => {
     const box = h(`div.bk-flip-page.${side}`, { style: `width:${pw * s}px;height:${ph * s}px` });
     if (i == null) { box.classList.add('blank'); return box; }
-    const doc = h('div.bk-doc', { style: `transform:scale(${s});transform-origin:0 0` }, renderPage(view.byKey.get(keys[i]), { edit: false, n: i + 1 }));
-    sizeVars(doc);
+    const doc = h('div.bk-doc', { style: `transform:scale(${s});transform-origin:0 0` }, src.page(i));
+    sizeVars(doc, src.settings);
     box.append(doc);
     if (side !== 'leaf') box.addEventListener('click', () => { if (!swiped) go(side === 'left' && !single() ? -1 : 1); });
     return box;
   };
-  const fit = (el) => { requestAnimationFrame(() => fitTrees(el)); document.fonts?.ready.then(() => fitTrees(el)); };
+  // A shared copy was fitted when it was made.
+  const fit = (el) => { if (src.shared) return; requestAnimationFrame(() => fitTrees(el)); document.fonts?.ready.then(() => fitTrees(el)); };
   const label = () => {
     const sp = list[at].filter((x) => x != null).map((x) => x + 1);
     where.textContent = sp.length > 1 ? `Pages ${sp[0]}–${sp[1]} of ${keys.length}` : `Page ${sp[0]} of ${keys.length}`;
@@ -1114,6 +1165,160 @@ function openFlipbook(startIndex = 0) {
   overlay.querySelector('.bk-flip-top button')?.focus();
 }
 
+// ------------------------------------------------------------------ sharing by link
+
+// Every page as it looks now, as finished HTML. Photos that are not already
+// public (book photos and Family-branch-only photos have addresses that
+// expire) are copied into the share's own folder, so the copy keeps working.
+async function makeSnapshot(token, progress) {
+  const doc = h('div.bk-doc');
+  sizeVars(doc);
+  visibleOrder().forEach((k, i) => doc.append(renderPage(view.byKey.get(k), { edit: false, n: i + 1 })));
+  const holder = h('div.bk-print', doc);
+  document.body.append(holder);
+  try {
+    const imgs = [...holder.querySelectorAll('img')];
+    await Promise.all([document.fonts?.ready, ...imgs.map((im) => (im.complete ? null : new Promise((r) => { im.onload = r; im.onerror = r; })))]);
+    fitTrees(holder);
+    const keep = (u) => !u || /^(img\/|\.\/img\/|data:)/.test(u) || u.includes('/storage/v1/object/public/photos-public/') || u.startsWith(`${location.origin}${location.pathname.replace(/[^/]*$/, '')}img/`);
+    const copies = new Map();
+    const photos = [];
+    const todo = [...new Set(imgs.map((im) => im.getAttribute('src')).filter((u) => !keep(u)))];
+    let done = 0;
+    const stamp = Date.now().toString(36);
+    const copy = async (u, n) => {
+      if (store.preview) { copies.set(u, u); return; }
+      try {
+        const blob = await (await fetch(u)).blob();
+        const ext = { 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' }[blob.type] || 'jpg';
+        const path = `${token}/${stamp}-${n}.${ext}`;
+        const { error } = await store.sb.storage.from(SHARE_BUCKET).upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: true });
+        if (error) throw error;
+        copies.set(u, store.sb.storage.from(SHARE_BUCKET).getPublicUrl(path).data.publicUrl);
+        photos.push(path);
+      } catch (e) { console.warn('share photo', e); } finally { progress?.(++done, todo.length); }
+    };
+    for (let i = 0; i < todo.length; i += 6) await Promise.all(todo.slice(i, i + 6).map((u, j) => copy(u, i + j + 1)));
+    for (const im of imgs) {
+      const u = im.getAttribute('src');
+      if (copies.has(u)) im.setAttribute('src', copies.get(u));
+      else if (!keep(u)) im.remove();
+      im.removeAttribute('srcset');
+    }
+    const s = B.data.settings;
+    return { settings: { template: s.template, size: s.size, bleed: !!s.bleed }, pages: [...doc.children].map((el) => el.outerHTML), photos };
+  } finally { holder.remove(); }
+}
+
+// The admin's Share box: make the link, send it, refresh it, or stop it.
+async function shareDialog() {
+  const body = h('div.bk-share', h('p.loading', 'Checking…'));
+  const dlg = modal('Share this book', body, { wide: true });
+  let cur = null;
+  try { cur = await shares.of(B.id); } catch (e) {
+    clear(body, h('p.form-error', `Could not check the share link: ${e.message}. The share links table may not be set up yet.`));
+    return;
+  }
+  const btn = document.getElementById('bk-share-btn');
+  const busy = (text) => clear(body, h('p.loading', { id: 'bk-share-busy' }, text));
+  const publish = async () => {
+    const token = cur?.token || crypto.randomUUID();
+    busy('Making the shared copy of every page…');
+    try {
+      const snap = await makeSnapshot(token, (n, of) => { const el = document.getElementById('bk-share-busy'); if (el) el.textContent = `Copying photos for the shared copy: ${n} of ${of}…`; });
+      await shares.save(B.id, token, B.title, snap);
+      if (cur?.snapshot?.photos?.length && !store.preview) await store.sb.storage.from(SHARE_BUCKET).remove(cur.snapshot.photos).catch(() => {});
+      cur = { token, updated_at: new Date().toISOString(), snapshot: snap };
+      if (btn) btn.textContent = '🔗 Shared';
+      toast('The shared copy is ready.', 'ok');
+    } catch (e) { toast(`Could not share the book: ${e.message}`, 'error'); }
+    draw();
+  };
+  const stop = async () => {
+    if (!await confirmDialog('Stop sharing this book? The link stops working for everyone who has it. The book itself stays here, and you can share it again later (with a new link).', 'Stop sharing')) return;
+    busy('Removing the shared copy…');
+    try {
+      await shares.remove(cur.token, cur.snapshot?.photos || []);
+      cur = null;
+      if (btn) btn.textContent = '🔗 Share';
+      toast('Sharing stopped. The old link no longer opens the book.', 'ok');
+    } catch (e) { toast(`Could not stop sharing: ${e.message}`, 'error'); }
+    draw();
+  };
+  const warning = h('p.bk-share-warn', '⚠ Anyone who has the link can see every page, without signing in, including Family branch only details and photos of living family members. Send it only to family.');
+  function draw() {
+    if (!cur) {
+      clear(body,
+        h('p', 'Make a link that opens this book as a book: two pages side by side, turned with the arrows or a swipe. Anyone who has the link can turn the pages; nobody can change anything.'),
+        warning,
+        h('p.muted.small', 'The link opens a copy of the book as it is now. When you change the book later, press "Update the shared copy" so the link shows the changes.'),
+        h('div.form-actions.left', h('button.btn.primary', { type: 'button', id: 'bk-share-make', onclick: publish }, 'Make a share link')));
+      return;
+    }
+    const link = shareLink(cur.token);
+    const text = `Our family book "${B.title}" is ready to look at. Open this link and turn the pages:\n${link}`;
+    const enc = encodeURIComponent;
+    const pages = cur.snapshot?.pages?.length;
+    clear(body,
+      h('p.bk-share-on', `✅ Shared${pages ? ` (${pages} pages)` : ''}, copy made ${formatWhen(cur.updated_at)}. Anyone with this link can turn the pages but not change them.`),
+      h('div.bk-share-link', h('input', { type: 'text', readonly: true, value: link, id: 'bk-share-url', 'aria-label': 'Share link', onfocus: (e) => e.target.select() })),
+      h('div.bk-share-btns',
+        navigator.share ? h('button.btn.small', { type: 'button', onclick: () => navigator.share({ title: B.title, text }).catch(() => {}) }, 'Share…') : null,
+        h('a.btn.small.primary', { href: `https://wa.me/?text=${enc(text)}`, target: '_blank', rel: 'noopener', id: 'bk-share-wa' }, 'WhatsApp'),
+        h('a.btn.small', { href: `mailto:?subject=${enc(`Our family book: ${B.title}`)}&body=${enc(text)}`, id: 'bk-share-mail' }, 'Email'),
+        h('button.btn.small', { type: 'button', onclick: async () => {
+          try { await navigator.clipboard.writeText(link); toast('Link copied. Paste it into WhatsApp, a text or an email.', 'ok'); } catch { document.getElementById('bk-share-url')?.select(); toast('Could not copy. Select the link and copy it.', 'error'); }
+        } }, 'Copy link'),
+        h('a.btn.small', { href: link, target: '_blank', rel: 'noopener' }, 'Open it')),
+      warning,
+      h('div.form-actions.left',
+        h('button.btn.small', { type: 'button', id: 'bk-share-update', onclick: publish, title: 'Make the copy again from the book as it is now. The link stays the same.' }, '↻ Update the shared copy'),
+        h('button.btn.small.danger', { type: 'button', id: 'bk-share-stop', onclick: stop }, 'Stop sharing')),
+      h('p.muted.small', 'People who do not use the site can also get the book as a file: "Make the print-ready PDF" and attach it.'));
+  }
+  draw();
+  return dlg;
+}
+
+// Only page markup comes back from a shared copy: drop anything that could run.
+function cleanPage(html) {
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  for (const el of t.content.querySelectorAll('script,iframe,object,embed,link,meta,base,form,input,textarea,button')) el.remove();
+  for (const el of t.content.querySelectorAll('*')) {
+    for (const a of [...el.attributes]) {
+      const n = a.name.toLowerCase();
+      if (n.startsWith('on') || n === 'contenteditable' || n === 'srcdoc' || (['href', 'src', 'xlink:href', 'action'].includes(n) && /^\s*(javascript|vbscript|data:text)/i.test(a.value))) el.removeAttribute(a.name);
+    }
+  }
+  return t.content;
+}
+
+// #/book?view=<token>: the shared copy, for anyone with the link.
+async function openShared(container, token) {
+  loadFonts();
+  if (document.querySelector(`.bk-flip[data-token="${CSS.escape(token)}"]`)) return;
+  clear(container, h('p.loading', 'Opening the family book…'));
+  let row = null;
+  try { if (/^[0-9a-f-]{36}$/i.test(token)) row = await shares.open(token); } catch (e) { console.warn('shared book', e); }
+  if (!row?.snapshot?.pages?.length) {
+    clear(container, h('div.bk-shared',
+      h('h1', 'This book is not shared'),
+      h('p', 'The family book at this link is no longer shared, or the link is not complete. Please ask the person who sent it for a new link.'),
+      h('p', h('a.btn', { href: '#/tree' }, 'See the family tree'))));
+    return;
+  }
+  const { pages, settings } = row.snapshot;
+  const src = { title: row.title, settings: { template: 'heritage', size: 'sq12', ...settings }, count: pages.length, shared: true, page: (i) => cleanPage(pages[i]) };
+  const open = () => { openFlipbook(0, src); document.querySelector('.bk-flip')?.setAttribute('data-token', token); };
+  clear(container, h('div.bk-shared',
+    h('h1', row.title),
+    h('p', `A family book from the family tree, ${pages.length} pages. Turn the pages with the arrows, the arrow keys or a swipe.`),
+    h('p', h('button.btn.primary', { type: 'button', id: 'bk-shared-open', onclick: open }, '📖 Open the book')),
+    row.updated_at ? h('p.muted.small', `Last updated ${formatWhen(row.updated_at)}.`) : null));
+  open();
+}
+
 // ------------------------------------------------------------------ print
 
 function printBook() {
@@ -1159,6 +1364,8 @@ function templateCards(name, value) {
 }
 
 export async function renderBook(container, query) {
+  const shared = query?.get('view');
+  if (shared) return openShared(container, shared);
   if (!store.isAdmin) {
     clear(container, h('h1', 'Family book maker'), h('p', 'The book maker is being tested by the admins. It will open to everyone later.'));
     return;
@@ -1242,6 +1449,7 @@ async function openBook(container, id) {
       toast('Rebuilt: new people and details from the tree are in, and your changes are kept.');
     } }, '↻ Rebuild from the tree'),
     h('button.btn.small', { type: 'button', onclick: () => addPageMenu(null) }, '+ Add a page'),
+    h('button.btn.small', { type: 'button', id: 'bk-share-btn', title: 'Make a link that family can open to turn the pages (read-only)', onclick: shareDialog }, '🔗 Share'),
     h('button.btn.small', { type: 'button', id: 'bk-preview-btn', title: 'See the book as a book: two pages side by side, turn the pages', onclick: () => openFlipbook() }, '📖 Preview as a book'),
     h('button.btn.small.primary', { type: 'button', onclick: printBook }, 'Make the print-ready PDF'),
     h('span.muted.small', { id: 'bk-saved' }, 'Saved'));
@@ -1256,5 +1464,6 @@ async function openBook(container, id) {
       h('div.bk-pages', { id: 'bk-pages' })));
   setupDelete(document.getElementById('bk-pages'));
   renderPages();
+  shares.of(B.id).then((r) => { const b = document.getElementById('bk-share-btn'); if (r && b) b.textContent = '🔗 Shared'; }).catch(() => {});
 }
 addEventListener('resize', () => { if (document.getElementById('bk-pages')) scaleAll(); });
