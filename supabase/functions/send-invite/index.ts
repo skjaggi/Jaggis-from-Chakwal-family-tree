@@ -5,9 +5,10 @@
 // Who may call it: the admin, or the member who created that invite.
 // Deployed with verify_jwt off because it checks the caller itself.
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
+import { FAMILY } from '../_shared/family.ts';
 
-const SITE = 'https://familytree.sjaggi.com/';
-const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
+const SITE = FAMILY.site;
+const ALLOWED_ORIGINS = FAMILY.origins;
 
 function cors(req: Request) {
   const origin = req.headers.get('Origin') || '';

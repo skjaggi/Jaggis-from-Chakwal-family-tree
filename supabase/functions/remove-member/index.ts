@@ -6,8 +6,9 @@
 //   { email, action: 'restore' } undoes that from the snapshot.
 // Deployed with verify_jwt off because it checks the caller itself.
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
+import { FAMILY } from '../_shared/family.ts';
 
-const ALLOWED_ORIGINS = ['https://familytree.sjaggi.com', 'https://skjaggi.github.io', 'http://localhost:8765'];
+const ALLOWED_ORIGINS = FAMILY.origins;
 const FOREVER = '876000h'; // 100 years
 
 function cors(req: Request) {

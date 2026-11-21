@@ -340,6 +340,7 @@ Newest first. Each feature pull request adds a line.
 | Date | Pull request | Change |
 |---|---|---|
 | 21 Nov 2026 | | Book maker: **Share** a book by a secret link (WhatsApp, Email, Copy link); anyone with the link turns the pages read-only; Update the shared copy and Stop sharing. New `book_shares` table, `shared_book()` function and `book-shared` bucket. |
+| 21 Nov 2026 | | Behind the scenes, no visible change: the email and visitor functions (send-invite, send-reminder, weekly-summary, visitor-stats, remove-member) take the site address, sender name, email footer and visitor counter from one file, supabase/functions/_shared/family.ts. Each function picks this up the next time it is deployed; the wording is identical. |
 | 21 Nov 2026 | | Behind the scenes, no visible change: the Founder and Creator badges and the branch level (generation 4) also come from site/js/family.js. The database keeps its own branch level in public.branch_level(), also 4. |
 | 21 Nov 2026 | | Behind the scenes, no visible change: the Jaggi-specific words, logo, copyright, Library topics and email wording now come from one family settings file, site/js/family.js (first step of the commercial product plan, phase 0). |
 | 21 Nov 2026 | #42 | AI helper: separate model choices for Ask the family tree and web search, both Claude Haiku 5.5 by default; cost notes updated from real use; names in bold headings are links. |
