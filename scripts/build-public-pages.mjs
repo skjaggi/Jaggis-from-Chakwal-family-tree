@@ -131,6 +131,19 @@ ${body}
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script type="module" src="${up}js/page-header.js"></script>
 <script type="module">import { countView } from '${up}js/count.js'; countView(location.pathname);</script>
+<script>
+  // Safeguard after an update: if a browser kept an old copy and the page's
+  // styles did not load, fetch them fresh and reload once (see --css-ok in the CSS).
+  addEventListener('load', function () {
+    try {
+      if (getComputedStyle(document.documentElement).getPropertyValue('--css-ok').trim()) { sessionStorage.removeItem('css-retry'); return; }
+      if (sessionStorage.getItem('css-retry')) return;
+      sessionStorage.setItem('css-retry', '1');
+      var links = [].slice.call(document.querySelectorAll('link[rel=stylesheet]'));
+      Promise.all(links.map(function (l) { return fetch(l.href, { cache: 'reload' }).catch(function () {}); })).then(function () { location.reload(); });
+    } catch (e) {}
+  });
+</script>
 </body>
 </html>
 `;

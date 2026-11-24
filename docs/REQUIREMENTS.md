@@ -317,6 +317,7 @@ Sunil (24 Nov 2026): after a group photo is used on the Faces page, offer to kee
 | Email sender | A separate family Gmail account through Gmail SMTP and an app password. Sending from an @sjaggi.com address is a later option. | Free |
 | Visitor count | GoatCounter (`jaggis-chakwal`) | Free |
 
+- **Fresh styles after an update** (Sunil, 24 Nov 2026: a phone showed the site without its styles after an update): every page checks that its styles loaded (`--css-ok` in app.css); if not, it fetches them fresh and reloads once. GitHub Pages cannot set its own caching rules (it already asks browsers to check again after 10 minutes).
 - A GitHub Action reads the database every three days so the free Supabase project does not pause.
 - Database changes are applied as reversible SQL with a rollback script and a backup; data is never deleted without Sunil's go-ahead.
 - Tests run on every pull request: database (schema, privacy rules, approval flow) and browser (Playwright against a fake backend).
@@ -370,6 +371,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 24 Nov 2026 | | **Fresh styles after an update.** Each page (tree, Help, Ancestors) checks that its styles loaded; if a browser kept an old copy, it fetches them fresh and reloads once. GitHub Pages already tells browsers to check again after 10 minutes. No database change. |
 | 24 Nov 2026 | | **Shorter top menu** (as on the product site). Tree, List, Library, Help and Review on top; More ▾ (Dashboard, Ancestors, Export), My account ▾ (My changes, My blessings, Invite a relative, light/dark, Sign out) and Admin ▾ (Members, Book maker, Ask AI, View as a member). Phones: Tree, List, Library and a ☰ Menu sheet of big buttons. The Faces menu item is now the tree's **📷 Add people from a group photo** button, and its page shows three numbered steps. Help updated. No database change. |
 | 24 Nov 2026 | | **Library for family members only.** Visitors no longer see the Library (menu on every page including Help and Ancestors, the page, the card section); no database policy lets them read Library rows; the link form no longer offers "Everyone". Help section 10. Database script 2026-11-24-library-members-only.sql. |
 | 24 Nov 2026 | | **Faces and the Family Album** (from the product site). Faces page: pick each face in a group photo as that person's tree photo, or add them as someone new. Family Album in the Library: keep the group photo with names on the faces, or tap **+ Add photo to album** to add any family photo (naming people optional) with title, where, when and a description; opens like a book; point at or tap a face to see the name. New Library topic "Family photos". Help sections 6 and 10. Database script 2026-11-24-library-photos.sql. |
