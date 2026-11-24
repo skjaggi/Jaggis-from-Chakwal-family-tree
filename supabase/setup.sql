@@ -1126,9 +1126,9 @@ grant select on public.library_links to anon, authenticated;
 grant insert, update, delete on public.library_links to authenticated;
 
 -- Everyone (signed in or not) sees approved public links.
+-- The Library is for signed-in family members only (Sunil, 24 Nov 2026):
+-- no policy lets a visitor read a row, so visitors see no links and no album photos.
 drop policy if exists "anyone reads public library links" on public.library_links;
-create policy "anyone reads public library links" on public.library_links for select to anon, authenticated
-  using (status = 'approved' and visibility = 'public');
 -- Family members also see family-only links and their own suggestions; the admin sees everything.
 drop policy if exists "family reads library links" on public.library_links;
 create policy "family reads library links" on public.library_links for select to authenticated

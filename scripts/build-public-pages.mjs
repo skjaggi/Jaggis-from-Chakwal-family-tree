@@ -96,7 +96,6 @@ function headerHtml(up) {
 <div class="top-right"><nav id="nav" aria-label="Main">${[
     a('#/tree', 'Tree'), a('#/outline', 'List'), a('#/dashboard', 'Dashboard'),
     a('people/', 'Ancestors', ' class="active" aria-current="page" title="Family members who have passed away, one page each"'),
-    a('#/library', 'Library', ' title="Videos and articles about the family and Chakwal"'),
     a('help.html', 'Help'), a('#/export', 'Export', ' title="Download the tree as a PDF or a GEDCOM file"'),
   ].join('')}</nav><div id="who" class="who"></div></div>
 </header>`;

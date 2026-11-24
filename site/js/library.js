@@ -359,7 +359,6 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   const note = h('textarea', { name: 'note', rows: 3, maxlength: 2000, placeholder: 'What is it about, and why does it matter to the family?' });
   note.value = v.note || '';
   for (const el of [title, note, source]) el.addEventListener('input', () => suggest());
-  const vis = select('visibility', [['public', 'Everyone (the Library is public)'], ['family', 'Family members only (signed in)']], v.visibility || 'public');
   const image = h('input', { name: 'image_url', type: 'url', placeholder: 'https://… (optional, for articles)', value: v.image_url || '' });
 
   // People in the tree this link is about.
@@ -419,8 +418,8 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
     isPhoto ? h('div.row2', field('Where it was taken', takenWhere), field('When it was taken', takenWhen)) : null,
     isPhoto ? h('p.form-note', 'The names on the faces are changed from the Faces page.') : field('People in the tree it is about', h('div', chips, picker)),
     isPhoto ? null : h('details.lib-more', h('summary', 'More options'),
-      field('Who can see it', vis),
       field('Picture link', image, 'Videos from YouTube get their picture automatically.')),
+    h('p.form-note', 'Only signed-in family members can see the Library.'),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       h('button.btn.primary', { type: 'submit' }, link ? 'Save' : admin ? 'Add to the Library' : 'Send for approval')));
@@ -445,7 +444,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
         ? { title: title.value.trim(), topic: topicName, note: note.value.trim() || null, taken_where: takenWhere.value.trim() || null, taken_when: takenWhen.value.trim() || null }
         : {
           url: u, title: title.value.trim(), source: source.value.trim() || null, topic: topicName,
-          note: note.value.trim() || null, person_ids: people, visibility: vis.value, image_url: img || null,
+          note: note.value.trim() || null, person_ids: people, visibility: 'family', image_url: img || null,
         }, link?.id);
       m.close();
       toast(link ? 'Saved.' : admin ? 'Added to the Library.' : `Sent. It appears in the Library once the admin approves it, and you'll get +${LIBRARY_BLESSINGS} blessings.`, 'ok');
@@ -508,7 +507,6 @@ function cardTags(link, kind) {
   return h('p.lib-tags',
     h('span.tag.lib-topic', link.topic),
     h('span.tag', kind),
-    link.visibility === 'family' ? h('span.tag.lock', 'Family only') : null,
     link.status === 'pending' ? h('span.tag.warn', 'Waiting for approval') : null,
     link.status === 'declined' ? h('span.tag.warn', 'Declined') : null);
 }
@@ -667,7 +665,8 @@ function albumTile(album, about, onAdded) {
 // "In the Library" on a person's card: links tagged with this person.
 export function personLibrary(id) {
   const box = h('section.lib-person', { hidden: true });
-  if (store.preview) return box;
+  // The Library is for signed-in family members only.
+  if (store.preview || !store.signedIn) return box;
   linksAbout(id).then((links) => {
     const p = store.fam.byId.get(id);
     const add = store.signedIn ? h('button.btn.small.ghost', { type: 'button', onclick: () => openLibraryForm({ prefill: { person_ids: [id] } }) }, `+ Add a link about ${shortName(p)}`) : null;

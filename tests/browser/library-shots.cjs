@@ -97,8 +97,11 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
   }
   // Signed-out visitor
   const ctx = await context(b, { role: 'anon' }); const pg = await ctx.newPage(); pg.on('pageerror', (e) => errors.push(e.message));
-  await pg.goto(SITE + '#/library'); await pg.waitForSelector('.lib-card');
-  ok(await pg.locator('button:has-text("Sign in to suggest a link")').count() === 1, 'visitors are asked to sign in to suggest');
+  await pg.goto(SITE + '#/library'); await pg.waitForSelector('#page h1');
+  // The Library is for signed-in family members only.
+  ok(/Please sign in/.test(await pg.textContent('#page h1')), 'visitors are asked to sign in to see the Library');
+  ok(await pg.locator('.lib-card').count() === 0, 'visitors see no Library links');
+  ok(await pg.locator('#nav [data-nav=library]').count() === 0, 'visitors have no Library menu item');
   await ctx.close();
   console.log('library ERRORS:', errors.length ? errors.join('\n') : 'none');
   if (errors.length) process.exitCode = 1;

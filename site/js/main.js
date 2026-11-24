@@ -130,7 +130,8 @@ async function route() {
     const page = $('page');
     if (state.view === 'dashboard') return renderDashboard(page);
     if (state.view === 'export') return renderExport(page);
-    if (state.view === 'library') return renderLibrary(page, { person: state.query.get('person'), photo: state.query.get('photo'), onSignIn: openSignIn });
+    // The Library is for signed-in family members (the preview shows it too).
+    if (state.view === 'library' && (store.signedIn || store.preview)) return renderLibrary(page, { person: state.query.get('person'), photo: state.query.get('photo'), onSignIn: openSignIn });
     // A shared family book link opens for anyone who has it.
     if (state.view === 'book' && state.query.get('view')) return renderBook(page, state.query);
     if (!store.signedIn) {

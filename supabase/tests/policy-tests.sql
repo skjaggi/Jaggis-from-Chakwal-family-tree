@@ -291,7 +291,7 @@ set local role anon;
 select pg_temp.expect((select count(*) from public.not_duplicates) = 0, 'visitors cannot read not-duplicate marks');
 rollback;
 
--- Library: members suggest links, the admin approves; visitors see approved public ones
+-- Library: members suggest links, the admin approves; visitors see none
 begin;
 set local role authenticated;
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
@@ -333,7 +333,7 @@ set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
 select pg_temp.expect((select count(*) from public.blessings_ledger() where kind = 'library' and user_id = '00000000-0000-0000-0000-00000000000b') = 1, 'approved suggestion earns blessings');
 select pg_temp.expect((select points from public.blessings_ledger() where kind = 'library' and user_id = '00000000-0000-0000-0000-00000000000b') = 3, 'a library link is worth 3 blessings');
 set local role anon;
-select pg_temp.expect((select count(*) from public.library_links) = 1, 'visitors see approved public links only');
+select pg_temp.expect((select count(*) from public.library_links) = 0, 'visitors see no Library links, not even public ones');
 rollback;
 
 -- Family book drafts: admins only

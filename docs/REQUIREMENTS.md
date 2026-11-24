@@ -39,8 +39,8 @@ Related project: a printed **coffee table book**, *Jaggis of Chakwal* (about 50 
 
 | Role | Who | Can do |
 |---|---|---|
-| Visitor | Anyone with the link, no sign-in | See names and relationships, Public details and photos; search; view the tree from any person; Library (public links); Ancestors pages; Help. |
-| Member | A relative who was invited and signed in | Everything a visitor can, plus Branch-only details for their branch; claim their own box; suggest additions and edits; add photos; suggest Library links; invite relatives; add open questions; earn Blessings. |
+| Visitor | Anyone with the link, no sign-in | See names and relationships, Public details and photos; search; view the tree from any person; Ancestors pages; Help. |
+| Member | A relative who was invited and signed in | Everything a visitor can, plus Branch-only details for their branch; the Library and Family Album; claim their own box; suggest additions and edits; add photos; suggest Library links; invite relatives; add open questions; earn Blessings. |
 | Branch admin | Any member who has claimed their own box ("This is me") | Changes to their own family go live straight away (see 5.2); approve or decline other members' suggestions for their part of the tree under **Review**. |
 | Admin | Sunil (and others given the Admin role, such as Suraj) | Everything: edit anything directly, approve or decline all changes, Undo, remove people and links, manage members, send emails, give or take back blessings, see visit reports. |
 
@@ -212,7 +212,8 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 - Library page with videos, articles and writing about the Jaggis of Chakwal, grouped by topic buttons, with search. YouTube videos play on the page with automatic thumbnails; other links open on their own site (picture link added by hand).
 - Members **suggest a link** (title, topic, a note, people it is about); the form suggests a topic, and **+ New topic…** adds one. The link waits for admin approval under Review (Approve, Decline, Edit first); the member sees it as Waiting for approval and can withdraw it. Duplicate links are refused.
 - Links tagged with a person show on their card under **In the Library**, with **+ Add a link about…**.
-- Admin links go in straight away; the admin can edit or remove any link and mark one **family only** (signed-in members); everything else is public.
+- Admin links go in straight away; the admin can edit or remove any link.
+- **Members only** (Sunil, 24 Nov 2026): the whole Library, links and Family Album, is for signed-in family members. Visitors have no Library menu item (also not on Help and Ancestors pages), `#/library` asks them to sign in, cards show no "In the Library" for them, and no database policy lets a visitor read a Library row. The "Who can see it" choice is gone from the link form; links are saved as family. Script `supabase/updates/2026-11-24-library-members-only.sql` (rollback alongside), run by Sunil.
 
 ### 8.8 Admin tools
 
@@ -240,7 +241,7 @@ It is a preview, not a sign-in as them: the admin's own login is used to read th
 ### 8.10 Look and branding
 
 - Banyan theme: teal and gold, pastel branch colours; **light / dark** switch in the menu (remembered per device; follows the device until chosen).
-- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library, Help, Export; Review, Members, Book and Ask AI for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
+- Header: Jaggis of Chakwal logo (hover or tap to enlarge), search box, full menu (Tree, List, Dashboard, My changes, Invite, Blessings, Ancestors, Library (signed in only), Help, Export; Review, Members, Book and Ask AI for admins; Review for branch admins), light/dark switch, Sign in / Sign out, and the signed-in member's chip (photo, blessings, badges, "?"). The header is identical on every page, including Help and Ancestors; on those pages search opens the person in the tree and Sign in opens the sign-in box on the tree. Ancestors pages keep plain visitor links in their HTML for search engines.
 - Footer on every page: "© 2026 Jaggi Family and Quantum Nexus LLC. All rights reserved." with the Quantum Nexus mark.
 
 ### 8.11 Help
@@ -353,6 +354,7 @@ Sunil (24 Nov 2026): after a group photo is used on the Faces page, offer to kee
 | 21 Nov 2026 | Sunil: a finished book can be shared by WhatsApp or email as a read-only link; anyone who has the link can open it (not only signed-in members). |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
 | 24 Nov 2026 | Sunil: Faces from a group photo, the Family Album (opens like a book, names on faces, where and when, who added it) and "+ Add photo to album" were tried on the product site first and then added here. Album photos are for signed-in family only. |
+| 24 Nov 2026 | Sunil: the Library and photo albums must not be visible to visitors, on both sites. Visitors no longer see the Library at all. |
 
 ## 11. Open questions
 
@@ -366,6 +368,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 24 Nov 2026 | | **Library for family members only.** Visitors no longer see the Library (menu on every page including Help and Ancestors, the page, the card section); no database policy lets them read Library rows; the link form no longer offers "Everyone". Help section 10. Database script 2026-11-24-library-members-only.sql. |
 | 24 Nov 2026 | | **Faces and the Family Album** (from the product site). Faces page: pick each face in a group photo as that person's tree photo, or add them as someone new. Family Album in the Library: keep the group photo with names on the faces, or tap **+ Add photo to album** to add any family photo (naming people optional) with title, where, when and a description; opens like a book; point at or tap a face to see the name. New Library topic "Family photos". Help sections 6 and 10. Database script 2026-11-24-library-photos.sql. |
 | 21 Nov 2026 | | Book maker: **Share** a book by a secret link (WhatsApp, Email, Copy link); anyone with the link turns the pages read-only; Update the shared copy and Stop sharing. New `book_shares` table, `shared_book()` function and `book-shared` bucket. |
 | 21 Nov 2026 | | Behind the scenes, no visible change: the email and visitor functions (send-invite, send-reminder, weekly-summary, visitor-stats, remove-member) take the site address, sender name, email footer and visitor counter from one file, supabase/functions/_shared/family.ts. Each function picks this up the next time it is deployed; the wording is identical. |
