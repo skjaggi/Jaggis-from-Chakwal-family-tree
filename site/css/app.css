@@ -1,4 +1,5 @@
 :root {
+  --css-ok: 1; /* the pages check this to know their styles loaded */
   /* Banyan look: pale sage page, white cards, teal and gold accents */
   --bg: #edf2ea;
   --surface: #ffffff;
