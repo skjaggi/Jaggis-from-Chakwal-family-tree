@@ -22,7 +22,8 @@ export function navItems({ base = '', active = null, root = null, count = 0, onS
     store.isAdmin || store.claimedId || count ? tab('review', `${base}#/review`, 'Review', {}, count ? h('span.count', String(count)) : null) : null,
     store.isAdmin ? tab('members', `${base}#/members`, 'Members') : null,
     tab('ancestors', `${base}people/`, 'Ancestors', { title: 'Family members who have passed away, one page each' }),
-    tab('library', `${base}#/library`, 'Library', { title: family.library.menuTitle }),
+    // The Library is for signed-in family members only.
+    signed || store.preview ? tab('library', `${base}#/library`, 'Library', { title: family.library.menuTitle }) : null,
     signed && !store.preview ? tab('faces', `${base}#/faces`, 'Faces', { title: 'Pick out each face in a group photo and use it as that person\'s tree photo' }) : null,
     tab('help', `${base}help.html`, 'Help'),
     tab('export', `${base}#/export`, 'Export', { title: 'Download the tree as a PDF or a GEDCOM file' }),
