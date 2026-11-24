@@ -23,6 +23,7 @@ export function navItems({ base = '', active = null, root = null, count = 0, onS
     store.isAdmin ? tab('members', `${base}#/members`, 'Members') : null,
     tab('ancestors', `${base}people/`, 'Ancestors', { title: 'Family members who have passed away, one page each' }),
     tab('library', `${base}#/library`, 'Library', { title: family.library.menuTitle }),
+    signed && !store.preview ? tab('faces', `${base}#/faces`, 'Faces', { title: 'Pick out each face in a group photo and use it as that person\'s tree photo' }) : null,
     tab('help', `${base}help.html`, 'Help'),
     tab('export', `${base}#/export`, 'Export', { title: 'Download the tree as a PDF or a GEDCOM file' }),
     // Admins only while it is being tested.

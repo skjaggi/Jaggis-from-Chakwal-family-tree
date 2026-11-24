@@ -278,6 +278,32 @@ Pilot on this site of the AI search planned for the product (Sunil approved 20 N
 - **Settings and data:** `ai_settings` (daily limit, model, research_model), `ai_usage`, `ai_findings`; all admins only by row-level security; usage and findings are written only by the edge functions. Rollback in `supabase/updates/2026-11-20-ai-search.rollback.sql` (and `2026-11-21-ai-research-model.rollback.sql` for the second model setting).
 - **Later:** open to members (answers already respect each member's own privacy), suggestions to fill gaps (missing spouse or birth year: who to ask, where to look), monthly allowance and charging for heavy use in the product.
 
+### 8.14 Faces from a group photo
+
+Sunil's idea (22 Nov 2026): from one family photo, give several people their tree photo. Menu item **Faces** (`#/faces`) for signed-in members; also linked from the photo form ("Pick each face from it").
+
+- **Choose a photo:** the photo is read in the browser only (scaled to at most 2400 px) and never uploaded or stored.
+- **Face finding, not recognition:** the faces are found in the browser by the open-source face finder @vladmandic/face-api 1.7.15 (MIT; SSD MobileNet model, about 7 MB loaded from jsDelivr the first time, then cached). Each face gets a numbered box, numbered left to right, row by row. The site never guesses who a face is, and no face data (face prints) is made or kept. Found all 7 faces in Sunil's test photo.
+- **Mark or remove:** "Mark a face the site missed" adds a box where you tap; "Not a face? Remove" drops a wrong box; a face can be skipped (not family).
+- **Name each face:** pick someone already in the tree (search), or **Add a new person**: choose how they are related to someone in the tree (child, husband or wife, parent, brother or sister; a brother or sister is added as a child of the same parents and needs that person to have a parent in the tree), fill in the usual add form, then the face becomes their photo. If the new person waits for approval, their face can be added after approval.
+- **Their photo:** the face opens in the usual photo framer (drag and zoom in the circle), with "Who can see this photo" defaulting to Family branch only (or the person's current setting if they already have a photo; replacing is warned). Saved through the normal `set_photo` change, so the usual rules apply: live straight away for people you look after (and for the admin), otherwise sent for approval; blessings as for any photo; history says "(from a group photo)".
+- **After naming:** each face shows Tree photo saved or Sent for approval, with "Fill in their details" (the edit form) and "See in tree". The faces named stay on the page while the site is open.
+- **No database changes.** Tests: `tests/browser/faces.cjs` (a stand-in face finder in CI; `FACES_REAL=1 FACES_PHOTO=file` runs the real one).
+- **Just name them:** for someone who already has a tree photo, "Keep their photo, just name them here" names them in this photo without changing their tree photo.
+
+### 8.15 Family Album (group photos in the Library)
+
+Sunil (24 Nov 2026): after a group photo is used on the Faces page, offer to keep it in the Library; in a **Family Album** that opens like a book; pointing at a face shows who it is; each picture has where and when it was taken, a description, who added it and when.
+
+- **Keeping a photo:** on the Faces page, once a face is named, "Keep this photo in the Family Album?" asks for a title, where and when it was taken, and a few words. The whole photo (scaled to at most 2400 px, JPEG) goes to the private storage bucket `library-photos`, as a Library item of kind `photo` (topic "Family photos", a new Library topic) with the named faces (`faces`: person and box as fractions of the picture) and `person_ids`. The admin's go in at once; a member's wait for approval under Review like a suggested link (+3 blessings when approved). If more faces are named afterwards, the admin can "Update the names in the Library".
+- **Privacy:** group photos are for signed-in family members only, never public (enforced by the database); the sender and the admin see a photo while it waits. The photo leaves the device only when the member chooses to keep it.
+- **The album:** a Family Album tile at the top of the Library (signed-in members) with the count and the latest photos, and the button "+ Add photo to album" below it. It opens as a book: a cover (the family's name, number of photos, a few pictures), then one photo per page in the order added, with title, when · where, the description, "In this photo (left to right)" with links to the tree, and "Added by … on …". Next/Back buttons, swipe on phones, arrow keys on computers, a page-turn movement (off for people who ask for less motion). Album photos are not in the link grid.
+- **Add photo to album** (Sunil, 24 Nov 2026: add photos straight into the album without going to the Faces page): the button opens "Add photo to album". The member chooses a photo; the faces are found as on the Faces page; tapping a face lets them name someone already in the tree (optional: some, all or none; "Mark a face the site missed", "Not a face", "Remove the name"). Then title (required), where, when and "About this photo", and "Add to the album" (admin, goes in at once and the album opens at it) or "Send to the album" (member, waits for approval). Naming someone here never changes their tree photo. Same database item and rules as photos kept from the Faces page; no database change.
+- **Names on faces:** pointing at a face (or tapping it on a phone) shows the person's name; tapping the name opens them in the tree; "Show all names" shows every name; pointing at a name in the list lights up the face. Names near the edge open inwards.
+- **Elsewhere:** a person's card lists the photos they are named in under "In the Library"; `#/library?photo=<id>` opens the album at that photo. The admin edits a photo's title, topic, where, when and description ("Edit the details"), or removes it (its picture is deleted too).
+- **Database:** `library_links` gains `kind`, `photo_path`, `faces`, `taken_where`, `taken_when`, `added_by_name`; `url` may be empty for photos; bucket `library-photos` with its own rules; `storage_in_family()` knows the bucket. Script `supabase/updates/2026-11-24-library-photos.sql`, rollback `2026-11-24-library-photos.rollback.sql`. Needs Sunil's OK before it runs on the family database. On this site `storage_in_family()` does not exist (one family), so the script has no such part.
+- **Tests:** database rules in `supabase/tests/policy-tests.sql`; screens in `tests/browser/faces.cjs` with a made-up cartoon group photo (`tests/browser/book-photos/group-sample.jpg`), never a real family photo.
+
 ## 9. Hosting and technical requirements
 
 | Part | Service | Cost |
@@ -326,6 +352,7 @@ Pilot on this site of the AI search planned for the product (Sunil approved 20 N
 | 20 Nov 2026 | Sunil: on a married person's book page, the spouse's photo is about the same size, with a ring symbol showing they are married. |
 | 21 Nov 2026 | Sunil: a finished book can be shared by WhatsApp or email as a read-only link; anyone who has the link can open it (not only signed-in members). |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
+| 24 Nov 2026 | Sunil: Faces from a group photo, the Family Album (opens like a book, names on faces, where and when, who added it) and "+ Add photo to album" were tried on the product site first and then added here. Album photos are for signed-in family only. |
 
 ## 11. Open questions
 
@@ -339,6 +366,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 24 Nov 2026 | | **Faces and the Family Album** (from the product site). Faces page: pick each face in a group photo as that person's tree photo, or add them as someone new. Family Album in the Library: keep the group photo with names on the faces, or tap **+ Add photo to album** to add any family photo (naming people optional) with title, where, when and a description; opens like a book; point at or tap a face to see the name. New Library topic "Family photos". Help sections 6 and 10. Database script 2026-11-24-library-photos.sql. |
 | 21 Nov 2026 | | Book maker: **Share** a book by a secret link (WhatsApp, Email, Copy link); anyone with the link turns the pages read-only; Update the shared copy and Stop sharing. New `book_shares` table, `shared_book()` function and `book-shared` bucket. |
 | 21 Nov 2026 | | Behind the scenes, no visible change: the email and visitor functions (send-invite, send-reminder, weekly-summary, visitor-stats, remove-member) take the site address, sender name, email footer and visitor counter from one file, supabase/functions/_shared/family.ts. Each function picks this up the next time it is deployed; the wording is identical. |
 | 21 Nov 2026 | | Behind the scenes, no visible change: the Founder and Creator badges and the branch level (generation 4) also come from site/js/family.js. The database keeps its own branch level in public.branch_level(), also 4. |

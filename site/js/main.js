@@ -19,6 +19,7 @@ import { renderAi } from './ai.js';
 import { downloadGedcom } from './gedcom.js';
 import { countView } from './count.js';
 import { renderLibrary } from './library.js';
+import { renderFaces } from './faces.js';
 import { openViewAsPicker, renderViewAsBanner, exitViewAs, resumeViewAs } from './view-as.js';
 
 const $ = (id) => document.getElementById(id);
@@ -31,7 +32,7 @@ function parseHash() {
   if (/^(access_token|error|type)=/.test(raw)) raw = ''; // sign-in redirect, handled by Supabase
   const [path, query = ''] = raw.split('?');
   const [view, root] = path.split('/');
-  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings', 'library', 'book', 'ai'].includes(view) ? view : 'tree';
+  state.view = ['tree', 'outline', 'review', 'mine', 'members', 'invite', 'dashboard', 'export', 'blessings', 'library', 'book', 'ai', 'faces'].includes(view) ? view : 'tree';
   state.root = root && store.fam.byId.has(root) ? root : store.fam.defaultRootId;
   const params = new URLSearchParams(query);
   state.query = params;
@@ -129,7 +130,7 @@ async function route() {
     const page = $('page');
     if (state.view === 'dashboard') return renderDashboard(page);
     if (state.view === 'export') return renderExport(page);
-    if (state.view === 'library') return renderLibrary(page, { person: state.query.get('person'), onSignIn: openSignIn });
+    if (state.view === 'library') return renderLibrary(page, { person: state.query.get('person'), photo: state.query.get('photo'), onSignIn: openSignIn });
     // A shared family book link opens for anyone who has it.
     if (state.view === 'book' && state.query.get('view')) return renderBook(page, state.query);
     if (!store.signedIn) {
@@ -143,6 +144,7 @@ async function route() {
     if (state.view === 'blessings') return renderBlessings(page);
     if (state.view === 'book') return renderBook(page, state.query);
     if (state.view === 'ai') return renderAi(page, state.query);
+    if (state.view === 'faces') return renderFaces(page);
     return;
   }
 
