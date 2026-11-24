@@ -19,13 +19,14 @@ export const family = {
   gedcomSource: 'JAGGI_FAMILY_TREE',
   fileName: 'jaggi-family-tree',
   library: {
-    blurb: 'Videos, articles and other writing about the Jaggis of Chakwal and the places our family comes from, collected by the family. ',
+    blurb: 'Videos, articles, family photos and other writing about the Jaggis of Chakwal and the places our family comes from, collected by the family. ',
     menuTitle: 'Videos and articles about the family and Chakwal',
-    topics: ['Chakwal history', 'Partition 1947', 'Arya High School', 'Family members', 'Places today', 'Other'],
+    topics: ['Chakwal history', 'Partition 1947', 'Arya High School', 'Family members', 'Family photos', 'Places today', 'Other'],
     defaultTopic: 'Chakwal history',
     titleExample: 'e.g. Chakwal before Partition',
     // Words that suggest a topic for a new link, checked in this order.
     hints: [
+      ['Family photos', 'photo|picture|wedding|get-together|reunion'],
       ['Partition 1947', 'partition|1947|refugee|riot|migrat|set (them|it) on fire'],
       ['Arya High School', 'arya|school|plaque|college|student|teacher'],
       ['Family members', 'jaggi|bakhshi|our family|grandfather|grandmother|dada|nana', { tagged: true }],

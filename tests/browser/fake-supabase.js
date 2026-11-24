@@ -95,7 +95,7 @@ class Q {
     const T = db[this.t];
     const match = r => this.f.every(f => f(r));
     let data = null;
-    if (this.op === 'insert' && this.t === 'library_links' && T.some((l) => l.status !== 'declined' && l.url.toLowerCase() === String(this.row.url).toLowerCase())) {
+    if (this.op === 'insert' && this.t === 'library_links' && this.row.url && T.some((l) => l.status !== 'declined' && String(l.url).toLowerCase() === String(this.row.url).toLowerCase())) {
       return { data: null, error: { message: 'duplicate key value violates unique constraint "library_links_url_once"' } };
     }
     if (this.op === 'insert' || this.op === 'upsert') {
@@ -116,6 +116,7 @@ class Q {
   then(res, rej) { try { res(this.run()); } catch (e) { rej(e); } }
 }
 const files = new Map();
+window.__files = files;
 export function createClient() {
   const session = window.__FAKE_ROLE__ === 'anon' ? null : { user: { id: uid, email: 'me@example.com' } };
   return {
@@ -200,8 +201,9 @@ export function createClient() {
       }
       const r = db.change_requests.find(x => x.id === args.request_id);
       if (name === 'approve_change_request') {
+        let id = null;
         if (r.kind === 'add_person') {
-          const id = crypto.randomUUID();
+          id = crypto.randomUUID();
           db.people.push({ id, ...r.payload.person, generation: 7, photo_visibility: 'branch' });
           db.person_details.push({ person_id: id, ...r.payload.details });
           if (r.payload.link.as === 'child') db.parent_child.push({ id: crypto.randomUUID(), parent_id: r.payload.link.of, child_id: id, kind: 'biological', confidence: 'confirmed' });
@@ -211,6 +213,7 @@ export function createClient() {
         if (r.kind === 'remove_photo') { const p = db.people.find(p => p.id === r.payload.person_id); p.photo_path = null; }
         if (r.kind === 'edit_person') { const d = db.person_details.find(d => d.person_id === r.payload.person_id); Object.assign(d, r.payload.details); }
         r.status = 'approved'; window.__approved = (window.__approved || []).concat(r);
+        return { data: id, error: null };
       } else { r.status = 'rejected'; }
       return { data: null, error: null };
     },

@@ -42,7 +42,7 @@ function liveNow(mode, person, relation) {
 // Gender and Living? are required: an empty "Choose..." shows until one is picked.
 const GENDERS = [['', 'Choose...'], ['male', 'Male'], ['female', 'Female'], ['other', 'Other']];
 const LIVING = [['', 'Choose...'], ['true', 'Living'], ['false', 'Deceased']];
-const VIS = [['branch', 'Family branch only: signed-in family in this branch'], ['public', 'Public: anyone']];
+export const VIS = [['branch', 'Family branch only: signed-in family in this branch'], ['public', 'Public: anyone']];
 const KINDS = [['biological', 'Birth'], ['adoptive', 'Adopted'], ['step', 'Step'], ['foster', 'Foster']];
 const CONF = [['confirmed', 'Confirmed'], ['uncertain', 'Not certain']];
 const STATUSES = [['married', 'Married'], ['divorced', 'Divorced'], ['widowed', 'Widowed'], ['separated', 'Separated'], ['partners', 'Partners']];
@@ -59,7 +59,7 @@ export { LABELS };
 
 // A warning under a "Who can see" choice when a living person's details or
 // photo are about to be made Public, so the choice is an informed one.
-function publicWarning(visSelect, isLiving, what) {
+export function publicWarning(visSelect, isLiving, what) {
   const note = h('p.vis-warn', { role: 'status', hidden: true },
     `Public means anyone who opens the tree can see ${what}, including people outside the family. `
     + 'For someone who is living, Family branch only is safer: only signed-in family in their branch see it.');
@@ -69,17 +69,21 @@ function publicWarning(visSelect, isLiving, what) {
   return { note, update };
 }
 
-async function send(kind, payload, opts, close) {
+// Returns { applied, result } (result: the new person's id for an add that
+// went live), or null if it failed.
+export async function send(kind, payload, opts, close) {
   try {
-    const { applied } = await submitChange(kind, payload, opts);
+    const { applied, result } = await submitChange(kind, payload, opts);
     close();
     forgetBlessings();
     const thanks = thankYou(kind, payload, opts?.summary || '', applied);
     toast((applied ? 'Saved. It is in the tree now.' : 'Sent for approval. You can follow it under "My changes".') + thanks, 'ok');
     if (applied && thanks) store.emit(); // update the blessings in the top corner
+    return { applied, result };
   } catch (e) {
     console.error(e);
     toast(e.message || 'Something went wrong.', 'error');
+    return null;
   }
 }
 
@@ -91,8 +95,19 @@ function textArea(name, value, rows = 3) {
   return h('textarea', { name, rows, value: value ?? '' });
 }
 
-// mode 'add' needs relation {as: 'child'|'spouse'|'parent', of: personId}
-export async function openPersonForm({ mode, person = null, relation = null }) {
+// mode 'add' needs relation {as: 'child'|'spouse'|'parent'|'sibling', of: personId}.
+// onSaved({ applied, result }) runs after a successful save or send.
+export async function openPersonForm({ mode, person = null, relation = null, onSaved = null }) {
+  // A brother or sister is added as a child of the same parents.
+  if (relation?.as === 'sibling') {
+    const sib = store.fam.byId.get(relation.of);
+    const ps = store.fam.parents(relation.of).map((x) => x.person).filter(Boolean);
+    if (!ps.length) {
+      toast(`${shortName(sib)} has no parents in the tree yet. Add a parent of ${shortName(sib)} first (a first name is enough), then their brothers and sisters can be added.`, 'error');
+      return;
+    }
+    return openPersonForm({ mode, person, relation: { as: 'child', of: ps[0].id, otherParent: ps[1]?.id || '', siblingOf: sib.id }, onSaved });
+  }
   if (!(await claimGate())) return;
   const fam = store.fam;
   const d = person ? fam.details.get(person.id) || {} : {};
@@ -102,9 +117,13 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
 
   const relBox = [];
   if (relation?.as === 'child') {
-    const spouses = fam.spouses(of.id);
+    const options = fam.spouses(of.id).map((s) => s.person);
+    // Adding a brother or sister: offer their other parent even if no marriage is recorded.
+    const other = relation.otherParent ? fam.byId.get(relation.otherParent) : null;
+    if (other && !options.some((q) => q.id === other.id)) options.unshift(other);
+    const pick = relation.siblingOf ? (other?.id || '') : options[0]?.id;
     relBox.push(
-      spouses.length ? field('Other parent', select('other_parent', [['', 'Not recorded'], ...spouses.map((s) => [s.person.id, fullName(s.person)])], spouses[0].person.id)) : null,
+      options.length ? field('Other parent', select('other_parent', [['', 'Not recorded'], ...options.map((q) => [q.id, fullName(q)])], pick)) : null,
       field('Relationship', select('kind', KINDS, 'biological')),
       field('Is this certain?', select('confidence', CONF, 'confirmed')));
   } else if (relation?.as === 'parent') {
@@ -119,7 +138,9 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
   // "Choose..." (not yet known) counts as living, as everywhere else.
   const detailsWarn = publicWarning(visSelect, () => form?.is_living?.value !== 'false', "this person's birth year, places, work, notes and story");
   const form = h('form.form', { novalidate: true },
-    relation ? h('p.form-note', `Adding a ${relation.as} of ${fullName(of)}.`) : null,
+    relation ? h('p.form-note', relation.siblingOf
+      ? `Adding a brother or sister of ${fullName(fam.byId.get(relation.siblingOf))}, as a child of ${fullName(of)}.`
+      : `Adding a ${relation.as} of ${fullName(of)}.`) : null,
     h('fieldset', h('legend', 'Name'),
       h('div.row2', field('Title', textInput('title', p.title, { placeholder: 'e.g. Bakhshi' })), field('Gender *', select('gender', GENDERS, p.gender && p.gender !== 'unknown' ? p.gender : ''))),
       field('First name(s) *', textInput('given_name', p.given_name, { required: true })),
@@ -186,8 +207,9 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
       const link = { as: relation.as, of: relation.of };
       for (const k of ['other_parent', 'kind', 'confidence', 'status', 'start_date', 'end_date']) if (fd.has(k)) link[k] = val(k);
       const name = [newPerson.given_name, newPerson.surname].filter(Boolean).join(' ');
-      await send('add_person', { person: newPerson, details: newDetails, link },
+      const r = await send('add_person', { person: newPerson, details: newDetails, link },
         { target: relation.of, summary: `Add ${name} as ${relation.as} of ${shortName(of)}` }, m.close);
+      if (r) onSaved?.(r);
     } else {
       // Send only what changed.
       const pChanges = {};
@@ -203,13 +225,14 @@ export async function openPersonForm({ mode, person = null, relation = null }) {
         btn.disabled = false;
         return;
       }
-      await send('edit_person', { person_id: person.id, person: pChanges, details: dChanges },
+      const r = await send('edit_person', { person_id: person.id, person: pChanges, details: dChanges },
         { target: person.id, summary: `Edit ${shortName(person)}: ${changed.map((k) => LABELS[k].toLowerCase()).join(', ')}` }, m.close);
+      if (r) onSaved?.(r);
     }
     btn.disabled = false;
   });
 
-  const title = mode === 'add' ? `Add ${relation.as}` : `Edit ${shortName(person)}`;
+  const title = mode === 'add' ? (relation.siblingOf ? 'Add brother or sister' : `Add ${relation.as}`) : `Edit ${shortName(person)}`;
   const m = modal(title, form, { guard: true });
   setTimeout(() => form.given_name.focus(), 50);
 }
@@ -242,6 +265,7 @@ export async function openPhotoForm(person) {
       ? `Drag the photo to center it, or choose a different one. ${fullName(person)} has one profile photo.`
       : `One profile photo for ${fullName(person)}.`),
     field(current ? 'Choose a different photo' : 'Photo', input),
+    h('p.form-note', 'Have a group photo with several relatives? ', h('a', { href: '#/faces', onclick: () => m.close() }, 'Pick each face from it'), '.'),
     editor.el,
     field('Who can see this photo', vis),
     publicWarning(vis, () => person.is_living !== false, 'this photo').note,
