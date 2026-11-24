@@ -1,5 +1,5 @@
 // App start-up, routing and the header.
-import { navItems, fitHeader } from './header.js';
+import { navItems, fitHeader, markActive } from './header.js';
 import { store, init, sendLoginLink, verifyCode, signOut, pendingCount, listRequests, logView } from './data.js';
 import { config } from './config.js';
 import { fullName, shortName, searchPeople, relationHint } from './model.js';
@@ -113,8 +113,8 @@ async function route() {
   countView(`${location.pathname}#/${state.view}`, `${config.siteTitle}: ${state.view}`);
   const isTreeish = state.view === 'tree' || state.view === 'outline';
   document.body.dataset.view = state.view;
+  markActive([...$('nav').children], state.view);
   for (const a of document.querySelectorAll('[data-nav]')) {
-    a.classList.toggle('active', a.dataset.nav === state.view);
     // Tree and List keep the current starting person and selection.
     if (isTreeish && (a.dataset.nav === 'tree' || a.dataset.nav === 'outline')) {
       a.href = `#/${a.dataset.nav}/${state.root}${state.selected ? `?p=${state.selected}` : ''}`;
@@ -237,6 +237,15 @@ function renderBreadcrumbs() {
     h('span.start-gen', `Gen ${fam.byId.get(state.root)?.generation ?? chain.length}`,
       above > 0 ? ` · ${above} generation${above === 1 ? '' : 's'} above` : null));
   addTrail(crumbs);
+  crumbs.append(groupPhotoButton());
+}
+
+// Members: add people to the tree from a group photo (the Faces page). It
+// sits at the right end of the "Start tree from" line, on the Tree and List.
+function groupPhotoButton() {
+  if (store.preview || store.viewAs) return '';
+  return h('a.btn.small.group-photo-btn', { href: '#/faces', title: 'Pick out each face in a group photo, say who it is, and add new relatives to the tree' },
+    h('span', { 'aria-hidden': 'true' }, '📷'), h('span.long', 'Add people from a group photo'), h('span.short', 'Group photo'));
 }
 
 // The tree's "you are here" path (the generation of the person in the middle
@@ -411,7 +420,7 @@ async function renderHeader() {
     },
     onViewAs: pickViewAs,
   }));
-  for (const a of nav.querySelectorAll('[data-nav]')) a.classList.toggle('active', a.dataset.nav === state.view);
+  markActive([...nav.children], state.view);
   $('who').textContent = store.viewAs ? `Viewing as ${store.profile?.display_name || store.profile?.email}` : signed ? `Signed in as ${store.profile?.display_name || store.session.user.email}${store.isAdmin ? ' (admin)' : store.claimedId ? ' (branch admin)' : ''}` : '';
   // Once they've claimed their box: their photo, blessings and badges instead.
   if (signed) await renderCorner($('who')).catch(() => false);

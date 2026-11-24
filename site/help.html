@@ -52,10 +52,10 @@
       <nav id="nav" aria-label="Main">
         <a href="./#/tree">Tree</a>
         <a href="./#/outline">List</a>
-        <a href="./#/dashboard">Dashboard</a>
+
         <a href="people/" title="Family members who have passed away, one page each">Ancestors</a>
         <a href="help.html" class="active" aria-current="page">Help</a>
-        <a href="./#/export" title="Download the tree as a PDF or a GEDCOM file">Export</a>
+
       </nav>
       <div id="who" class="who"></div>
     </div>
@@ -72,7 +72,7 @@
       <a href="#stay">3. Staying signed in</a>
       <a href="#look">4. Looking around the tree</a>
       <a href="#edit">5. Adding or correcting information</a>
-      <a href="#photo">6. Adding a photo (and faces from a group photo)</a>
+      <a href="#photo">6. Adding a photo (and adding people from a group photo)</a>
       <a href="#invite">7. Inviting a relative</a>
       <a href="#blessings">8. Blessings and badges</a>
       <a href="#dashboard">9. The family dashboard, PDF and GEDCOM</a>
@@ -146,8 +146,16 @@
       <li><strong>Start the tree from one person:</strong> once signed in, use the <span class="ui">Start tree from</span> drop-down in the line above the tree. It lists everyone who has children, grouped by generation. Pick someone (for example Tapashi Ram Jaggi or Harbans Lal Jaggi) and the tree shows only them and their descendants, with their spouses. The names before the drop-down are their ancestors: tap one to step back up. The badge after it, for example <span class="ui">Gen 4 · 3 generations above</span>, shows their generation and how many generations are above them. To see everyone again, pick Bhanna Mal Jaggi. Your choice is remembered on that phone or computer: next time you open the site there, the tree starts from the same person. To go back to opening on your own line, pick Bhanna Mal Jaggi. See <a href="#start-from">the pictures below</a>.</li>
       <li>You can also open anyone's details and tap <span class="ui">Show tree from here</span> (also remembered). Visitors who are not signed in see <span class="ui">Showing from</span> with the ancestors, and <span class="ui">Whole tree</span> to go back.</li>
       <li><strong>List view:</strong> tap <span class="ui">List</span> at the top for a simple indented list, which is easier to read on a small phone.</li>
-      <li><strong>The same menu on every page:</strong> the bar at the top is the same on the tree, on this Help page and on the Ancestors pages. When you are signed in it shows all your items (and <span class="ui">Review</span> and <span class="ui">Members</span> for the admin), your photo, blessings and badges, and <span class="ui">Sign out</span>. You can also search for someone from any of these pages; picking a name takes you to them in the tree.</li>
-      <li><strong>Light or dark:</strong> tap <span class="ui">☾ Dark</span> or <span class="ui">☀ Light</span> in the menu to switch colours. Your choice is remembered on that phone or computer; until you choose, the site follows your device's own setting.</li>
+      <li><strong>The menu at the top:</strong> it is the same on the tree, on this Help page and on the Ancestors pages, and kept short:
+        <ul>
+          <li><span class="ui">Tree</span>, <span class="ui">List</span>, <span class="ui">Library</span> (once signed in) and <span class="ui">Help</span> are always there. <span class="ui">Review</span> is there too for anyone who checks changes, with the number waiting.</li>
+          <li><span class="ui">More ▾</span> opens <span class="ui">Dashboard</span>, <span class="ui">Ancestors</span> and <span class="ui">Export (PDF or GEDCOM)</span>.</li>
+          <li><span class="ui">My account ▾</span> (once signed in) opens <span class="ui">My changes</span>, <span class="ui">My blessings</span>, <span class="ui">Invite a relative</span>, the light/dark switch and <span class="ui">Sign out</span>. Your photo, blessings and badges show at the top too.</li>
+          <li><span class="ui">Admin ▾</span> (admins only) opens <span class="ui">Members</span>, <span class="ui">Book maker</span>, <span class="ui">Ask AI</span> and <span class="ui">👁 View as a member</span>.</li>
+          <li><strong>On a phone</strong> the top shows <span class="ui">Tree</span>, <span class="ui">List</span>, <span class="ui">Library</span> and <span class="ui">☰ Menu</span>. Tap <span class="ui">☰ Menu</span> for big buttons for everything else, grouped as <em>More pages</em>, <em>Me</em> and <em>Admin</em>.</li>
+        </ul>
+        You can also search for someone from any page; picking a name takes you to them in the tree.</li>
+      <li><strong>Light or dark:</strong> tap <span class="ui">☾ Dark</span> or <span class="ui">☀ Light</span> (under <span class="ui">My account</span>, or under <span class="ui">More</span> when you are not signed in) to switch colours. Your choice is remembered on that phone or computer; until you choose, the site follows your device's own setting.</li>
       <li><strong>The family logo:</strong> rest the mouse on the logo at the top left, or tap it on a phone, to see it large.</li>
       <li><strong>You, at the top:</strong> once you are signed in and have claimed your box, your photo, name, <a href="#blessings">blessings</a> and badges sit in the header (on a phone, beside the logo). Tap them to open the Blessings page; tap <span class="ui">?</span> for how blessings work.</li>
     </ul>
@@ -177,13 +185,13 @@
     </div>
     <p>For births and deaths, only the <strong>year</strong> is recorded, never the full date. Years can be approximate, for example <em>c. 1925</em> or <em>1930s</em>. Use <strong>Sources</strong> to say where the information came from (for example "Dadi's memory" or "school records"), and <strong>What's uncertain</strong> for anything you're not sure about.</p>
     <p><strong>Your own family:</strong> once you have claimed your box, changes to yourself, your husband or wife and your descendants are saved straight away (the button says <span class="ui">Save</span>). Everything else is a suggestion.</p>
-    <p>After you tap <span class="ui">Send for approval</span>, your change waits for the admin. <strong>It won't show in the tree until it is approved.</strong> While it waits, you can see it on that person's card in a yellow <strong>Waiting for admin approval</strong> box (only you see this), and under <span class="ui">My changes</span>, where you can also withdraw it. Don't worry about making a mistake; nothing changes until it's approved.</p>
+    <p>After you tap <span class="ui">Send for approval</span>, your change waits for the admin. <strong>It won't show in the tree until it is approved.</strong> While it waits, you can see it on that person's card in a yellow <strong>Waiting for admin approval</strong> box (only you see this), and under <span class="ui">My account</span> › <span class="ui">My changes</span>, where you can also withdraw it. Don't worry about making a mistake; nothing changes until it's approved.</p>
     <div class="shots">
       <figure class="shot"><img src="img/help/pending-card.jpg" width="390" height="760" loading="lazy" alt="Your change, waiting for approval, on the person's card. Only you see it."><figcaption>Your change, waiting for approval, on the person's card. Only you see it.</figcaption></figure>
       <figure class="shot"><img src="img/help/my-changes.jpg" width="390" height="760" loading="lazy" alt="My changes: everything you sent, with what you changed."><figcaption>My changes: everything you sent, with what you changed.</figcaption></figure>
     </div>
 
-    <h2 id="photo">6. Adding a photo (and faces from a group photo)</h2>
+    <h2 id="photo">6. Adding a photo (and adding people from a group photo)</h2>
     <ol>
       <li>Sign in and tap the person's card.</li>
       <li>Tap <span class="ui">Add photo</span> and choose a picture.</li>
@@ -194,10 +202,10 @@
     <p>To move a photo that's already there, tap <span class="ui">Change or center photo</span>, drag it into place and send it. To take a photo off, tap <span class="ui">Remove photo</span>.</p>
     <p>Each person has one profile photo. The site makes the picture smaller automatically, so any photo from your phone is fine.</p>
 
-    <h3 id="faces">Photos for several people from one group photo</h3>
-    <p>Have a photo from a wedding or a family get-together? You can use it to give several relatives their tree photo at once.</p>
+    <h3 id="faces">Add people from a group photo</h3>
+    <p>Have a photo from a wedding or a family get-together? You can use it to add relatives to the tree and give each one their tree photo, all at once. The page goes in three steps, shown at the top: <strong>1 Find the faces</strong>, <strong>2 Say who they are and add them to the tree</strong>, and <strong>3 Keep the photo in the Family Album</strong> (if you like).</p>
     <ol>
-      <li>Sign in and tap <span class="ui">Faces</span> in the menu (or <span class="ui">Pick each face from it</span> in the photo form).</li>
+      <li>Sign in and tap <span class="ui">📷 Add people from a group photo</span> at the right end of the line above the tree (on a phone it says <span class="ui">📷 Group photo</span>). You can also tap <span class="ui">Pick each face from it</span> in the photo form. <span class="ui">← Back to the tree</span> takes you back.</li>
       <li>Tap <span class="ui">Choose a group photo</span>. The site finds the faces and puts a numbered box around each one. The first time this takes a little longer while the face finder loads.</li>
       <li>Tap a face. Either type the name of someone already in the tree, or tap <span class="ui">Add a new person</span>, choose how they are related to someone in the tree (child, husband or wife, parent, or brother or sister) and fill in their details. A brother or sister is added as a child of the same parents, so the person in the tree needs at least one parent first.</li>
       <li>Drag and zoom the face so it sits in the circle, choose who can see it, and tap <span class="ui">Use as tree photo</span> (or <span class="ui">Send for approval</span>).</li>
@@ -206,13 +214,13 @@
     <p>If the site missed a face, tap <span class="ui">Mark a face the site missed</span> and then tap the middle of the face in the photo. If a box is not a face, tap <span class="ui">Not a face? Remove</span>. Faces of people who are not family can be skipped.</p>
     <p>If someone already has a good tree photo, tap <span class="ui">Keep their photo, just name them here</span>: they are named in this photo and their tree photo stays as it is.</p>
     <h3 id="album-keep">Keeping the group photo in the Family Album</h3>
-    <p>Once at least one face is named, a box appears under the faces: <span class="ui">Keep this photo in the Family Album?</span> Give the photo a short title, and if you like, where and when it was taken (for example <em>Delhi</em> and <em>December 2019</em>) and a few words about it. Tap <span class="ui">Send to the Family Album</span> (the admin's photos go in straight away as <span class="ui">Add to the Family Album</span>). The admin checks a member's photo first, and you earn <strong>3 blessings</strong> once it is approved. See <a href="#album">the Family Album</a>.</p>
+    <p>Once at least one face is named, step 3 appears under the faces: <span class="ui">Step 3: keep this photo in the Family Album?</span> Give the photo a short title, and if you like, where and when it was taken (for example <em>Delhi</em> and <em>December 2019</em>) and a few words about it. Tap <span class="ui">Send to the Family Album</span> (the admin's photos go in straight away as <span class="ui">Add to the Family Album</span>). The admin checks a member's photo first, and you earn <strong>3 blessings</strong> once it is approved. See <a href="#album">the Family Album</a>.</p>
     <div class="tip"><strong>Your privacy:</strong> the group photo stays on your phone or computer unless you choose to keep it in the Family Album; then it is seen only by signed-in family members, never by visitors. Each face you use as a tree photo is saved as that one person's photo, and it starts as <em>Family branch only</em>. The site finds faces but never guesses who anyone is: you always name each person yourself. The usual rules apply: photos for your own family go in straight away, other photos are checked first.</div>
 
     <h2 id="invite">7. Inviting a relative</h2>
     <p>Anyone who is signed in can invite another family member.</p>
     <ol>
-      <li>Tap <span class="ui">Invite</span> at the top.</li>
+      <li>Tap <span class="ui">My account</span> at the top, then <span class="ui">Invite a relative</span> (on a phone: <span class="ui">☰ Menu</span>, then <span class="ui">Invite a relative</span>).</li>
       <li>Type their email and name, and pick who they are in the tree. If they aren't in the tree yet, add them first from a relative's card.</li>
       <li>Tap <span class="ui">Invite</span>. The site emails them an invitation with a button that signs them in.</li>
       <li>If you like, also tap <span class="ui">WhatsApp</span> or <span class="ui">Copy message</span> to send them a ready-made message from your own phone.</li>
@@ -224,7 +232,7 @@
     <p>The people you invited are listed on the same page, with <span class="ui">Resend invitation email</span> in case it got lost.</p>
 
     <h2 id="blessings">8. Blessings and badges</h2>
-    <p>Every time you add to the family tree, you earn <strong>blessings</strong> ✦. They show how much each of us has given to keeping our family story alive. Blessings count once a change is approved (changes to your own family count straight away). Tap <span class="ui">Blessings</span> in the menu, or your blessings at the top, to see the leaderboard.</p>
+    <p>Every time you add to the family tree, you earn <strong>blessings</strong> ✦. They show how much each of us has given to keeping our family story alive. Blessings count once a change is approved (changes to your own family count straight away). Tap your blessings at the top, or <span class="ui">My account</span> › <span class="ui">My blessings</span>, to see the leaderboard.</p>
     <table class="help-table">
       <thead><tr><th>You earn</th><th>Blessings</th></tr></thead>
       <tbody>
@@ -253,7 +261,7 @@
     <figure class="shot"><img src="img/help/blessings.jpg" width="390" height="760" loading="lazy" alt="The Blessings page: the leaderboard, your badges and branch totals."><figcaption>The Blessings page: the leaderboard, your badges and branch totals.</figcaption></figure>
 
     <h2 id="dashboard">9. The family dashboard</h2>
-    <p>Tap <span class="ui">Dashboard</span> at the top to see the whole tree at a glance:</p>
+    <p>Tap <span class="ui">More</span> › <span class="ui">Dashboard</span> at the top to see the whole tree at a glance:</p>
     <ul>
       <li><strong>Numbers:</strong> how many people, generations, marriages, branches, photos and sources.</li>
       <li><strong>Needs attention:</strong> who is missing a birth year, a birthplace, a parent, a photo or a source. Tap a row to see the names, then tap a name to open their card and fill in what you know.</li>
@@ -272,7 +280,7 @@
     </div>
 
     <h3>Printing the tree or saving it as a PDF</h3>
-    <p>Tap <span class="ui">Export</span> at the top, then <span class="ui">Make the PDF</span>. You get a family book: a cover page with the Jaggis of Chakwal logo, the whole tree as an indented chart, and a page for everyone with their years, places and photo. Every page has the small family logo at the top and the copyright line at the bottom. When the print window opens, choose <span class="ui">Save as PDF</span> as the printer. On an iPhone, tap Share, then Print, pinch outwards on the preview, then Share and Save to Files.</p>
+    <p>Tap <span class="ui">More</span> at the top, then <span class="ui">Export (PDF or GEDCOM)</span> (on a phone it is under <span class="ui">☰ Menu</span>), then <span class="ui">Make the PDF</span>. You get a family book: a cover page with the Jaggis of Chakwal logo, the whole tree as an indented chart, and a page for everyone with their years, places and photo. Every page has the small family logo at the top and the copyright line at the bottom. When the print window opens, choose <span class="ui">Save as PDF</span> as the printer. On an iPhone, tap Share, then Print, pinch outwards on the preview, then Share and Save to Files.</p>
     <p>The <span class="ui">.ged</span> file on the same page is for genealogy programs and sites such as Ancestry, FamilySearch or MyHeritage. It is not meant to be opened on its own. Both include only what you are allowed to see.</p>
 
     <h2 id="library">10. The family Library: videos, articles and the Family Album</h2>
@@ -289,7 +297,7 @@
     <p>Your link appears in the Library once the admin approves it, and you earn <strong>3 blessings</strong>. Until then you see it at the top of the Library page, marked <em>Waiting for approval</em>, where you can also withdraw it. The same link can't be added twice.</p>
     <p>You can also add a link from a person's card: open their card, scroll to <span class="ui">In the Library</span>, and tap <span class="ui">+ Add a link about…</span>. The person is tagged for you.</p>
     <h3 id="album">The Family Album</h3>
-    <p>At the top of the Library (for signed-in family members) is the <span class="ui">Family Album</span>: family photos, added here or kept from the <a href="#faces">Faces</a> page. Tap it and it opens like a book, starting with its cover.</p>
+    <p>At the top of the Library (for signed-in family members) is the <span class="ui">Family Album</span>: family photos, added here or kept from <a href="#faces">Add people from a group photo</a>. Tap it and it opens like a book, starting with its cover.</p>
     <h3 id="album-add">Adding a photo to the album</h3>
     <ol>
       <li>Under the Family Album, tap <span class="ui">+ Add photo to album</span>, then <span class="ui">Choose a photo</span>.</li>
@@ -315,7 +323,7 @@
     </ul>
 
     <h2 id="admin">11. For the admin</h2>
-    <p>The admin sees five more items in the menu, <span class="ui">Review</span>, <span class="ui">Members</span>, <span class="ui">Book</span>, <span class="ui">Ask AI</span> and <span class="ui">👁 View as</span>. Branch admins (anyone who has claimed a box) also see <span class="ui">Review</span> for suggestions about their part of the tree.</p>
+    <p>The admin sees <span class="ui">Review</span> at the top, and an <span class="ui">Admin ▾</span> menu with <span class="ui">Members</span>, <span class="ui">Book maker</span>, <span class="ui">Ask AI</span> and <span class="ui">👁 View as a member</span> (on a phone these are under <span class="ui">☰ Menu</span>, in the <em>Admin</em> group). Branch admins (anyone who has claimed a box) also see <span class="ui">Review</span> for suggestions about their part of the tree.</p>
     <h3>Review</h3>
     <ul>
       <li>Every change waiting for approval, with exactly what would change. Tap <span class="ui">Approve</span> or <span class="ui">Decline</span>, with an optional note to the member. The number on <span class="ui">Review</span> is how many are waiting, including Library links.</li>
@@ -331,17 +339,17 @@
       <li><strong>Members who have signed in,</strong> with their role and box, which the admin can change.</li>
     </ul>
     <h3 id="view-as">View the site as a member</h3>
-    <p>To check what a relative sees, without asking them or opening their branch yourself, tap <span class="ui">👁 View as</span> in the menu and pick them from the list (type part of a name or email to find them). The list says who is a branch admin and of which box, who has no box yet, and who has not signed in yet.</p>
+    <p>To check what a relative sees, without asking them or opening their branch yourself, tap <span class="ui">Admin</span> › <span class="ui">👁 View as a member</span> and pick them from the list (type part of a name or email to find them). The list says who is a branch admin and of which box, who has no box yet, and who has not signed in yet.</p>
     <ul>
       <li>The whole site then looks exactly as it does for them: their menu, the tree opened on their own branch just as it opens when they sign in, their claim reminder, their photo, blessings and badges at the top, which buttons each card shows, whether a change would go live straight away or wait for approval, which <em>Family branch only</em> details and photos they can see, and the suggestions on their <span class="ui">Review</span> page.</li>
-      <li>On the Help and Ancestors pages, <span class="ui">👁 View as</span> takes you back to the tree and opens the same list.</li>
+      <li>On the Help and Ancestors pages, <span class="ui">👁 View as a member</span> takes you back to the tree and opens the same list.</li>
       <li>A purple strip at the top says <strong>Viewing as &lt;name&gt;</strong>. Tap <span class="ui">Someone else</span> to switch, or <span class="ui">Back to my view</span> to return to your own admin view. It stays on if you reload the page in the same tab.</li>
       <li>It is only a preview. You are not signed in as them and their account is not touched. While viewing, nothing is saved, uploaded, approved, invited or emailed: the site says so if you try, so you can safely open forms and press buttons to see what they would get.</li>
     </ul>
     <h3 id="book">Making a printed family book (admins, being tested)</h3>
-    <p>Admins see <span class="ui">Book</span> in the menu. It makes a printed family book from the tree, ready to send to a print shop. While it is being tested only admins can use it.</p>
+    <p>Admins see <span class="ui">Book maker</span> in the <span class="ui">Admin</span> menu. It makes a printed family book from the tree, ready to send to a print shop. While it is being tested only admins can use it.</p>
     <ol>
-      <li>Tap <span class="ui">Book</span>, then under <strong>Make a new book</strong> choose a <strong>design</strong>: <em>Heritage</em> (cream pages, deep green and gold, the banyan tree faintly behind; made for the Jaggis of Chakwal coffee table book), <em>Classic</em> (white pages, black serif type) or <em>Modern</em> (clean type, teal bands, big photos).</li>
+      <li>Tap <span class="ui">Admin</span> › <span class="ui">Book maker</span>, then under <strong>Make a new book</strong> choose a <strong>design</strong>: <em>Heritage</em> (cream pages, deep green and gold, the banyan tree faintly behind; made for the Jaggis of Chakwal coffee table book), <em>Classic</em> (white pages, black serif type) or <em>Modern</em> (clean type, teal bands, big photos).</li>
       <li>Choose a <strong>page size</strong>, from 8 × 8 in up to the 12 × 12 in coffee table size, and where the book <strong>starts</strong>: the whole tree, or one branch (that person, everyone below them and the people they married).</li>
       <li>Leave <span class="ui">Give a page only to people with a photo, a story, a spouse or children</span> ticked to keep the book shorter: everyone else is still named on their parents' page and in the tree chart. Tick <span class="ui">Add printer's bleed</span> if the print shop asks for bleed (most photo book printers, such as Lulu or Blurb, do).</li>
       <li>Tap <span class="ui">Build the book</span>. It builds itself in a few seconds: a cover with the logo and early photos, <em>About this book</em>, the family tree chart (on one page, its type sized to fill the page), then for each generation a title page with a <em>picture tree</em> of everyone in that generation (round, arched, framed or leaf-shaped photos with names, grouped under both parents, with the parent's husband or wife beside them, in a different style for each generation), and one page per person or couple, with photos, years, places, work, marriage, children and their Notes / Story. Person pages take turns between five layouts (photo left, wide photo on top, photo right, round portrait, photo band) so the book does not look the same from page to page.</li>
@@ -353,7 +361,7 @@
     <p><strong>New people in the tree?</strong> Tap <span class="ui">↻ Rebuild from the tree</span>: new people and details come in and your changes stay.</p>
     <p><strong>The PDF.</strong> Tap <span class="ui">Make the print-ready PDF</span> and choose <span class="ui">Save as PDF</span> in the print window, with margins set to None if asked. The pages come out at the book's real size. Use Chrome or Edge on a computer for this; phones don't keep the page size. The book includes the private (Family branch only) details admins can see, so keep the PDF within the family. Ordering printed copies from the site comes later.</p>
     <h3 id="ai">Ask AI: questions and web research (admins, being tested)</h3>
-    <p>Admins see <span class="ui">Ask AI</span> in the menu. It uses Claude, an AI made by Anthropic, in two ways. While it is being tested only admins can use it.</p>
+    <p>Admins see <span class="ui">Ask AI</span> in the <span class="ui">Admin</span> menu. It uses Claude, an AI made by Anthropic, in two ways. While it is being tested only admins can use it.</p>
     <ul>
       <li><strong>Ask the family tree.</strong> Type a question, such as <em>Who were Kesar Mal Jaggi's grandchildren?</em> or <em>Which ancestors still have no year of birth?</em>, and tap <span class="ui">Ask</span> (or press Enter), or tap one of the example questions. The answer comes only from what the site holds: the people in the tree, their details, Notes / Story and sources, the Library and the open questions. It does not search the web, and it only uses what you yourself are allowed to see. Every name in the answer is a link: tap it to open that person in the tree. Ask follow-up questions in the same conversation; <span class="ui">New conversation</span> starts again. If the tree doesn't know, the answer says so rather than guessing.</li>
       <li><strong>Find more about a person.</strong> On the card of someone who has passed away, tap <span class="ui">🔎 Find more with AI</span> (or type their name on the Ask AI page). The window shows exactly what will be sent for the search: their name, years, places, work, and the names of relatives who have also passed away. <strong>Details of living people are never sent</strong>, and the button doesn't appear for anyone who is living or whose "Living?" is not filled in. For a married woman, her name before marriage is only searched if you tick the box. You can add a hint (for example where he worked); please don't type anything about living relatives. Tap <span class="ui">Start the search</span>. It takes about a minute; you can close the window and find the result later on the Ask AI page under <strong>Waiting for you</strong>.</li>

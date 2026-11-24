@@ -250,6 +250,9 @@ main { position: relative; flex: 1; min-height: 0; display: flex; flex-direction
 #start-from { font: inherit; font-weight: 600; max-width: min(80vw, 300px); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .start-gen { border: 1.5px solid var(--gold); color: var(--ink); border-radius: 999px; padding: 0 10px; font-weight: 600; font-size: 0.78rem; white-space: nowrap; }
 .start-path { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+/* "📷 Add people from a group photo" at the right end of the tree's top line. */
+.crumbs .group-photo-btn { margin-left: auto; text-decoration: none; }
+.group-photo-btn .short { display: none; }
 /* Phones: the path above, then the drop-down with its badge, then "you are
    here"; each one line that scrolls sideways rather than wrapping. */
 @media (max-width: 600px) {
@@ -258,7 +261,13 @@ main { position: relative; flex: 1; min-height: 0; display: flex; flex-direction
   .start-path { flex: 1 0 100%; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; scrollbar-width: none; font-size: 0.85rem; }
   .start-path::-webkit-scrollbar { display: none; }
   #start-from { flex: 1 1 0; min-width: 0; max-width: none; }
-  .crumbs .tree-trail { flex-basis: 100%; padding-left: 0; border-left: 0; font-size: 0.8rem; }
+  /* The drop-down and its badge fill their own line; the group photo button
+     shares the "you are here" line below, at its end. */
+  #start-from { flex-basis: 110px; }
+  .crumbs .group-photo-btn { order: 3; min-height: 28px; padding: 2px 10px; font-size: 0.85rem; }
+  .crumbs .tree-trail { order: 2; flex: 1 1 60%; min-width: 0; padding-left: 0; border-left: 0; font-size: 0.8rem; }
+  .group-photo-btn .long { display: none; }
+  .group-photo-btn .short { display: inline; }
 }
 .tree-canvas { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
 .tree-svg { width: 100%; height: 100%; display: block; cursor: grab; }
@@ -854,10 +863,18 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
   .viewas-tag { grid-column: 1; grid-row: auto; justify-self: start; max-width: none; }
   .viewas-banner .viewas-note { display: none; }
 }
-}
 
-/* Faces from a group photo (#/faces) */
+/* Add people from a group photo (#/faces), opened from the tree's button */
 .page:has(.faces-page) { max-width: 1100px; }
+.faces-page .back-link { display: inline-block; margin-bottom: 4px; padding: 8px 0; }
+.faces-steps { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 10px 0 14px; }
+.faces-steps li { display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+.faces-steps li b { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); color: var(--ink); }
+.faces-steps li.now { border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.faces-steps li.now b { background: var(--accent); color: var(--accent-ink); }
+.faces-steps li.done b { background: #2e9e5b; color: #fff; }
+.faces-steps small { font-weight: 400; color: var(--muted); }
+@media (max-width: 560px) { .faces-steps { flex-direction: column; gap: 4px; } .faces-steps li { border-radius: 12px; } }
 .faces-page .lead { font-size: 1.05rem; }
 .faces-promise { margin: 8px 0 16px; padding-left: 20px; color: var(--muted); }
 .faces-promise li { margin: 4px 0; }
@@ -990,3 +1007,40 @@ dialog.album-dialog { width: min(1180px, 96vw); max-width: 96vw; }
   .album-right { padding: 14px; background: #fbf6ec; }
   .album-cover h2 { font-size: 1.9rem; }
   .album-tile-thumbs { display: none; }
+}
+
+/* ---------- top menu: everyday pages, then drop-downs (More, My account, Admin) */
+details.menu { position: relative; }
+details.menu > summary { list-style: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; color: var(--ink); white-space: nowrap; }
+details.menu > summary::-webkit-details-marker { display: none; }
+details.menu > summary:hover, details.menu[open] > summary { background: var(--surface-2); }
+details.menu > summary.active { background: var(--surface-2); font-weight: 600; }
+details.menu .caret { font-size: 0.8em; color: var(--muted); }
+.menu-list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 230px;
+  display: flex; flex-direction: column; padding: 6px; gap: 2px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
+.menu-list a, .menu-list .linkish { display: block; text-align: left; padding: 11px 14px; min-height: 44px; border-radius: 8px; white-space: nowrap; }
+.menu-list a.active { background: var(--surface-2); font-weight: 600; }
+.menu-section + .menu-section { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+.menu-heading { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 6px 14px 2px; }
+.phone-nav { display: none !important; }
+@media (max-width: 760px) {
+  .wide-nav { display: none !important; }
+  .phone-nav { display: revert !important; }
+  details.menu.phone-nav { display: block !important; }
+  nav { flex-wrap: nowrap; }
+  nav a, .linkish, details.menu > summary { padding: 6px 10px; font-size: 0.95rem; }
+  /* The phone menu opens as a big sheet under the header, with large tap targets. */
+  details.menu.sheet .menu-list {
+    position: fixed; left: 8px; right: 8px; top: auto; margin-top: 6px; max-height: 75vh; overflow-y: auto; min-width: 0;
+  }
+  /* Two big buttons per row, so the whole menu fits on one phone screen. */
+  details.menu.sheet .menu-section { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  details.menu.sheet .menu-heading { grid-column: 1 / -1; }
+  details.menu.sheet .menu-list a, details.menu.sheet .menu-list .linkish {
+    font-size: 1rem; min-height: 48px; display: flex; align-items: center; white-space: normal; line-height: 1.2;
+    background: var(--surface-2); padding: 8px 12px; width: 100%;
+  }
+}

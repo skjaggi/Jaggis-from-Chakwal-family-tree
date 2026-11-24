@@ -116,17 +116,30 @@ export function renderFaces(page) {
   const tools = h('div.faces-tools', { hidden: true });
   const grid = h('div.faces-grid');
   const keep = h('section.faces-keep', { hidden: true });
+  // Where you are: 1 find the faces, 2 name them and build the tree,
+  // 3 (optional) keep the photo in the Family Album.
+  const steps = h('ol.faces-steps', { 'aria-label': 'Steps' },
+    h('li', h('b', '1'), ' Find the faces'),
+    h('li', h('b', '2'), ' Say who they are and add them to the tree'),
+    h('li', h('b', '3'), ' Keep the photo in the Family Album ', h('small', '(if you like)')));
+  const showStep = () => {
+    const n = !s.photo || s.busy ? 1 : tagsOf().length ? 3 : 2;
+    [...steps.children].forEach((li, i) => { li.classList.toggle('now', i + 1 === n); li.classList.toggle('done', i + 1 < n); });
+  };
 
   clear(page,
     h('div.faces-page',
-      h('h1', 'Faces from a group photo'),
-      h('p.lead', 'Choose a photo with several relatives in it. The site finds the faces; tap each one to say who it is, and that face becomes their photo in the tree.'),
+      h('a.back-link', { href: '#/tree' }, '← Back to the tree'),
+      h('h1', 'Add people from a group photo'),
+      h('p.lead', 'Choose a photo with several relatives in it. The site finds the faces; tap each one to say who it is, or add them to the tree if they are new. Each face becomes that person\'s photo in the tree.'),
+      steps,
       h('ul.faces-promise', { hidden: !!s.photo },
         h('li', 'The group photo stays on your phone or computer. Only the faces you choose are saved, each as one person\'s tree photo. Afterwards you can choose to keep the whole photo in the Family Album, for signed-in family only.'),
         h('li', 'The site finds faces but never guesses who they are: you name each one.'),
         h('li', 'New photos start as "Family branch only". Photos for people you look after go in straight away; others are checked first, as usual.')),
       h('div.faces-choose', chooseBtn, input),
       status, stage, tools, grid, keep));
+  showStep();
 
   input.addEventListener('change', async () => {
     const file = input.files[0];
@@ -190,6 +203,7 @@ export function renderFaces(page) {
   });
 
   function draw() {
+    showStep();
     const promise = page.querySelector('.faces-promise');
     if (promise) promise.hidden = !!s.photo; // the photo needs the room on a phone
     stage.hidden = !s.photo;
@@ -221,7 +235,7 @@ export function renderFaces(page) {
     if (s.kept) {
       const same = JSON.stringify(tags) === JSON.stringify(s.kept.faces);
       clear(keep,
-        h('h2', 'In the Family Album'),
+        h('h2', 'Step 3: in the Family Album'),
         h('p', s.kept.status === 'approved'
           ? ['This photo is in the Family Album, with the names on the faces. ', h('a', { href: `#/library?photo=${s.kept.id}` }, 'See it in the album')]
           : `This photo was sent to the Family Album and appears there once the admin approves it (+${LIBRARY_BLESSINGS} blessings).`),
@@ -249,7 +263,7 @@ export function renderFaces(page) {
     const topic = select('topic', topics.map((t) => [t, t]), topics.includes('Family photos') ? 'Family photos' : topics[0]);
     const btn = h('button.btn.primary', { type: 'submit' }, store.isAdmin ? 'Add to the Family Album' : 'Send to the Family Album');
     const form = h('form.form.faces-keep-form',
-      h('h2', 'Keep this photo in the Family Album?'),
+      h('h2', 'Step 3: keep this photo in the Family Album?'),
       h('p', `The Family Album is in the Library and opens like a book. Family members can see who is who: pointing at a face (or tapping it on a phone) shows the name. Named so far: ${names}.`),
       h('p.form-note', store.isAdmin
         ? 'The whole photo is saved, for signed-in family members only (never public).'

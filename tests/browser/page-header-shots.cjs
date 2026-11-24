@@ -26,7 +26,7 @@ const who = {
       const pg = await ctx.newPage();
       pg.on('pageerror', e => console.log('ERR', name, e.message));
       await pg.goto('http://localhost:8765' + path);
-      await pg.waitForSelector('nav#nav button');
+      await pg.waitForSelector('nav#nav a');
       if (cfg.role !== 'anon') await pg.waitForSelector('.me-chip');
       await pg.waitForTimeout(600);
       menus[name] = await pg.locator('nav#nav > *').evaluateAll(els => els.map(e => e.textContent.replace(/\d+$/, '').trim()).join(' | '));

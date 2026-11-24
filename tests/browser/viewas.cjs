@@ -23,10 +23,11 @@ const fail = []; const check = (ok, what) => { console.log(ok ? 'ok  ' : 'FAIL',
     await pg.goto('http://localhost:8765/'); await pg.waitForSelector('#nav a');
     // A cousin who has claimed Sunil Kumar's box (a branch admin).
     await pg.evaluate((id) => { const u = window.__db.profiles.find((x) => x.id === 'u-2'); u.display_name = 'Asha Jaggi'; u.person_id = id; u.claimed_person_id = id; }, SUNIL);
-    const nav = async () => (await pg.locator('#nav').innerText()).replace(/\s+/g, ' ');
+    const nav = async () => (await pg.locator('#nav').textContent()).replace(/\s+/g, ' ');
     if (tag === 'desktop') check((await nav()).includes('View as') && (await nav()).includes('Members'), 'admin menu has View as and Members');
-    if (tag === 'phone') { const m = pg.locator('#menu-toggle'); if (await m.count() && await m.isVisible()) await m.click(); }
-    await pg.locator('#nav .viewas-btn').click();
+    // View as sits in the Admin drop-down (on a phone: in the Menu sheet).
+    await pg.locator(tag === 'phone' ? '#nav details.sheet > summary' : '#nav details.wide-nav:has(.viewas-btn) > summary').click();
+    await pg.locator('#nav .viewas-btn:visible').click();
     await pg.waitForSelector('.viewas-row');
     await pg.fill('.viewas-pick input', 'asha');
     if (OUT) await pg.screenshot({ path: `${OUT}/1-picker-${tag}.png` });
@@ -36,7 +37,7 @@ const fail = []; const check = (ok, what) => { console.log(ok ? 'ok  ' : 'FAIL',
     check(/Viewing as Asha Jaggi/.test(banner) && /Branch admin of/.test(banner), 'banner: ' + banner);
     if (tag === 'desktop') {
       check(!(await nav()).includes('Members') && (await nav()).includes('Review'), 'member menu: ' + await nav());
-      check(await pg.locator('#nav .viewas-btn').count() === 1, 'View as still offered to the real admin');
+      check(await pg.locator('#nav .viewas-btn').count() === 2, 'View as still offered to the real admin');
     }
     // The tree opens on her own line, as when she signs in: her box is drawn.
     check(await pg.locator(`g.node[data-id="${SUNIL}"]`).count() > 0, 'tree opens on her own line');
