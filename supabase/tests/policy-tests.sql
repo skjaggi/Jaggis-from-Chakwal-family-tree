@@ -450,3 +450,41 @@ do $$ begin
   end;
 end $$;
 rollback;
+
+-- Library group photos: family only, faces tagged, picture in its own folder
+begin;
+alter table storage.objects enable row level security;
+grant select, insert, delete on storage.objects to authenticated;
+set local role authenticated;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+insert into public.library_links (id, kind, title, topic, visibility, photo_path, faces, person_ids)
+  values ('11111111-1111-1111-1111-111111111111', 'photo', 'Wedding 2019', 'Photos', 'family', '11111111-1111-1111-1111-111111111111/photo.jpg',
+          jsonb_build_array(jsonb_build_object('person_id', pg_temp.pid('Sunil Kumar'), 'x', 0.1, 'y', 0.2, 'w', 0.1, 'h', 0.12)),
+          array[pg_temp.pid('Sunil Kumar')]);
+select pg_temp.expect((select status from public.library_links where kind = 'photo') = 'pending', 'a member''s group photo waits for approval');
+insert into storage.objects (bucket_id, name) values ('library-photos', '11111111-1111-1111-1111-111111111111/photo.jpg');
+select pg_temp.expect((select count(*) from storage.objects where bucket_id = 'library-photos') = 1, 'sender stores and sees their group photo');
+do $$ begin
+  begin
+    insert into public.library_links (kind, title, visibility, photo_path) values ('photo', 'Public?', 'public', 'x/photo.jpg');
+    raise exception 'FAILED: a group photo was made public';
+  exception when check_violation then raise notice 'ok: group photos are family only';
+  end;
+  begin
+    insert into storage.objects (bucket_id, name) values ('library-photos', '22222222-2222-2222-2222-222222222222/photo.jpg');
+    raise exception 'FAILED: picture stored without a Library item';
+  exception when insufficient_privilege then raise notice 'ok: a Library picture needs its Library item';
+  end;
+end $$;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.expect((select count(*) from storage.objects where bucket_id = 'library-photos') = 0, 'other members cannot see a photo waiting for approval');
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000a';
+update public.library_links set status = 'approved' where kind = 'photo';
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
+select pg_temp.expect((select count(*) from storage.objects where bucket_id = 'library-photos') = 1, 'family members see an approved group photo');
+select pg_temp.expect((select faces -> 0 ->> 'person_id' from public.library_links where kind = 'photo') = pg_temp.pid('Sunil Kumar')::text, 'tagged faces are kept with the photo');
+delete from storage.objects where bucket_id = 'library-photos';
+select pg_temp.expect((select count(*) from storage.objects where bucket_id = 'library-photos') = 1, 'members cannot delete an approved group photo');
+set local role anon;
+select pg_temp.expect((select count(*) from public.library_links where kind = 'photo') = 0, 'visitors never see group photos');
+rollback;
