@@ -36,7 +36,12 @@ async function open(b, opts, role) {
   const pg = await ctx.newPage();
   pg.on('pageerror', e => fail(role + ': ' + e.message));
   pg.on('console', m => { if (m.type() === 'error') console.log('console:', m.text()); });
-  await pg.goto('http://localhost:8765/#/faces'); await pg.waitForTimeout(1000);
+  await pg.goto('http://localhost:8765/#/tree'); await pg.waitForSelector('g.node');
+  // Members reach the page from the tree's "Add people from a group photo" button.
+  const btn = pg.locator('.group-photo-btn');
+  if (role !== 'anon') { await btn.click(); await pg.waitForSelector('.faces-page'); } else if (await btn.count()) fail('visitor sees the group photo button');
+  else await pg.goto('http://localhost:8765/#/faces');
+  await pg.waitForTimeout(1000);
   await pg.keyboard.press('Escape'); await pg.waitForTimeout(200);
   return { ctx, pg };
 }
@@ -58,20 +63,20 @@ async function pickPerson(pg, name) {
   // A visitor (not signed in) gets the sign-in page and no Faces menu.
   {
     const { ctx, pg } = await open(b, { viewport: { width: 1280, height: 800 } }, 'anon');
-    if (await pg.$('[data-nav="faces"]')) fail('visitor sees the Faces menu');
     if (!/Please sign in/.test(await pg.textContent('#page'))) fail('visitor can open Faces');
     await ctx.close();
   }
   // The admin, on a computer.
   {
     const { ctx, pg } = await open(b, { viewport: { width: 1280, height: 860 }, deviceScaleFactor: OUT ? 2 : 1 }, 'admin');
-    if (!await pg.$('[data-nav="faces"]')) fail('admin has no Faces menu');
+    if (!/1 Find the faces/.test(await pg.textContent('.faces-steps li.now'))) fail('step 1 not shown first');
     if (OUT) await pg.screenshot({ path: `${OUT}1-start.png` });
     await choosePhoto(pg);
     const n = await pg.$$eval('.face-card', (els) => els.length);
     console.log('faces found:', n, '|', await pg.textContent('.faces-status'));
     if (!REAL && n !== 5) fail(`found ${n} faces, expected 5`);
     if (OUT) { await pg.waitForTimeout(600); await pg.screenshot({ path: `${OUT}2-faces-found.png` }); }
+    if (!/2 Say who/.test(await pg.textContent('.faces-steps li.now'))) fail('step 2 not shown after the faces are found');
 
     // Face 1 → someone already in the tree.
     await pg.click('.face-card >> nth=0 >> .face-pick');
@@ -152,7 +157,7 @@ async function pickPerson(pg, name) {
     console.log('album:', kept && JSON.stringify([kept.title, kept.status, kept.taken_where, kept.taken_when, kept.faces.length, kept.added_by_name]));
     if (!kept || kept.status !== 'approved' || kept.faces.length !== 2 || kept.taken_when !== 'December 2019') fail('photo not kept in the album');
     if (!(await pg.evaluate((p) => window.__files.has('library-photos/' + p), kept.photo_path))) fail('album picture not stored');
-    if (!/In the Family Album/.test(await pg.textContent('.faces-keep'))) fail('album status not shown');
+    if (!/in the Family Album/.test(await pg.textContent('.faces-keep'))) fail('album status not shown');
     // A second photo already there, so the album has a cover.
     await pg.evaluate((k) => {
       const id = crypto.randomUUID();
@@ -215,7 +220,6 @@ async function pickPerson(pg, name) {
   // A member on a phone: a face for someone they don't look after waits for approval.
   {
     const { ctx, pg } = await open(b, { ...devices['iPhone 13'], hasTouch: true, ...(OUT ? {} : { deviceScaleFactor: 1 }) }, 'member');
-    if (!await pg.$('[data-nav="faces"]')) fail('member has no Faces menu');
     await choosePhoto(pg);
     if (OUT) {
       await pg.waitForTimeout(600);
