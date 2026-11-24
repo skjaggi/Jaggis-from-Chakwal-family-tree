@@ -854,3 +854,39 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
   .viewas-tag { grid-column: 1; grid-row: auto; justify-self: start; max-width: none; }
   .viewas-banner .viewas-note { display: none; }
 }
+
+/* ---------- top menu: everyday pages, then drop-downs (More, My account, Admin) */
+details.menu { position: relative; }
+details.menu > summary { list-style: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; color: var(--ink); white-space: nowrap; }
+details.menu > summary::-webkit-details-marker { display: none; }
+details.menu > summary:hover, details.menu[open] > summary { background: var(--surface-2); }
+details.menu > summary.active { background: var(--surface-2); font-weight: 600; }
+details.menu .caret { font-size: 0.8em; color: var(--muted); }
+.menu-list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 60; min-width: 230px;
+  display: flex; flex-direction: column; padding: 6px; gap: 2px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
+.menu-list a, .menu-list .linkish { display: block; text-align: left; padding: 11px 14px; min-height: 44px; border-radius: 8px; white-space: nowrap; }
+.menu-list a.active { background: var(--surface-2); font-weight: 600; }
+.menu-section + .menu-section { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+.menu-heading { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 6px 14px 2px; }
+.phone-nav { display: none !important; }
+@media (max-width: 760px) {
+  .wide-nav { display: none !important; }
+  .phone-nav { display: revert !important; }
+  details.menu.phone-nav { display: block !important; }
+  nav { flex-wrap: nowrap; }
+  nav a, .linkish, details.menu > summary { padding: 9px 12px; font-size: 1rem; }
+  /* The phone menu opens as a big sheet under the header, with large tap targets. */
+  details.menu.sheet .menu-list {
+    position: fixed; left: 8px; right: 8px; top: auto; margin-top: 6px; max-height: 75vh; overflow-y: auto; min-width: 0;
+  }
+  /* Two big buttons per row, so the whole menu fits on one phone screen. */
+  details.menu.sheet .menu-section { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  details.menu.sheet .menu-heading { grid-column: 1 / -1; }
+  details.menu.sheet .menu-list a, details.menu.sheet .menu-list .linkish {
+    font-size: 1rem; min-height: 48px; display: flex; align-items: center; white-space: normal; line-height: 1.2;
+    background: var(--surface-2); padding: 8px 12px; width: 100%;
+  }
+}
