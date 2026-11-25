@@ -962,6 +962,8 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
 /* Add a picture to the album (from the Library) */
 .album-add .faces-choose { margin: 4px 0 8px; }
 .album-add-stage .face-num { white-space: nowrap; max-width: none; }
+/* A name label never covers the face next to it: taps go through to that face. */
+.album-add-stage .face-num { pointer-events: none; }
 .album-add-stage .face-box.named .face-num { padding: 0 8px; }
 .face-box.picking { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold); }
 .album-add-who { background: var(--surface-2, var(--surface)); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin: 8px 0 12px; }
@@ -969,6 +971,8 @@ svg.tree-medal { overflow: visible; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .3
 .album-add-who-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .album-add-who-actions .btn { min-height: 44px; }
 .album-add-details h3 { margin: 12px 0 6px; }
+.album-admin { display: flex; flex-wrap: wrap; gap: 8px; }
+.album-admin .btn { min-height: 44px; }
 dialog.album-dialog { width: min(1180px, 96vw); max-width: 96vw; }
 .album { display: flex; flex-direction: column; gap: 12px; }
 .album-book { perspective: 1800px; }

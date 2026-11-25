@@ -5,14 +5,17 @@
 // may fill in the details (title, where, when, about). Naming people is
 // optional, so any family photo can go in, even one with nobody named.
 // Unlike the Faces page, nobody's tree photo changes here.
+// "Name the faces" (25 Nov 2026): the same screen, opened with a photo that is
+// already in the album (link), lets the admin add, change or remove the names
+// on its faces afterwards. The photo and its details stay as they are.
 import { store } from './data.js';
 import { personPicker } from './forms.js';
 import { fullName, shortName } from './model.js';
 import { h, clear, modal, toast, field, confirmDialog } from './ui.js';
 import { readPhoto, findFaces, order, finderReady } from './faces.js';
-import { saveGroupPhoto, allTopics, LIBRARY_BLESSINGS } from './library.js';
+import { saveGroupPhoto, updatePhotoFaces, libraryPhotoUrl, allTopics, LIBRARY_BLESSINGS } from './library.js';
 
-export function openAddToAlbum({ onDone = () => {} } = {}) {
+export function openAddToAlbum({ onDone = () => {}, link = null } = {}) {
   const s = { photo: null, url: null, faces: [], adding: false, picking: null, busy: false };
   const input = h('input', { id: 'album-file', type: 'file', accept: 'image/*', hidden: true });
   const chooseBtn = h('button.btn.big.primary', { type: 'button', onclick: () => input.click() }, 'Choose a photo');
@@ -26,7 +29,7 @@ export function openAddToAlbum({ onDone = () => {} } = {}) {
   const where = h('input', { name: 'taken_where', type: 'text', maxlength: 120, placeholder: 'e.g. Delhi, at the wedding' });
   const when = h('input', { name: 'taken_when', type: 'text', maxlength: 60, placeholder: 'e.g. December 2019, or about 1975' });
   const note = h('textarea', { name: 'note', rows: 3, maxlength: 2000, placeholder: 'What was happening, or a memory (optional)' });
-  const saveLabel = store.isAdmin ? 'Add to the album' : 'Send to the album';
+  const saveLabel = link ? 'Save the names' : store.isAdmin ? 'Add to the album' : 'Send to the album';
   const btn = h('button.btn.primary', { type: 'submit', disabled: true }, saveLabel);
   clear(details,
     h('h3', 'About this photo'),
@@ -38,15 +41,54 @@ export function openAddToAlbum({ onDone = () => {} } = {}) {
       : `Only signed-in family members can see album photos (never public). The admin checks it first; once approved you earn +${LIBRARY_BLESSINGS} blessings.`));
 
   const form = h('form.form.album-add',
-    h('p.lead', 'Choose a family photo. If people in it are in the tree, you can tap their faces to name them, so the family can see who is who. Naming them is up to you.'),
-    h('div.faces-choose', chooseBtn, input),
+    h('p.lead', link
+      ? 'Tap a face to name who it is, change the name, or take it off. Then tap Save the names.'
+      : 'Choose a family photo. If people in it are in the tree, you can tap their faces to name them, so the family can see who is who. Naming them is up to you.'),
+    link ? null : h('div.faces-choose', chooseBtn, input),
     status, stage, tools, who, details,
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
       btn));
   // Enter in the name search picks nobody and must not send the form.
   who.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
-  const m = modal('Add photo to album', form, { wide: true, guard: true, onClose: () => { if (s.url) URL.revokeObjectURL(s.url); } });
+  const m = modal(link ? `Name the faces: ${link.title}` : 'Add photo to album', form, { wide: true, guard: true, onClose: () => { if (s.url) URL.revokeObjectURL(s.url); } });
+
+  // A photo already in the album: open it with its names, then look for faces nobody has named yet.
+  if (link) (async () => {
+    s.busy = true;
+    try {
+      status.textContent = 'Opening the photo…';
+      const url = await libraryPhotoUrl(link);
+      if (!url) throw new Error('no photo');
+      s.photo = await readPhoto(await (await fetch(url)).blob());
+    } catch {
+      status.textContent = 'The photo could not be opened. Please try again later.';
+      s.busy = false;
+      return;
+    }
+    s.url = URL.createObjectURL(await new Promise((res) => s.photo.toBlob(res, 'image/jpeg', 0.9)));
+    const W = s.photo.width, H = s.photo.height;
+    s.faces = (link.faces || []).map((f) => ({ box: { x: f.x * W, y: f.y * H, w: f.w * W, h: f.h * H }, person: store.fam.byId.get(f.person_id) || null }))
+      .filter((f) => f.person).sort((a, b) => a.box.x - b.box.x).map((f, i) => ({ ...f, n: i + 1 }));
+    btn.disabled = false;
+    draw();
+    status.textContent = finderReady() ? 'Looking for faces nobody has named yet…' : 'Looking for faces nobody has named yet (the first time takes a little while)…';
+    try {
+      // A found face whose middle sits inside a named one is that same face.
+      const inside = (b, f) => b.x + b.w / 2 > f.box.x && b.x + b.w / 2 < f.box.x + f.box.w && b.y + b.h / 2 > f.box.y && b.y + b.h / 2 < f.box.y + f.box.h;
+      const extra = order(await findFaces(s.photo)).filter((b) => !s.faces.some((f) => inside(b, f)));
+      let n = s.faces.length;
+      s.faces.push(...extra.map((b) => ({ n: ++n, box: b, person: null })));
+      status.textContent = extra.length
+        ? `${s.faces.filter((f) => f.person).length} named, ${extra.length} not named yet. Tap a face to name it.`
+        : 'Tap a face to name it or change its name, or mark a face the site missed.';
+    } catch (e) {
+      console.warn('face finder', e);
+      status.textContent = 'Tap a named face to change it, or mark a face the site missed.';
+    }
+    s.busy = false;
+    draw();
+  })();
 
   input.addEventListener('change', async () => {
     const file = input.files[0];
@@ -119,7 +161,7 @@ export function openAddToAlbum({ onDone = () => {} } = {}) {
         style: `left:${pct(f.box.x, s.photo.width)};top:${pct(f.box.y, s.photo.height)};width:${pct(f.box.w, s.photo.width)};height:${pct(f.box.h, s.photo.height)}`,
         'aria-label': `Face ${f.n}${f.person ? `: ${fullName(f.person)}` : ''}`,
         onclick: () => { s.adding = false; s.picking = f; draw(); },
-      }, h('span.face-num', f.person ? shortName(f.person) : String(f.n)))));
+      }, h('span.face-num', f.person ? (f.person.given_name || '').split(' ')[0] || shortName(f.person) : String(f.n)))));
     const named = s.faces.filter((f) => f.person);
     clear(tools,
       h('button.btn.small' + (s.adding ? '.primary' : ''), { type: 'button', onclick: () => { s.adding = !s.adding; s.picking = null; draw(); } },
@@ -149,7 +191,7 @@ export function openAddToAlbum({ onDone = () => {} } = {}) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!s.photo) return toast('Please choose a photo first.', 'error');
-    if (!title.value.trim()) { toast('Please give the photo a short title.', 'error'); title.focus(); return; }
+    if (!link && !title.value.trim()) { toast('Please give the photo a short title.', 'error'); title.focus(); return; }
     btn.disabled = true;
     btn.textContent = 'Saving…';
     try {
@@ -160,6 +202,13 @@ export function openAddToAlbum({ onDone = () => {} } = {}) {
         w: +(f.box.w / s.photo.width).toFixed(4),
         h: +(f.box.h / s.photo.height).toFixed(4),
       }));
+      if (link) {
+        await updatePhotoFaces(link.id, faces);
+        m.close();
+        toast('The names are saved.', 'ok');
+        onDone({ ...link, faces });
+        return;
+      }
       const blob = await new Promise((res) => s.photo.toBlob(res, 'image/jpeg', 0.88));
       const topics = allTopics();
       const row = await saveGroupPhoto({
