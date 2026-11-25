@@ -239,7 +239,8 @@ export function renderFaces(page) {
         h('p', s.kept.status === 'approved'
           ? ['This photo is in the Family Album, with the names on the faces. ', h('a', { href: `#/library?photo=${s.kept.id}` }, 'See it in the album')]
           : `This photo was sent to the Family Album and appears there once the admin approves it (+${LIBRARY_BLESSINGS} blessings).`),
-        !same && store.isAdmin ? h('button.btn', { type: 'button', onclick: async () => {
+        // The admin, or the member who kept the photo, can update its names (25 Nov 2026).
+        !same ? h('button.btn', { type: 'button', onclick: async () => {
           try {
             await updatePhotoFaces(s.kept.id, tags);
             s.kept.faces = tags;
@@ -247,7 +248,7 @@ export function renderFaces(page) {
             drawKeep();
           } catch (e) { toast(e.message, 'error'); }
         } }, 'Update the names in the Library') : null,
-        !same && !store.isAdmin ? h('p.muted.small', 'You named more faces after sending it. The admin can add those names to the Library photo.') : null);
+        null);
       return;
     }
     const title = h('input', { type: 'text', maxlength: 200, placeholder: 'e.g. Cousins at the wedding, 2019', value: s.title });
