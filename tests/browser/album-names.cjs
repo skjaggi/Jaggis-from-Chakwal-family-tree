@@ -1,4 +1,5 @@
-// "Name the faces" on a photo already in the Family Album (admin): the photo opens
+// "Name the faces" on a photo already in the Family Album (the admin, or the member
+// who added it; other members don't get the button): the photo opens
 // with its names, faces nobody named are found, a name is added and one taken
 // off, and the album shows the new names. Uses the made-up cartoon group photo.
 const { chromium, devices } = require('playwright'); const fs = require('fs');
@@ -12,7 +13,8 @@ const ALBUM = [{ src: '/test-photos/group.jpg', title: 'Cousins at the wedding',
 (async () => {
   const b = await chromium.launch(); const errors = [];
   for (const [label, dev] of [['desktop', { viewport: { width: 1280, height: 860 } }], ['phone', devices['iPhone 13']]]) {
-    for (const role of ['admin', 'member']) {
+    for (const who of ['admin', 'member', 'sender']) {
+      const role = who === 'admin' ? 'admin' : 'member';
       const ctx = await b.newContext({ ...dev, deviceScaleFactor: 1 });
       await ctx.route('https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm', (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/.vendor/d3.esm.js') }));
       await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
@@ -25,19 +27,20 @@ const ALBUM = [{ src: '/test-photos/group.jpg', title: 'Cousins at the wedding',
       await ctx.addInitScript(([role, al]) => {
         Object.assign(window, { __FAKE_ROLE__: role, __FAKE_CLAIMED__: 1, __FAKE_ALBUM__: al });
         try { sessionStorage.setItem('claim-welcome', '1'); for (const k of ['blessings-intro', 'blessingsIntro', 'founder-thanks']) localStorage.setItem(k, '1'); } catch {}
-      }, [role, ALBUM]);
+      }, [role, ALBUM.map((a) => ({ ...a, mine: who === 'sender' }))]);
       const pg = await ctx.newPage();
-      pg.on('pageerror', (e) => errors.push(`${label} ${role}: ${e.message}`));
+      pg.on('pageerror', (e) => errors.push(`${label} ${who}: ${e.message}`));
       await pg.goto('http://localhost:8765/#/library'); await pg.waitForSelector('.album-tile');
       await pg.click('.album-tile-open'); await pg.waitForSelector('.album-spread .lib-face'); await pg.waitForTimeout(300);
       const btn = pg.locator('.album-spread button', { hasText: 'Name the faces' });
-      if (role === 'member') { if (await btn.count()) fail(`${label}: a member sees Name the faces`); else console.log(`ok: ${label} member: no Name the faces button`); await ctx.close(); continue; }
+      if (who === 'member') { if (await btn.count()) fail(`${label}: a member sees Name the faces on someone else's photo`); else console.log(`ok: ${label} member: no Name the faces on someone else's photo`); await ctx.close(); continue; }
+      if (!(await pg.locator('.album-spread button', { hasText: 'Edit the details' }).count())) fail(`${label} ${who}: no Edit the details`);
       await btn.click();
       await pg.waitForSelector('dialog .album-add-stage .face-box');
       await pg.waitForFunction(() => /not named yet/.test(document.querySelector('dialog .faces-status')?.textContent || ''));
       const faces = await pg.$$eval('dialog .album-add-stage .face-box', (els) => els.map((e) => e.classList.contains('named')));
       if (faces.length !== 5 || faces.filter(Boolean).length !== 2) fail(`${label}: expected 5 faces, 2 named: ${JSON.stringify(faces)}`);
-      else console.log(`ok: ${label} admin: opens with 2 names and finds 3 more faces`);
+      else console.log(`ok: ${label} ${who}: opens with 2 names and finds 3 more faces`);
       if (await pg.locator('dialog input[name=title]').isVisible()) fail(`${label}: details form should be hidden`);
       await pg.locator('dialog .face-box:not(.named)').first().click();
       await pg.fill('dialog .album-add-who .picker input', 'Kesar'); await pg.click('dialog .album-add-who .pick-list button');
@@ -48,7 +51,7 @@ const ALBUM = [{ src: '/test-photos/group.jpg', title: 'Cousins at the wedding',
       const row = await pg.evaluate(() => window.__db.library_links.find((l) => l.kind === 'photo'));
       const names = await pg.evaluate((ids) => ids.map((id) => window.__db.people.find((p) => p.id === id).given_name), row.faces.map((f) => f.person_id));
       if (row.faces.length !== 2 || !names.includes('Kesar Mal') || names.includes('Harbans Lal') || row.title !== ALBUM[0].title) fail(`${label}: names not saved right: ${names}`);
-      else console.log(`ok: ${label} admin: saved ${names.join(', ')}`);
+      else console.log(`ok: ${label} ${who}: saved ${names.join(', ')}`);
       await pg.waitForSelector('.album-spread .lib-face'); await pg.waitForTimeout(300);
       if (!/Kesar Mal/.test(await pg.textContent('.album-spread .lib-photo-names'))) fail(`${label}: album does not show the new name`);
       await ctx.close();

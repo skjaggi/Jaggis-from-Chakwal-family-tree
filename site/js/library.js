@@ -127,9 +127,11 @@ export async function pendingLibraryCount() {
 
 async function saveLink(fields, id = null) {
   const q = id
-    ? store.sb.from('library_links').update(fields).eq('id', id)
+    ? store.sb.from('library_links').update(fields).eq('id', id).select('id')
     : store.sb.from('library_links').insert({ ...fields, status: store.isAdmin ? 'approved' : 'pending', submitted_by: store.session.user.id });
-  const { error } = await q;
+  const { data, error } = await q;
+  // The database changes nothing (without an error) for someone who may not edit it.
+  if (!error && id && !data?.length) throw new Error(NOT_YOURS);
   if (error) {
     if (/library_links_url_once|duplicate/i.test(error.message)) {
       const same = (cache || []).find((l) => l.url.toLowerCase() === String(fields.url).toLowerCase());
@@ -200,12 +202,20 @@ export async function saveGroupPhoto({ blob, title, topic, note, faces, taken_wh
   return row;
 }
 
-// Change the names on a photo already in the Library (admin).
+const NOT_YOURS = 'This could not be saved: only the admin, or the person who added it, can change it.';
+
+// Change the names on a photo already in the Library (the admin, or the member who added it).
 export async function updatePhotoFaces(id, faces) {
-  const { error } = await store.sb.from('library_links').update({ faces, person_ids: [...new Set(faces.map((f) => f.person_id))] }).eq('id', id);
+  const { data, error } = await store.sb.from('library_links').update({ faces, person_ids: [...new Set(faces.map((f) => f.person_id))] }).eq('id', id).select('id');
   if (error) throw error;
+  if (!data?.length) throw new Error(NOT_YOURS);
   forgetLibrary();
 }
+
+// Who may change an album photo's details and the names on its faces: the admin,
+// and the family member who added it (Sunil, 25 Nov 2026). The database checks
+// the same rule, and only the admin approves or removes.
+export const canEditPhoto = (link) => store.isAdmin || (link.kind === 'photo' && !!store.session && link.submitted_by === store.session.user.id);
 
 // One album page: the photo with a name over each tagged face (shown when you
 // point at a face on a computer or tap it on a phone, or all at once with
@@ -263,7 +273,7 @@ function albumPage(link, close) {
         }, h('button.link', { type: 'button', onclick: () => open(f.person_id) }, fullName(f.person)))))] : null,
       h('p.album-added', `Added by ${link.added_by_name || 'a family member'} on ${added}`),
       link.status === 'pending' ? h('p.tag.warn', 'Waiting for approval') : null,
-      store.isAdmin ? h('div.album-admin',
+      canEditPhoto(link) ? h('div.album-admin',
         h('button.btn.small.ghost', { type: 'button', onclick: async () => {
           close();
           const { openAddToAlbum } = await import('./album-add.js');
@@ -416,7 +426,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   const takenWhere = h('input', { type: 'text', maxlength: 120, placeholder: 'e.g. Delhi, at the wedding', value: v.taken_where || '' });
   const takenWhen = h('input', { type: 'text', maxlength: 60, placeholder: 'e.g. December 2019', value: v.taken_when || '' });
   const form = h('form.form.lib-form',
-    h('p.form-note', admin
+    isPhoto ? null : h('p.form-note', admin
       ? 'Paste the link, give it a short title, pick a topic, and tag anyone in the tree it is about. Your links go into the Library straight away.'
       : `Paste the link, give it a short title, pick a topic, and tag anyone in the tree it is about. The admin checks each link before it appears. Once approved you earn +${LIBRARY_BLESSINGS} blessings.`),
     isPhoto ? null : field('Link (web address) *', url, 'Copy it from the address bar, or from Share → Copy link on YouTube.'),
@@ -426,7 +436,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
     newTopicBox,
     field('A few words about it', note),
     isPhoto ? h('div.row2', field('Where it was taken', takenWhere), field('When it was taken', takenWhen)) : null,
-    isPhoto ? h('p.form-note', 'The names on the faces are changed from the Faces page.') : field('People in the tree it is about', h('div', chips, picker)),
+    isPhoto ? h('p.form-note', 'To change the names on the faces, tap Name the faces on the album page.') : field('People in the tree it is about', h('div', chips, picker)),
     isPhoto ? null : h('details.lib-more', h('summary', 'More options'),
       field('Picture link', image, 'Videos from YouTube get their picture automatically.')),
     h('p.form-note', 'Only signed-in family members can see the Library.'),
