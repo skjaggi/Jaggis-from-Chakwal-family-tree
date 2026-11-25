@@ -488,7 +488,7 @@ Answered on 21 Nov 2026: build before buying a domain, using the existing GitHub
 
 1. **Brand name and domain.** To be decided; not needed to start building (6.1). Suggestions in section 10.
 2. **Which company sells it** (Quantum Nexus LLC recommended). To be decided; needed before Stripe payments are set up (phase 4, spring 2027).
-3. **Heritage plan price** (about $99 a year suggested). To be decided before the paid launch.
+3. ~~Heritage plan price~~: answered 24 Nov 2026, Heritage is held back; one paid plan at $49.99 a year or $5.99 a month. The product's own repository has the up-to-date plan.
 4. ~~Start date~~: answered 21 Nov 2026, start now.
 
 ## 12. Decisions
