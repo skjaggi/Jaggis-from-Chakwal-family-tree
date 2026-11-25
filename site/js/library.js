@@ -263,7 +263,17 @@ function albumPage(link, close) {
         }, h('button.link', { type: 'button', onclick: () => open(f.person_id) }, fullName(f.person)))))] : null,
       h('p.album-added', `Added by ${link.added_by_name || 'a family member'} on ${added}`),
       link.status === 'pending' ? h('p.tag.warn', 'Waiting for approval') : null,
-      store.isAdmin ? h('button.btn.small.ghost', { type: 'button', onclick: () => { close(); openLibraryForm({ link }); } }, 'Edit the details') : null));
+      store.isAdmin ? h('div.album-admin',
+        h('button.btn.small.ghost', { type: 'button', onclick: async () => {
+          close();
+          const { openAddToAlbum } = await import('./album-add.js');
+          // Afterwards the album opens again at this photo, with the new names.
+          openAddToAlbum({ link, onDone: () => {
+            const to = `#/library?photo=${link.id}`;
+            if (location.hash === to) dispatchEvent(new HashChangeEvent('hashchange')); else location.hash = to;
+          } });
+        } }, 'Name the faces'),
+        h('button.btn.small.ghost', { type: 'button', onclick: () => { close(); openLibraryForm({ link }); } }, 'Edit the details')) : null));
 }
 
 // The Family Album: opens like a book, one photo to a page, with a cover.

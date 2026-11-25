@@ -117,6 +117,17 @@ class Q {
 }
 const files = new Map();
 window.__files = files;
+// Sample Family Album photos (window.__FAKE_ALBUM__): [{ src, title, taken_where,
+// taken_when, note, faces: [{ name: given name, x, y, w, h }] }], boxes as fractions.
+for (const [i, ph] of (window.__FAKE_ALBUM__ || []).entries()) {
+  const id = `album-${i}`;
+  files.set(`library-photos/${id}/photo.jpg`, await (await fetch(ph.src)).blob());
+  const faces = ph.faces.map(({ name, ...box }) => ({ person_id: pidOf(name), ...box })).filter((f) => f.person_id);
+  db.library_links.push({ id, kind: 'photo', url: null, title: ph.title, topic: 'Family photos', note: ph.note || null, visibility: 'family',
+    photo_path: `${id}/photo.jpg`, faces, person_ids: [...new Set(faces.map((f) => f.person_id))], taken_where: ph.taken_where || null,
+    taken_when: ph.taken_when || null, added_by_name: ph.added_by || null, status: 'approved', submitted_by: uid, source: null, image_url: null,
+    submitted_at: new Date(Date.now() - (i + 1) * 864e5).toISOString() });
+}
 export function createClient() {
   const session = window.__FAKE_ROLE__ === 'anon' ? null : { user: { id: uid, email: 'me@example.com' } };
   return {
