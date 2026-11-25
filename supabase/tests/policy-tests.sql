@@ -483,6 +483,21 @@ update public.library_links set status = 'approved' where kind = 'photo';
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
 select pg_temp.expect((select count(*) from storage.objects where bucket_id = 'library-photos') = 1, 'family members see an approved group photo');
 select pg_temp.expect((select faces -> 0 ->> 'person_id' from public.library_links where kind = 'photo') = pg_temp.pid('Sunil Kumar')::text, 'tagged faces are kept with the photo');
+-- Who may edit an album photo: the admin and the member who added it (25 Nov 2026).
+update public.library_links set title = 'Not mine' where kind = 'photo';
+select pg_temp.expect((select title from public.library_links where kind = 'photo') = 'Wedding 2019', 'another member cannot edit someone else''s photo');
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000b';
+update public.library_links set title = 'Wedding, December 2019', taken_where = 'Delhi', faces = '[]'::jsonb, person_ids = '{}' where kind = 'photo';
+select pg_temp.expect((select title from public.library_links where kind = 'photo') = 'Wedding, December 2019', 'the member who added a photo edits its details');
+select pg_temp.expect((select jsonb_array_length(faces) from public.library_links where kind = 'photo') = 0, 'the member who added a photo changes the names on it');
+do $$ begin
+  begin
+    update public.library_links set status = 'declined' where kind = 'photo';
+    raise exception 'FAILED: the sender changed the photo''s approval';
+  exception when insufficient_privilege then raise notice 'ok: the sender cannot approve or decline their photo';
+  end;
+end $$;
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-00000000000c';
 delete from storage.objects where bucket_id = 'library-photos';
 select pg_temp.expect((select count(*) from storage.objects where bucket_id = 'library-photos') = 1, 'members cannot delete an approved group photo');
 set local role anon;

@@ -1138,10 +1138,7 @@ create policy "family reads library links" on public.library_links for select to
 drop policy if exists "family suggests library links" on public.library_links;
 create policy "family suggests library links" on public.library_links for insert to authenticated
   with check (public.is_admin() or (exists (select 1 from public.profiles where id = auth.uid()) and status = 'pending'));
--- Only the admin approves, declines or edits.
-drop policy if exists "admin edits library links" on public.library_links;
-create policy "admin edits library links" on public.library_links for update to authenticated
-  using (public.is_admin()) with check (public.is_admin());
+-- Who may edit: see "admin or the sender edits library links" with the group photos below.
 -- The admin can remove any link; members can withdraw their own while it waits.
 drop policy if exists "remove library links" on public.library_links;
 create policy "remove library links" on public.library_links for delete to authenticated
@@ -1193,6 +1190,31 @@ create policy "remove library photos" on storage.objects for delete to authentic
   using (bucket_id = 'library-photos' and (public.is_admin() or exists (
     select 1 from public.library_links l where l.id::text = (storage.foldername(name))[1]
       and l.submitted_by = auth.uid() and l.status = 'pending')));
+
+-- The admin edits any link or photo. The family member who added a photo to the
+-- Family Album may also edit it (Sunil, 25 Nov 2026): its title, topic, words,
+-- where and when, and the names on its faces. Only the admin approves, declines
+-- or changes anything else (checked by _library_own_edit_guard below).
+drop policy if exists "admin edits library links" on public.library_links;
+drop policy if exists "admin or the sender edits library links" on public.library_links;
+create policy "admin or the sender edits library links" on public.library_links for update to authenticated
+  using (public.is_admin() or (kind = 'photo' and submitted_by = auth.uid() and exists (select 1 from public.profiles where id = auth.uid())))
+  with check (public.is_admin() or (kind = 'photo' and submitted_by = auth.uid()));
+create or replace function public._library_own_edit_guard() returns trigger
+language plpgsql set search_path = public as $$
+declare
+  mine constant text[] := array['title', 'topic', 'note', 'taken_where', 'taken_when', 'faces', 'person_ids'];
+begin
+  -- The admin, and our own functions (which don't run as a signed-in member), change anything.
+  if current_user <> 'authenticated' or public.is_admin() then return new; end if;
+  if (to_jsonb(new) - mine) is distinct from (to_jsonb(old) - mine) then
+    raise exception 'Only the admin can change that.' using errcode = '42501';
+  end if;
+  return new;
+end $$;
+drop trigger if exists library_own_edit_guard on public.library_links;
+create trigger library_own_edit_guard before update on public.library_links
+  for each row execute function public._library_own_edit_guard();
 
 -- ---------------------------------------------------------------- family book drafts
 -- Books made with the family book maker (#/book). Admins only while it is
