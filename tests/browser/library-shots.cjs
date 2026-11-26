@@ -16,6 +16,8 @@ async function context(b, { role = 'admin', phone = false, theme = 'light' } = {
   await ctx.route('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.89.0/+esm', (r) => r.fulfill({ contentType: 'application/javascript', body: fs.readFileSync(__dirname + '/fake-supabase.js') }));
   await ctx.route('**/js/config.js*', (r) => r.fulfill({ contentType: 'application/javascript', body: "export const config = { supabaseUrl: 'https://x.supabase.co', supabaseAnonKey: 'k', siteTitle: 'Jaggis of Chakwal', adminName: 'Sunil' };" }));
   await ctx.route('https://i.ytimg.com/**', (r) => r.fulfill({ contentType: 'image/jpeg', body: thumb }));
+  await ctx.route('https://www.google.com/s2/favicons**', (r) => r.fulfill({ contentType: 'image/jpeg', body: thumb }));
+  await ctx.route('https://example.com/pictures/**', (r) => r.fulfill({ contentType: 'image/jpeg', body: thumb }));
   await ctx.route('https://www.youtube.com/oembed**', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ title: 'Chakwal: the old town and its families (sample video)', author_name: 'Sample channel' }) }));
   await ctx.addInitScript(([r, t]) => { window.__FAKE_ROLE__ = r; window.__FAKE_CLAIMED__ = 1; window.__FAKE_LIBRARY__ = 1; window.__FAKE_NAME__ = r === 'admin' ? 'Sunil Jaggi' : 'Asha'; try { localStorage.setItem('theme', t); } catch {} sessionStorage.setItem('claim-welcome', '1'); }, [role, theme]);
   return ctx;
@@ -31,6 +33,13 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
     await pg.screenshot({ path: OUT + `library-${name}.png`, fullPage: name !== 'phone' });
     if (name === 'desktop') {
       ok(await pg.locator('.lib-grid .lib-card').count() >= 6, 'library shows approved links');
+      // Older links: the admin's visit fills in pictures the websites offer; the rest show their headline.
+      await pg.waitForFunction(() => window.__db.library_links.some((l) => l.url.includes('1353858') && l.image_url));
+      ok(true, 'older link without a picture gets one on the admin\'s visit');
+      await pg.waitForSelector('.lib-card:has(a[href*="1353858"]) .lib-media:not(.no-thumb) img');
+      ok(true, 'its card shows the new picture');
+      ok(await pg.locator('.lib-card:has(a[href*="vahali"]) .lib-media.no-thumb .lib-hl-title').textContent() === 'Vahali State: a gem in the Salt Range', 'no picture: the headline shows instead');
+      ok(await pg.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('library-pictures-tried') || '{}')).length >= 2), 'links already looked up are remembered');
       await pg.click('.lib-topics button:has-text("Partition")');
       ok(await pg.locator('.lib-grid .lib-card').count() === 1, 'topic filter');
       await pg.click('.lib-topics button:has-text("All")');
@@ -55,6 +64,24 @@ const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) process
       await pg.click('dialog button[type=submit]'); await pg.waitForSelector('dialog', { state: 'detached' });
       await pg.waitForSelector('.lib-topics button:has-text("Moti Mahal and butter chicken")');
       ok(true, 'new topic becomes a button');
+      // Another site's link: its own preview picture and title fill in by themselves.
+      await pg.click('button:has-text("Add a link")');
+      await pg.fill('dialog input[name=url]', 'https://example.com/news/old-chakwal');
+      await pg.locator('dialog input[name=url]').dispatchEvent('change');
+      await pg.waitForSelector('dialog .lib-form-preview img');
+      ok(await pg.inputValue('dialog input[name=image_url]') === 'https://example.com/pictures/old-chakwal.jpg', 'article link: preview picture filled in');
+      ok((await pg.inputValue('dialog input[name=title]')).includes('Old Chakwal remembered'), 'article link: title filled in');
+      await pg.locator('dialog .lib-form-preview').screenshot({ path: OUT + 'library-link-preview.png' });
+      // A different link with no picture: the first link's picture is not kept.
+      await pg.fill('dialog input[name=url]', 'https://example.org/plain-page');
+      await pg.locator('dialog input[name=url]').dispatchEvent('change'); await pg.waitForTimeout(300);
+      ok(await pg.inputValue('dialog input[name=image_url]') === '', 'changed link: old picture cleared');
+      await pg.fill('dialog input[name=url]', 'https://example.com/news/old-chakwal');
+      await pg.locator('dialog input[name=url]').dispatchEvent('change'); await pg.waitForSelector('dialog .lib-form-preview img');
+      await pg.click('dialog button[type=submit]'); await pg.waitForSelector('dialog', { state: 'detached' });
+      ok(await pg.evaluate(() => window.__db.library_links.some((l) => l.url.includes('old-chakwal') && l.image_url === 'https://example.com/pictures/old-chakwal.jpg')), 'article link saved with its picture');
+      await pg.waitForSelector('.lib-card img[src="https://example.com/pictures/old-chakwal.jpg"]');
+      ok(true, 'article card shows its picture');
       await pg.locator('.lib-play').first().click();
       ok(await pg.locator('.lib-media iframe[src*="youtube-nocookie.com/embed/SAMPLEvid01"]').count() === 1, 'video plays on the page');
       // Review page: the suggested link

@@ -30,7 +30,7 @@ The Jaggis of Chakwal family tree is a phone-friendly website where anyone can l
 | Release | Target | Status |
 |---|---|---|
 | Version 1 | Thanksgiving, 26 Nov 2026 | **Live** since 13 Nov 2026, at familytree.sjaggi.com since 14 Nov. Several items first planned for version 2 shipped early: branch admins, custom domain, source and uncertainty fields on screen, edit history. |
-| Version 2 | Early 2027 | Planned: linked documents (certificates, letters), GEDCOM import, "How are we related?" between any two people, automatic Library preview pictures. |
+| Version 2 | Early 2027 | Planned: linked documents (certificates, letters), GEDCOM import, "How are we related?" between any two people. |
 | Future | Later | Open sign-up so any family can start its own tree, self-hosting, App Store and Play Store apps, more languages, prize draws for Blessings. Planned as a separate product: see [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). |
 
 Related project: a printed **coffee table book**, *Jaggis of Chakwal* (about 50 hardcover copies, 12x12 inches or larger, about 100 pages, target first quarter 2027). Its requirements are kept separately (`Jaggis-of-Chakwal-Book-Requirements-and-Samples.pdf` in the project files).
@@ -209,7 +209,7 @@ Members earn blessings ✦ for approved contributions (own-family changes count 
 
 ### 8.7 Family Library
 
-- Library page with videos, articles and writing about the Jaggis of Chakwal, grouped by topic buttons, with search. YouTube videos play on the page with automatic thumbnails; other links open on their own site (picture link added by hand).
+- Library page with videos, articles and writing about the Jaggis of Chakwal, grouped by topic buttons, with search. YouTube videos play on the page with automatic thumbnails; other links open on their own site. When a link from another site is pasted, its own preview picture (the one WhatsApp shows) and title fill in by themselves, found by the link-preview function on the server (signed-in members only; it reads public pages and saves nothing); the picture can be changed or cleared under More options. Older links with no picture get one when the admin opens the Library (up to 12 per visit; each link at most once a month on that device). When a website offers no picture (X, Facebook, PDFs), the card shows the headline newspaper style, with the website's name and small logo (from Google's public site-icon service).
 - Members **suggest a link** (title, topic, a note, people it is about); the form suggests a topic, and **+ New topic…** adds one. The link waits for admin approval under Review (Approve, Decline, Edit first); the member sees it as Waiting for approval and can withdraw it. Duplicate links are refused.
 - Links tagged with a person show on their card under **In the Library**, with **+ Add a link about…**.
 - Admin links go in straight away; the admin can edit or remove any link.
@@ -362,7 +362,7 @@ Sunil (24 Nov 2026): after a group photo is used on the Faces page, offer to kee
 
 ## 11. Open questions
 
-- [x] Automatic preview pictures for non-YouTube Library links: answered 25 Nov 2026, yes. Built on the family product first, then brought here (still planned for this site until then).
+- [x] Automatic preview pictures for non-YouTube Library links: answered 25 Nov 2026, yes. Built on the family product first, then brought here on 26 Nov 2026.
 - [x] Future version: how other families host their own tree: answered 20 to 24 Nov 2026. It is one shared platform, the family product at app.sjaggi.com, with this site as its first family later on. Only the brand name and the selling company are still open, and neither is needed before spring 2027. The latest plan is in the product's own repository.
 - [x] Profession typo "bussiness" for Tapashi Ram Jaggi: answered 25 Nov 2026, change it to "Business" (a one-word change to his record in the live database).
 
@@ -374,6 +374,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 26 Nov 2026 | | **Pictures on Library link cards** (from the family product; Sunil asked for a picture or headline on every card). Pasting a link fills in the website's own preview picture and title (new link-preview function). Older links get their picture when the admin opens the Library. Links whose website offers none (X, Facebook, PDFs) show the headline in large print with the site's name and small logo. Help section 10. No database change. |
 | 25 Nov 2026 | | Open questions (section 11) answered by Sunil and closed. No change to the site. |
 | 25 Nov 2026 | | **The person who added an album photo can edit it too** (from the family product; Sunil asked for it on both sites). Besides the admin, the member who added a photo gets **Name the faces** and **Edit the details** on its page; other members don't. Only the admin approves or removes. The database enforces it: update policy "admin or the sender edits library links" (photos only) and trigger `_library_own_edit_guard`. Help section on the Family Album. Database script 2026-11-25-library-sender-edits.sql (rollback included). |
 | 25 Nov 2026 | | **Name the faces afterwards** (from the family product; Sunil asked to bring it here). Each Family Album page has **Name the faces** for the admin: the photo opens with its names, faces nobody named are found again, and names can be added, changed or taken off; only the names change. Names on faces show the first name only, and a name never blocks a tap on the face beside it. Help section on the Family Album. No database change. |

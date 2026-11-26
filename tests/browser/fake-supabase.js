@@ -149,6 +149,10 @@ export function createClient() {
           systems: { stats: [{ name: 'Android', count: 70 }, { name: 'iOS', count: 40 }, { name: 'Windows', count: 32 }] },
           sizes: { stats: [{ name: 'Phones', count: 100 }, { name: 'Computer monitors', count: 42 }] } }, error: null };
       }
+      if (name === 'link-preview') {
+        // A news page with a preview picture; any other page has none.
+        return { data: /example\.com\/news|1353858/.test(body.url) ? { image: 'https://example.com/pictures/old-chakwal.jpg', title: 'Old Chakwal remembered (sample article)' } : { image: null, title: null }, error: null };
+      }
       if (name === 'remove-member') {
         if (body.action === 'remove') { const i = db.invites.findIndex((x) => x.email === body.email); const inv = db.invites.splice(i, 1)[0]; (db.removed_members ||= []).push({ email: body.email, snapshot: { invite: inv, profile: null }, removed_at: new Date().toISOString() }); return { data: { removed: true }, error: null }; }
         const j = db.removed_members.findIndex((x) => x.email === body.email); const r = db.removed_members.splice(j, 1)[0]; db.invites.push(r.snapshot.invite); return { data: { restored: true }, error: null };
