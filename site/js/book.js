@@ -341,14 +341,58 @@ function photoSrc(key, slot, autoPersonId) {
   return autoPersonId ? store.photoUrls.get(autoPersonId) || null : null;
 }
 
+// Photo frames. With "Mixed photo frames" on (the default), each photo gets
+// its own frame and a slight tilt, picked from its page and place so it stays
+// the same every time. Any photo can be tilted, moved, made bigger or smaller,
+// or given another frame by hand (edits.pf[slot]: x and y as fractions of the
+// page, s size, r tilt in degrees, fr frame).
+export const FRAMES = [
+  { id: 'white', name: 'White border' },
+  { id: 'snapshot', name: 'Snapshot' },
+  { id: 'gold', name: 'Gold line' },
+  { id: 'tape', name: 'Taped' },
+  { id: 'corners', name: 'Album corners' },
+  { id: 'rounded', name: 'Rounded' },
+  { id: 'shadow', name: 'No border' },
+];
+const TILTS = [-3, -2, -1.2, 0, 1.2, 2, 3];
+const hash = (t) => { let x = 2166136261; for (const c of t) x = Math.imul(x ^ c.charCodeAt(0), 16777619); return x >>> 0; };
+function frameLook(key, slot, cls) {
+  const own = edits(key).pf?.[slot] || {};
+  const mixed = B.data.settings.mixFrames !== false;
+  const n = hash(`${key}|${slot}`);
+  // The cover and full-page photos stay straight and frameless unless changed by hand.
+  const auto = mixed && !/bp-(cover|full)-ph/.test(cls);
+  const fr = own.fr || (auto ? FRAMES[n % FRAMES.length].id : '');
+  const r = own.r ?? (auto ? TILTS[(n >>> 8) % TILTS.length] : 0);
+  return { fr, r, x: own.x || 0, y: own.y || 0, s: own.s || 1 };
+}
+const frameTransform = ({ x, y, r, s: sc }) => (x || y || r || sc !== 1
+  ? `translate(calc(var(--pw) * ${x}), calc(var(--ph) * ${y})) rotate(${r}deg) scale(${sc})` : '');
+function setFrame(key, slot, fn) {
+  setEdit(key, (e) => {
+    e.pf = { ...(e.pf || {}) };
+    const v = { ...(e.pf[slot] || {}) };
+    fn(v);
+    for (const k of Object.keys(v)) if (v[k] == null) delete v[k];
+    if (Object.keys(v).length) e.pf[slot] = v;
+    else delete e.pf[slot];
+    if (!Object.keys(e.pf).length) delete e.pf;
+  });
+}
+
 // A photo frame. Clicking it (while editing) opens the photo chooser.
 function photo(key, slot, autoPersonId, { cls = '', label = '', edit, monogram = '' }) {
   if (isGone(key, `p:${slot}`)) return null;
   const src = photoSrc(key, slot, autoPersonId);
-  const frame = h(`div.bp-photo${cls ? `.${cls}` : ''}`, { 'data-slot': slot },
+  const look = frameLook(key, slot, cls);
+  const frame = h(`div.bp-photo${cls ? `.${cls}` : ''}${look.fr ? `.fr-${look.fr}` : ''}`, { 'data-slot': slot },
     src ? h('img', { src, alt: label })
-      : h('div.bp-mono', monogram || ''));
+      : h('div.bp-mono', monogram || ''),
+    ['tape', 'corners'].includes(look.fr) ? h('span.bp-fr') : null);
+  frame.style.transform = frameTransform(look);
   if (!src) frame.classList.add('empty');
+  if (edit) frame.append(...photoTools(key, slot, frame, look));
   if (edit) {
     frame.classList.add('clickable');
     frame.dataset.delKey = key;
@@ -360,6 +404,56 @@ function photo(key, slot, autoPersonId, { cls = '', label = '', edit, monogram =
     if (img) img.addEventListener('load', () => checkPage(frame.closest('.bp')));
   }
   return frame;
+}
+
+// The small buttons on a photo while editing: move, tilt, frame, size, reset.
+function photoTools(key, slot, frame, look) {
+  const stop = (e) => { e.stopPropagation(); };
+  const btn = (txt, title, onclick) => h('button.bp-pt', { type: 'button', title, 'aria-label': title, onpointerdown: stop, onclick: (e) => { e.stopPropagation(); onclick(); } }, txt);
+  const redo = () => rerenderPage(key);
+  const nextFrame = () => setFrame(key, slot, (v) => { const i = FRAMES.findIndex((f) => f.id === look.fr); v.fr = FRAMES[(i + 1) % FRAMES.length].id; });
+  const changed = !!edits(key).pf?.[slot];
+  return [h('span.bp-ptools', { onclick: stop },
+    h('button.bp-pt.bp-pt-move', { type: 'button', title: 'Drag to move this photo', 'aria-label': 'Move photo', onpointerdown: (e) => dragPhoto(e, key, slot, frame, look, 'move'), onclick: stop }, '✥'),
+    btn('↺', 'Tilt left', () => { setFrame(key, slot, (v) => { v.r = Math.round(((v.r ?? look.r) - 2) * 10) / 10; }); redo(); }),
+    btn('↻', 'Tilt right', () => { setFrame(key, slot, (v) => { v.r = Math.round(((v.r ?? look.r) + 2) * 10) / 10; }); redo(); }),
+    btn('▢', `Frame: ${FRAMES.find((f) => f.id === look.fr)?.name || 'Plain'}. Click for the next frame`, () => { nextFrame(); redo(); }),
+    changed ? btn('⟲', 'Put this photo back as it was', () => { setFrame(key, slot, (v) => { for (const k of Object.keys(v)) delete v[k]; }); redo(); }) : null),
+  h('span.bp-pt-grip', { title: 'Drag to make the photo bigger or smaller', onpointerdown: (e) => dragPhoto(e, key, slot, frame, look, 'size'), onclick: stop })];
+}
+
+// Drag a photo to move it, or its corner to make it bigger or smaller. The
+// page is drawn scaled down, so moves are measured against its size on screen.
+function dragPhoto(e, key, slot, frame, look, mode) {
+  e.preventDefault();
+  e.stopPropagation();
+  const handle = e.currentTarget;
+  const page = frame.closest('.bp').getBoundingClientRect();
+  const fr = frame.getBoundingClientRect();
+  const v = { ...look };
+  const start = { px: e.clientX, py: e.clientY, x: v.x, y: v.y, s: v.s, w: fr.width };
+  frame.classList.add('dragging');
+  handle.setPointerCapture?.(e.pointerId);
+  const move = (ev) => {
+    if (mode === 'move') {
+      v.x = Math.max(-0.9, Math.min(0.9, start.x + (ev.clientX - start.px) / page.width));
+      v.y = Math.max(-0.9, Math.min(0.9, start.y + (ev.clientY - start.py) / page.height));
+    } else {
+      v.s = Math.max(0.3, Math.min(3, start.s * (1 + ((ev.clientX - start.px) + (ev.clientY - start.py)) / start.w)));
+    }
+    frame.style.transform = frameTransform(v);
+  };
+  const up = () => {
+    handle.removeEventListener('pointermove', move);
+    handle.removeEventListener('pointerup', up);
+    handle.removeEventListener('pointercancel', up);
+    frame.classList.remove('dragging');
+    setFrame(key, slot, (o) => { o.x = +v.x.toFixed(4) || null; o.y = +v.y.toFixed(4) || null; o.s = v.s === 1 ? null : +v.s.toFixed(3); });
+    rerenderPage(key);
+  };
+  handle.addEventListener('pointermove', move);
+  handle.addEventListener('pointerup', up);
+  handle.addEventListener('pointercancel', up);
 }
 
 function runFoot(n, edit) {
@@ -436,6 +530,16 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
       text(key, 'story', '', { cls: 'bp-story.fit', edit, ph: 'Write or paste the story here' }),
       text(key, 'by', '', { cls: 'bp-quote-by', edit, ph: 'Optional: shared by …' }),
     ];
+  } else if (page.type === 'more') {
+    // The rest of a long story, carried on from the person's page.
+    const fp = view.byKey.get(page.famKey);
+    body = [
+      h('div.bp-kicker', 'Continued'),
+      h('h1.bp-name', labelOf(page.famKey)),
+      h('div.bp-rule'),
+      h('div.bp-ed.bp-story.fit', fp ? storyPart(fp, page.part) : ''),
+      contNote(),
+    ];
   } else if (page.type === 'photo') {
     body = [
       photo(key, 'p', null, { cls: 'bp-full-ph', edit, label: 'Photo' }),
@@ -450,7 +554,8 @@ function renderPage(page, { edit = false, n = 0 } = {}) {
     ];
   }
   const showFoot = !['cover'].includes(page.type);
-  const pageEl = h(`div.bp.t-${page.type}`, { 'data-key': key },
+  const more = page.type === 'family' ? (flow.get(key)?.length || 0) > 0 : page.type === 'more' && page.part < (flow.get(page.famKey)?.length || 0);
+  const pageEl = h(`div.bp.t-${page.type}${more ? '.has-more' : ''}`, { 'data-key': key },
     h('div.bp-inner', body, addedItems(key, { edit }), showFoot ? runFoot(n, edit) : null, placedItems(key, { edit })));
   if (page.type === 'family') {
     const br = branchesOf(fam).of.get(page.id);
@@ -466,6 +571,27 @@ const RINGS = () => {
   el.innerHTML = '<svg viewBox="0 0 64 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2"><circle cx="24" cy="22" r="14"/><circle cx="40" cy="22" r="14"/><path d="M36 6l4-5 4 5" stroke-width="2.4" stroke-linejoin="round"/></svg>';
   return el;
 };
+
+// The story on a person's page: their own Notes / Story, then their husband's
+// or wife's (who has no page of their own), each in a paragraph.
+function familyStoryAuto(page) {
+  const fam = view.fam;
+  const d = fam.details.get(page.id) || {};
+  const spouses = fam.spouses(page.id).filter((x) => !page.blood.has(x.person.id));
+  return [d.notes, ...spouses.map((sp) => { const n = fam.details.get(sp.person.id)?.notes; return n ? `${sp.person.given_name}: ${n}` : ''; })].filter(Boolean).join('\n\n');
+}
+const familyStory = (page) => (edits(page.key).f?.story ?? familyStoryAuto(page)).trim();
+
+// A story too long for its page carries on, automatically, on "continued"
+// pages right after it. flow holds where each one is cut (character
+// offsets into the story), measured on screen by flowStories().
+const flow = new Map(); // family page key -> [cut, cut, ...]
+const storyPart = (page, i) => {
+  const full = familyStory(page);
+  const cuts = flow.get(page.key) || [];
+  return full.slice(i ? cuts[i - 1] : 0, i < cuts.length ? cuts[i] : full.length).trim();
+};
+const contNote = () => h('div.bp-cont-note', 'Continued on the next page');
 
 function familyPage(page, { edit }) {
   const fam = view.fam;
@@ -523,9 +649,24 @@ function familyPage(page, { edit }) {
         edit && own == null && !factsGone ? h('button.bp-mini', { type: 'button', onclick: (e) => { e.stopPropagation(); setEdit(key, (x) => { x.f = { ...(x.f || {}), facts: factsAuto }; }); rerenderPage(key); } }, 'Edit these lines') : null,
         h('div.bp-rule'),
         text(key, 'headline', '', { tag: 'h2', cls: 'bp-headline', edit, ph: 'Optional: a short headline, like a favourite saying' }),
-        text(key, 'story', [d.notes, ...spouses.map((sp) => { const n = fam.details.get(sp.person.id)?.notes; return n ? `${sp.person.given_name}: ${n}` : ''; })].filter(Boolean).join('\n\n'), { cls: 'bp-story.fit', edit, ph: 'Add a story or memory' }),
+        storyEl(page, edit),
         text(key, 'by', '', { cls: 'bp-quote-by', edit, ph: 'Optional: shared by …' }))),
   ];
+}
+
+// The story box on a person's page. When the story goes on to a "continued"
+// page, the box shows only the first part, but editing it edits the whole story.
+function storyEl(page, edit) {
+  const key = page.key;
+  const el = text(key, 'story', familyStoryAuto(page), { cls: 'bp-story.fit', edit, ph: 'Add a story or memory' });
+  if (!el) return null;
+  const showPart = () => { if (flow.get(key)?.length) el.textContent = storyPart(page, 0); };
+  showPart();
+  if (edit) {
+    el.addEventListener('focus', () => { if (flow.get(key)?.length) el.textContent = familyStory(page); });
+    el.addEventListener('blur', () => { showPart(); afterRender(); });
+  }
+  return [el, contNote()];
 }
 
 // Photos and text boxes the admin added to a page ("+ Photo", "+ Text").
@@ -772,7 +913,7 @@ function checkPage(pageEl) {
   const list = [];
   fitTrees(pageEl);
   const fits = [...pageEl.querySelectorAll('.fit'), pageEl.querySelector('.bp-inner')];
-  if (fits.some((el) => el && el.scrollHeight > el.clientHeight + 2)) list.push('Text is too long for this page. Shorten it, or move part of it to a new story page.');
+  if (fits.some((el) => el && overflows(el))) list.push('Text is too long for this page. Shorten it, or move part of it to a new story page.');
   for (const img of pageEl.querySelectorAll('.bp-photo img')) {
     if (!img.complete || !img.naturalWidth) continue;
     const fw = img.offsetWidth / 96;
@@ -811,6 +952,7 @@ const labelOf = (k) => {
   const p = view.byKey.get(k);
   if (!p) return k;
   if (p.type === 'family') return own?.name || p.label;
+  if (p.type === 'more') return `${labelOf(p.famKey)} (continued)`;
   if (['story', 'photo', 'quote'].includes(p.type)) return own?.title || own?.caption?.slice(0, 40) || own?.quote?.slice(0, 40) || EXTRA_TYPES[p.type];
   return own?.title || p.label;
 };
@@ -823,7 +965,95 @@ function computeView() {
   const { pages, rootId, count, gens } = autoPages(fam, s);
   const extra = (B.data.extra || []).map((x) => ({ key: x.key, type: x.type, label: EXTRA_TYPES[x.type], extra: true }));
   const byKey = new Map([...pages, ...extra].map((p) => [p.key, p]));
-  view = { fam, auto: pages, byKey, order: arrange(pages, B.data), rootId, count, gens };
+  view = { fam, auto: pages, byKey, order: withMore(arrange(pages, B.data), byKey), rootId, count, gens };
+}
+
+// The page order with each long story's "continued" pages right after it.
+// They are made from the measurements, so they are never saved in the order.
+function withMore(order, byKey) {
+  const out = [];
+  for (const k of order) {
+    if (k.startsWith('more:')) continue;
+    out.push(k);
+    const page = byKey.get(k);
+    if (page?.type !== 'family' || edits(k).hidden) continue;
+    (flow.get(k) || []).forEach((_, i) => {
+      const key = `more:${page.id}:${i + 1}`;
+      byKey.set(key, { key, type: 'more', famKey: k, part: i + 1, label: 'Story continued' });
+      out.push(key);
+    });
+  }
+  return out;
+}
+const savedOrder = () => view.order.filter((k) => !k.startsWith('more:'));
+
+// Measures every person's story on screen. One that does not fit is cut at
+// the end of the last sentence (or word) that fits, and the rest goes on a
+// "continued" page; a page that is still too full is cut again.
+// Text in two columns spills sideways into a third column, so width counts too.
+const overflows = (el) => el.scrollHeight > el.clientHeight + 2 || (el.classList.contains('fit') && el.scrollWidth > el.clientWidth + 2);
+const fitsNow = (bp) => ![...bp.querySelectorAll('.fit'), bp.querySelector('.bp-inner')].some((el) => el && overflows(el));
+function longestFit(bp, el, text) {
+  const ends = [];
+  for (const m of text.matchAll(/\S+/g)) ends.push(m.index + m[0].length);
+  let lo = 0, hi = ends.length - 1, best = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    el.textContent = text.slice(0, ends[mid]);
+    if (fitsNow(bp)) { best = ends[mid]; lo = mid + 1; } else hi = mid - 1;
+  }
+  if (!best) return ends[0] || text.length; // not even one word fits: move on anyway
+  // Rather end the page at a paragraph or sentence, if that loses little.
+  const head = text.slice(0, best);
+  const para = head.lastIndexOf('\n\n');
+  if (para > best * 0.75) return para;
+  const sentence = Math.max(...[...head.matchAll(/[.!?]["”’)]?(?=\s)/g)].map((m) => m.index + m[0].length), -1);
+  return sentence > best * 0.8 ? sentence : best;
+}
+let flowLoops = 0;
+function flowStories() {
+  const list = document.getElementById('bk-pages');
+  if (!list || !view || B?.readOnly) return;
+  let changed = false;
+  for (const wrap of list.querySelectorAll('.bk-page[data-key^="fam:"]')) {
+    const key = wrap.dataset.key;
+    const page = view.byKey.get(key);
+    const first = wrap.querySelector('.bp-fam-text .bp-story');
+    if (!page || !first || edits(key).hidden) { if (flow.delete(key)) changed = true; continue; }
+    if (document.activeElement === first) continue; // being edited: measured when done
+    const full = familyStory(page);
+    const cuts = [];
+    let start = 0;
+    for (let j = 0; j < 30; j++) {
+      const bp = j ? list.querySelector(`.bk-page[data-key="more:${CSS.escape(page.id)}:${j}"] .bp`) : wrap.querySelector('.bp');
+      const el = j ? bp?.querySelector('.bp-story') : first;
+      if (!el) break; // that page is made on the next pass, then measured
+      while (/\s/.test(full[start] || '')) start++;
+      const rest = full.slice(start);
+      const keep = el.textContent;
+      const had = bp.classList.contains('has-more');
+      el.textContent = rest;
+      bp.classList.remove('has-more');
+      const fits = fitsNow(bp);
+      if (!fits) {
+        bp.classList.add('has-more');
+        start += longestFit(bp, el, rest);
+        cuts.push(start);
+      }
+      el.textContent = keep;
+      bp.classList.toggle('has-more', had);
+      if (fits) break;
+    }
+    if ((flow.get(key) || []).join() !== cuts.join()) {
+      if (cuts.length) flow.set(key, cuts);
+      else flow.delete(key);
+      changed = true;
+    }
+  }
+  if (!changed) { flowLoops = 0; return; }
+  if (flowLoops++ > 12) return; // never keep re-laying out forever
+  computeView();
+  renderPages();
 }
 
 function queueSave() {
@@ -883,13 +1113,13 @@ function scrollToPage(k) {
 }
 
 function moveKey(k, delta) {
-  const order = [...view.order];
+  const order = savedOrder();
   const i = order.indexOf(k);
   const j = i + delta;
   if (i < 0 || j < 0 || j >= order.length) return;
   [order[i], order[j]] = [order[j], order[i]];
   B.data.order = order;
-  view.order = order;
+  view.order = withMore(order, view.byKey);
   queueSave();
   renderPages();
   scrollToPage(k);
@@ -898,8 +1128,9 @@ function moveKey(k, delta) {
 function addPage(type, afterKey) {
   const key = `x:${crypto.randomUUID().slice(0, 8)}`;
   (B.data.extra ||= []).push({ key, type });
-  const order = [...view.order];
-  const at = afterKey ? order.indexOf(afterKey) + 1 : order.length - 1;
+  const order = savedOrder();
+  const after = afterKey?.startsWith('more:') ? view.byKey.get(afterKey)?.famKey : afterKey;
+  const at = after ? order.indexOf(after) + 1 : order.length - 1;
   order.splice(at, 0, key);
   B.data.order = order;
   computeView();
@@ -979,10 +1210,22 @@ function rerenderPage(key) {
 
 function pageCard(k) {
   const page = view.byKey.get(k);
+  if (page.type === 'more') {
+    const box = h('div.bk-scale', h('div.bk-doc', renderPage(page, { edit: false, n: pageNumber(k) })));
+    sizeVars(box.firstElementChild);
+    return h('div.bk-page.bk-more', { 'data-key': k },
+      h('div.bk-page-bar',
+        h('span.bk-page-no', `Page ${pageNumber(k)}`),
+        h('span.bk-page-label', labelOf(k)),
+        h('span.bk-tag', 'Automatic'),
+        h('span.muted.small', `The story was too long for page ${pageNumber(page.famKey)}, so it carries on here. Edit it on that page.`)),
+      box,
+      h('div.bk-issues'));
+  }
   const hidden = !!edits(k).hidden;
   const n = pageNumber(k);
   const i = view.order.indexOf(k);
-  const edited = !!(edits(k).f || edits(k).ph || edits(k).adds || edits(k).layout || edits(k).style || edits(k).gone);
+  const edited = !!(edits(k).f || edits(k).ph || edits(k).pf || edits(k).adds || edits(k).layout || edits(k).style || edits(k).gone);
   const el = renderPage(page, { edit: !hidden, n });
   const box = h('div.bk-scale', h('div.bk-doc', el));
   sizeVars(box.firstElementChild);
@@ -994,10 +1237,10 @@ function pageCard(k) {
       h('span.bk-page-tools',
         h('button.icon-btn', { type: 'button', title: 'Move up', 'aria-label': 'Move page up', disabled: i <= 0, onclick: () => moveKey(k, -1) }, '↑'),
         h('button.icon-btn', { type: 'button', title: 'Move down', 'aria-label': 'Move page down', disabled: i >= view.order.length - 1, onclick: () => moveKey(k, 1) }, '↓'),
-        h('button.btn.small', { type: 'button', onclick: () => { setEdit(k, (e) => { e.hidden = !hidden; }); renderPages(); } }, hidden ? 'Show' : 'Hide'),
+        h('button.btn.small', { type: 'button', onclick: () => { setEdit(k, (e) => { e.hidden = !hidden; }); computeView(); renderPages(); } }, hidden ? 'Show' : 'Hide'),
         edited && !page.extra ? h('button.btn.small', { type: 'button', title: 'Go back to what the tree says, for this page', onclick: async () => {
           if (!await confirmDialog(`Undo every change on "${labelOf(k)}" and go back to what the tree says?`, 'Undo changes')) return;
-          setEdit(k, (e) => { delete e.f; delete e.ph; delete e.adds; delete e.layout; delete e.style; delete e.gone; });
+          setEdit(k, (e) => { delete e.f; delete e.ph; delete e.pf; delete e.adds; delete e.layout; delete e.style; delete e.gone; });
           rerenderPage(k);
         } }, 'Undo changes') : null,
         hidden ? null : h('button.btn.small', { type: 'button', title: 'Add another photo to this page', onclick: () => addItem(k, 'photo') }, '+ Photo'),
@@ -1031,7 +1274,7 @@ function renderPages() {
 }
 
 function afterRender() {
-  const run = () => document.querySelectorAll('#bk-pages .bp').forEach(checkPage);
+  const run = () => { flowStories(); document.querySelectorAll('#bk-pages .bp').forEach(checkPage); };
   requestAnimationFrame(run);
   document.fonts?.ready.then(run);
   setTimeout(run, 1500);
@@ -1441,6 +1684,7 @@ async function openBook(container, id) {
     h('label.bk-tool', 'Size ', h('select', { onchange: (e) => setSetting('size', e.target.value) }, Object.entries(SIZES).map(([k, z]) => h('option', { value: k, selected: k === s.size }, z.name)))),
     h('label.bk-tool', 'Starts from ', h('select', { onchange: (e) => setSetting('rootId', e.target.value) }, startOptions(store.fam, view.rootId))),
     h('label.bk-tool.check', { title: 'Untick to leave out the pages of people who have no photo, story, spouse or children yet (they are still in the picture trees and the chart)' }, h('input', { type: 'checkbox', id: 'bk-all-pages', checked: s.skipEmpty === false, onchange: (e) => setSetting('skipEmpty', !e.target.checked) }), ' A page for everyone'),
+    h('label.bk-tool.check', { title: 'Each photo gets its own frame and a slight tilt, like photos in an album. Untick for plain, straight photos (photos you tilted or moved by hand stay as you left them).' }, h('input', { type: 'checkbox', id: 'bk-mix-frames', checked: s.mixFrames !== false, onchange: (e) => setSetting('mixFrames', e.target.checked) }), ' Mixed photo frames'),
     h('label.bk-tool.check', h('input', { type: 'checkbox', checked: !!s.bleed, onchange: (e) => setSetting('bleed', e.target.checked) }), ' Bleed'),
     h('button.btn.small', { type: 'button', title: 'Add new people and details from the tree. Your changes stay.', onclick: async () => {
       toast('Rebuilding from the tree…');

@@ -129,16 +129,17 @@ const proxy = process.env.BOOK_FONTS && process.env.HTTPS_PROXY ? { proxy: { ser
     await pg.click('h1, .bk-count'); await pg.waitForTimeout(1200);
     const saved = await pg.evaluate((k) => window.__db.book_drafts[0].data.edits[k]?.f?.story, first);
     if (!/timber business/.test(saved || '')) fail(`${tpl}: edited story was not saved (${saved})`);
-    // Too much text: a warning; then put the tree's words back.
+    // Too much text: it carries on, on a continued page; then put the tree's words back.
     const second = famPages[2];
-    const before = await pg.textContent(`.bk-page[data-key="${second}"] .bp-story`);
-    const typeInto = (k, t) => pg.evaluate(([k, t]) => { const el = document.querySelector(`.bk-page[data-key="${k}"] .bp-story`); el.focus(); el.textContent = t; el.dispatchEvent(new Event('input')); el.blur(); }, [k, t]);
+    const before = await pg.textContent(`.bk-page[data-key="${second}"] .bp-fam-text .bp-story`);
+    const typeInto = (k, t) => pg.evaluate(([k, t]) => { const el = document.querySelector(`.bk-page[data-key="${k}"] .bp-fam-text .bp-story`); el.focus(); el.textContent = t; el.dispatchEvent(new Event('input')); el.blur(); }, [k, t]);
     await typeInto(second, 'A long memory that keeps going. '.repeat(320));
-    await pg.waitForTimeout(500);
-    if (!/too long/.test(await pg.textContent(`.bk-page[data-key="${second}"] .bk-issues`))) fail(`${tpl}: no overflow warning`);
+    await pg.waitForTimeout(1200);
+    if (!await pg.$(`.bk-page[data-key^="more:${second.slice(4)}:"]`)) fail(`${tpl}: a long story has no continued page`);
+    if (/too long/.test(await pg.textContent(`.bk-page[data-key="${second}"] .bk-issues`))) fail(`${tpl}: a long story still warns`);
     await typeInto(second, before);
-    await pg.waitForTimeout(300);
-    if (/too long/.test(await pg.textContent(`.bk-page[data-key="${second}"] .bk-issues`))) fail(`${tpl}: overflow warning stays after shortening`);
+    await pg.waitForTimeout(1200);
+    if (await pg.$(`.bk-page[data-key^="more:${second.slice(4)}:"]`)) fail(`${tpl}: the continued page stays after shortening`);
     // Add a quote page after the intro, in Punjabi.
     await pg.click('.bk-page[data-key="intro"] button:has-text("+ Page after")');
     await pg.click('.bk-add-choice:has-text("Quote page")'); await pg.waitForTimeout(400);

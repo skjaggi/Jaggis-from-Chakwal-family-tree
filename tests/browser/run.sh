@@ -28,6 +28,8 @@ node viewas.cjs
 node my-line.cjs
 node start-from.cjs
 node book.cjs
+node book-continued.cjs
+node book-frames.cjs
 node ai-shots.cjs
 node faces.cjs
 node album-names.cjs
