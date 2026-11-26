@@ -379,7 +379,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   const note = h('textarea', { name: 'note', rows: 3, maxlength: 2000, placeholder: 'What is it about, and why does it matter to the family?' });
   note.value = v.note || '';
   for (const el of [title, note, source]) el.addEventListener('input', () => suggest());
-  const image = h('input', { name: 'image_url', type: 'url', placeholder: 'https://… (optional, for articles)', value: v.image_url || '' });
+  const image = h('input', { name: 'image_url', type: 'url', placeholder: 'https://… (optional)', value: v.image_url || '' });
 
   // People in the tree this link is about.
   let people = [...(v.person_ids || [])].filter((id) => store.fam.byId.has(id));
@@ -402,6 +402,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
     const u = normalizeUrl(url.value);
     if (!u || u === lastLooked) return;
     lastLooked = u;
+    if (autoImage && image.value.trim() === autoImage) image.value = ''; // the last link's picture
     if (!source.value.trim()) source.value = siteName(u);
     if (youTubeId(u) && !title.value.trim()) {
       try {
@@ -413,12 +414,29 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
         }
       } catch { /* type the title by hand */ }
     }
-    preview.replaceChildren(previewThumb(u));
+    preview.replaceChildren(previewThumb(u, image.value.trim()));
+    // Other sites: ask for the page's own preview picture (the one WhatsApp shows).
+    if (!youTubeId(u) && !image.value.trim()) {
+      preview.replaceChildren(h('p.muted.small', 'Looking for a picture…'));
+      const found = await linkPreview(u);
+      if (lastLooked !== u) return; // the link was changed meanwhile
+      if (found.title && !title.value.trim()) { title.value = found.title; suggest(); }
+      if (found.image && !image.value.trim()) { image.value = found.image; autoImage = found.image; }
+      preview.replaceChildren(previewThumb(u, image.value.trim(), () => {
+        // The picture didn't load: leave the field empty rather than keep a broken picture.
+        if (autoImage && image.value.trim() === autoImage) image.value = '';
+        preview.replaceChildren();
+      }));
+    }
   };
+  let autoImage = '';
   if (!link && people.length) setTimeout(suggest, 0);
   url.addEventListener('change', lookUp);
   url.addEventListener('paste', () => setTimeout(lookUp, 0));
-  const preview = h('div.lib-form-preview', v.url ? previewThumb(v.url) : null);
+  image.addEventListener('change', () => { const u = normalizeUrl(url.value); preview.replaceChildren(u ? previewThumb(u, image.value.trim()) : ''); });
+  const preview = h('div.lib-form-preview', v.url ? previewThumb(v.url, v.image_url) : null);
+  // An older link with no picture yet: look for one when the admin opens it.
+  if (link && link.kind !== 'photo' && v.url && !youTubeId(v.url) && !v.image_url) setTimeout(lookUp, 0);
 
   const admin = store.isAdmin;
   const isPhoto = link?.kind === 'photo';
@@ -438,7 +456,7 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
     isPhoto ? h('div.row2', field('Where it was taken', takenWhere), field('When it was taken', takenWhen)) : null,
     isPhoto ? h('p.form-note', 'To change the names on the faces, tap Name the faces on the album page.') : field('People in the tree it is about', h('div', chips, picker)),
     isPhoto ? null : h('details.lib-more', h('summary', 'More options'),
-      field('Picture link', image, 'Videos from YouTube get their picture automatically.')),
+      field('Picture link', image, 'Filled in by itself when the website offers a picture. Paste a different picture link to change it, or clear it for no picture.')),
     h('p.form-note', 'Only signed-in family members can see the Library.'),
     h('div.form-actions',
       h('button.btn', { type: 'button', onclick: () => m.close() }, 'Cancel'),
@@ -479,9 +497,20 @@ export function openLibraryForm({ link = null, prefill = {}, onDone = () => {} }
   return m;
 }
 
-function previewThumb(u) {
-  const t = thumbOf({ url: u });
-  return t ? h('img', { src: t, alt: '', loading: 'lazy' }) : null;
+function previewThumb(u, img, onFail) {
+  const t = thumbOf({ url: u, image_url: img || null });
+  return t ? h('img', { src: t, alt: '', loading: 'lazy', onerror: (e) => { e.target.remove(); onFail?.(); } }) : '';
+}
+
+// The preview picture and title of another site's page, found by the
+// link-preview helper. Nothing comes back if the site doesn't offer one.
+async function linkPreview(u) {
+  if (store.preview || !store.sb) return {};
+  try {
+    const { data, error } = await store.sb.functions.invoke('link-preview', { body: { url: u } });
+    if (error || !data) return {};
+    return { image: /^https:\/\/\S+$/i.test(data.image || '') ? data.image : null, title: (data.title || '').slice(0, 200) || null };
+  } catch { return {}; }
 }
 
 // ---------------------------------------------------------------- cards
@@ -497,7 +526,7 @@ function card(link, { onChange, onPerson, tools = true }) {
     thumb
       ? h('img', { src: thumb, alt: '', loading: 'lazy', onerror: (e) => { e.target.remove(); media.classList.add('no-thumb'); } })
       : null,
-    h('span.lib-tile', h('span.lib-tile-icon', KIND_ICON[kind]), h('span', siteName(link.url))),
+    headlineTile(link, kind),
     yt ? h('button.lib-play', { type: 'button', 'aria-label': `Play ${link.title}`, onclick: () => {
       const start = new URL(link.url).searchParams.get('t');
       const secs = start ? parseInt(start, 10) || 0 : 0;
@@ -521,6 +550,42 @@ function card(link, { onChange, onPerson, tools = true }) {
       h('div.lib-foot',
         h('a.lib-open', { href: link.url, target: '_blank', rel: 'noopener' }, yt ? 'Watch on YouTube ↗' : 'Open ↗'),
         actions.length ? h('span.lib-actions', actions) : null)));
+}
+
+// No picture from the website: show the headline, newspaper style, with the
+// site's own small icon and name, so every card still has something to see.
+function headlineTile(link, kind) {
+  const host = siteName(link.url);
+  let hue = 0;
+  for (const c of host) hue = (hue * 31 + c.charCodeAt(0)) % 360;
+  return h('span.lib-tile.lib-headline', { style: `--hl-hue: ${hue}` },
+    h('span.lib-hl-site',
+      h('img.lib-hl-icon', { src: `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(host)}`, alt: '', loading: 'lazy', onerror: (e) => e.target.remove() }),
+      h('span', host)),
+    h('span.lib-hl-title', link.title),
+    h('span.lib-hl-kind', `${KIND_ICON[kind]} ${kind}`));
+}
+
+// Older links without a picture: when the admin opens the Library, look up
+// each one's preview picture and save it (a few at a time, each link at most
+// once a month on this device). Links whose website offers none keep the headline.
+const TRIED_KEY = 'library-pictures-tried';
+async function fillMissingPictures(links, onFound) {
+  if (!store.isAdmin || store.preview || !store.sb) return;
+  let tried = {};
+  try { tried = JSON.parse(localStorage.getItem(TRIED_KEY) || '{}') || {}; } catch { /* private window */ }
+  const now = Date.now();
+  const todo = links.filter((l) => !l.image_url && l.url && !youTubeId(l.url) && !(tried[l.id] > now - 30 * 864e5)).slice(0, 12);
+  for (const l of todo) {
+    const found = await linkPreview(l.url);
+    tried[l.id] = now;
+    if (!found.image) continue;
+    const { data, error } = await store.sb.from('library_links').update({ image_url: found.image }).eq('id', l.id).select('id');
+    if (error || !data?.length) continue;
+    l.image_url = found.image;
+    onFound(l);
+  }
+  try { localStorage.setItem(TRIED_KEY, JSON.stringify(tried)); } catch { /* fine */ }
 }
 
 function cardTags(link, kind) {
@@ -638,6 +703,10 @@ export async function renderLibrary(page, { person = null, photo = null, onSignI
     : store.preview ? null : h('button.btn', { type: 'button', onclick: () => onSignIn?.() }, 'Sign in to suggest a link');
 
   draw();
+  fillMissingPictures(live, (l) => {
+    const old = grid.querySelector(`.lib-card[data-id="${CSS.escape(l.id)}"]`);
+    if (old) old.replaceWith(card(l, { onChange: refresh, onPerson: goToPerson }));
+  });
   clear(page,
     h('div.lib-head',
       h('div', h('h1', 'Family Library'),
