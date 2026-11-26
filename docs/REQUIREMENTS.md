@@ -355,15 +355,18 @@ Sunil (24 Nov 2026): after a group photo is used on the Faces page, offer to kee
 | 20 Nov 2026 | Sunil: on a married person's book page, the spouse's photo is about the same size, with a ring symbol showing they are married. |
 | 21 Nov 2026 | Sunil: a finished book can be shared by WhatsApp or email as a read-only link; anyone who has the link can open it (not only signed-in members). |
 | 18 Nov 2026 | Name fields relabelled "Last name at birth" and "Married last name / other names". This requirements document lives in the repository and is updated in every feature pull request. |
+| 25 Nov 2026 | Sunil: yes to automatic preview pictures for Library links from other sites (product first, then here); the "how other families host their tree" question is closed; fix the "bussiness" typo for Tapashi Ram Jaggi. |
 | 24 Nov 2026 | Sunil: the top menu had too many items. Keep Tree, List, Library, Help (and Review) on top and put the rest under More, My account and Admin; on phones one ☰ Menu sheet. "Faces" becomes a button on the tree, "Add people from a group photo", with numbered steps. Tried on the product site first; Sunil tested it there and asked for the same here (24 Nov 2026). Ancestors goes under More. |
 | 24 Nov 2026 | Sunil: Faces from a group photo, the Family Album (opens like a book, names on faces, where and when, who added it) and "+ Add photo to album" were tried on the product site first and then added here. Album photos are for signed-in family only. |
 | 24 Nov 2026 | Sunil: the Library and photo albums must not be visible to visitors, on both sites. Visitors no longer see the Library at all. |
 
 ## 11. Open questions
 
-- [ ] Automatic preview pictures for non-YouTube Library links (offered, waiting for Sunil).
-- [ ] Future version: how other families host their own tree. Options and a recommendation (one shared platform, the Jaggi site as its first family) are in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md); Sunil's answers to its open questions pending.
-- [ ] Profession typo "bussiness" for Tapashi Ram Jaggi flagged for correction.
+- [x] Automatic preview pictures for non-YouTube Library links: answered 25 Nov 2026, yes. Built on the family product first, then brought here (still planned for this site until then).
+- [x] Future version: how other families host their own tree: answered 20 to 24 Nov 2026. It is one shared platform, the family product at app.sjaggi.com, with this site as its first family later on. Only the brand name and the selling company are still open, and neither is needed before spring 2027. The latest plan is in the product's own repository.
+- [x] Profession typo "bussiness" for Tapashi Ram Jaggi: answered 25 Nov 2026, change it to "Business" (a one-word change to his record in the live database).
+
+No open questions right now.
 
 ## Change log
 
@@ -371,6 +374,7 @@ Newest first. Each feature pull request adds a line.
 
 | Date | Pull request | Change |
 |---|---|---|
+| 25 Nov 2026 | | Open questions (section 11) answered by Sunil and closed. No change to the site. |
 | 25 Nov 2026 | | **The person who added an album photo can edit it too** (from the family product; Sunil asked for it on both sites). Besides the admin, the member who added a photo gets **Name the faces** and **Edit the details** on its page; other members don't. Only the admin approves or removes. The database enforces it: update policy "admin or the sender edits library links" (photos only) and trigger `_library_own_edit_guard`. Help section on the Family Album. Database script 2026-11-25-library-sender-edits.sql (rollback included). |
 | 25 Nov 2026 | | **Name the faces afterwards** (from the family product; Sunil asked to bring it here). Each Family Album page has **Name the faces** for the admin: the photo opens with its names, faces nobody named are found again, and names can be added, changed or taken off; only the names change. Names on faces show the first name only, and a name never blocks a tap on the face beside it. Help section on the Family Album. No database change. |
 | 24 Nov 2026 | | **Fresh styles after an update.** Each page (tree, Help, Ancestors) checks that its styles loaded; if a browser kept an old copy, it fetches them fresh and reloads once. GitHub Pages already tells browsers to check again after 10 minutes. No database change. |
