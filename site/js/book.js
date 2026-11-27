@@ -14,7 +14,7 @@
 // and text that does not fit its page. "Make the print-ready PDF" prints the
 // pages at their real size (with optional printer's bleed); choose "Save as
 // PDF" in the print window.
-import { store } from './data.js';
+import { store, renewPhotoLinks, onPhotoLinksRenew } from './data.js';
 import { config } from './config.js';
 import { family } from './family.js';
 import { fullName, lifeLine, KIND_LABEL } from './model.js';
@@ -165,6 +165,18 @@ async function loadPhotoUrls(data) {
   const { data: urls } = await store.sb.storage.from(BUCKET).createSignedUrls(paths, 60 * 60 * 6);
   (urls || []).forEach((r, i) => { if (r?.signedUrl) photoUrlCache.set(paths[i], r.signedUrl); });
 }
+// Book photo links run out after six hours too: renew them with the tree's.
+onPhotoLinksRenew(async (swap) => {
+  const paths = [...photoUrlCache.entries()].filter(([, u]) => !u.startsWith('blob:')).map(([p]) => p);
+  if (!paths.length || store.preview) return;
+  const { data: urls } = await store.sb.storage.from(BUCKET).createSignedUrls(paths, 60 * 60 * 6);
+  (urls || []).forEach((r, i) => {
+    if (!r?.signedUrl) return;
+    const old = photoUrlCache.get(paths[i]);
+    if (old && old !== r.signedUrl) swap.set(old, r.signedUrl);
+    photoUrlCache.set(paths[i], r.signedUrl);
+  });
+});
 
 // ------------------------------------------------------------------ building the book from the tree
 
@@ -400,8 +412,13 @@ function photo(key, slot, autoPersonId, { cls = '', label = '', edit, monogram =
     frame.title = 'Click to replace this photo';
     frame.append(h('span.bp-photo-hint', src ? 'Replace photo' : 'Add a photo'));
     frame.addEventListener('click', () => choosePhoto(key, slot, autoPersonId, label));
-    const img = frame.querySelector('img');
-    if (img) img.addEventListener('load', () => checkPage(frame.closest('.bp')));
+  }
+  // Check the page again once the photo has loaded, or if it fails to load
+  // (a broken photo is listed in the warnings and shown on the page).
+  const img = edit && frame.querySelector('img');
+  if (img) {
+    img.addEventListener('load', () => { frame.classList.remove('broken'); checkPage(frame.closest('.bp')); });
+    img.addEventListener('error', () => { frame.classList.add('broken'); checkPage(frame.closest('.bp')); });
   }
   return frame;
 }
@@ -914,7 +931,10 @@ function checkPage(pageEl) {
   fitTrees(pageEl);
   const fits = [...pageEl.querySelectorAll('.fit'), pageEl.querySelector('.bp-inner')];
   if (fits.some((el) => el && overflows(el))) list.push('Text is too long for this page. Shorten it, or move part of it to a new story page.');
+  let broken = 0;
   for (const img of pageEl.querySelectorAll('.bp-photo img')) {
+    if (img.complete && !img.naturalWidth) broken++;
+    img.closest('.bp-photo').classList.toggle('broken', img.complete && !img.naturalWidth);
     if (!img.complete || !img.naturalWidth) continue;
     const fw = img.offsetWidth / 96;
     const fh = img.offsetHeight / 96;
@@ -923,6 +943,7 @@ function checkPage(pageEl) {
     img.closest('.bp-photo').classList.toggle('low-res', dpi < 150);
     if (dpi < 150) list.push(`A photo is small for its frame (about ${dpi} dots per inch; 150 or more prints well, 300 is best). It may print blurry. Use a larger scan if you have one.`);
   }
+  if (broken) list.unshift(`${broken === 1 ? 'A photo' : `${broken} photos`} did not load. Click "Rebuild from the tree" to load ${broken === 1 ? 'it' : 'them'} again, or click the photo to choose another one.`);
   pageEl.classList.toggle('has-issue', list.length > 0);
   const wrap = pageEl.closest('.bk-page');
   const box = wrap?.querySelector('.bk-issues');
@@ -941,7 +962,7 @@ function renderIssueSummary() {
     const keys = view.order.filter((k) => issues.has(k) && !edits(k).hidden);
     clear(el, keys.length
       ? [h('strong', `⚠ ${keys.length} page${keys.length === 1 ? '' : 's'} to check`), h('ul', keys.map((k) => h('li', h('button.linkish', { type: 'button', onclick: () => scrollToPage(k) }, `Page ${pageNumber(k) || '–'}: ${labelOf(k)}`))))]
-      : h('span.ok', '✓ No warnings: every photo is sharp enough and all text fits.'));
+      : h('span.ok', '✓ No warnings: every photo loaded and is sharp enough, and all text fits.'));
   }, 150);
 }
 
@@ -1414,6 +1435,7 @@ function openFlipbook(startIndex = 0, src = null) {
 // public (book photos and Family-branch-only photos have addresses that
 // expire) are copied into the share's own folder, so the copy keeps working.
 async function makeSnapshot(token, progress) {
+  await renewPhotoLinks();
   const doc = h('div.bk-doc');
   sizeVars(doc);
   visibleOrder().forEach((k, i) => doc.append(renderPage(view.byKey.get(k), { edit: false, n: i + 1 })));
@@ -1564,7 +1586,8 @@ async function openShared(container, token) {
 
 // ------------------------------------------------------------------ print
 
-function printBook() {
+async function printBook() {
+  await renewPhotoLinks(); // fresh photo links, so none break while printing
   const { size, bleed } = { size: SIZES[B.data.settings.size] || SIZES.sq12, bleed: B.data.settings.bleed ? BLEED : 0 };
   const W = size.w + 2 * bleed;
   const H = size.h + 2 * bleed;
@@ -1673,6 +1696,7 @@ async function openBook(container, id) {
   }
   B.data.settings = { template: 'heritage', size: 'sq12', skipEmpty: true, bleed: false, ...B.data.settings };
   await loadPhotoUrls(B.data).catch(() => {});
+  await renewPhotoLinks(); // only if the links are getting old
   computeView();
   const s = B.data.settings;
   const setSetting = (k, v) => { s[k] = v; computeView(); queueSave(); renderPages(); };
@@ -1688,6 +1712,7 @@ async function openBook(container, id) {
     h('label.bk-tool.check', h('input', { type: 'checkbox', checked: !!s.bleed, onchange: (e) => setSetting('bleed', e.target.checked) }), ' Bleed'),
     h('button.btn.small', { type: 'button', title: 'Add new people and details from the tree. Your changes stay.', onclick: async () => {
       toast('Rebuilding from the tree…');
+      await renewPhotoLinks({ force: true });
       computeView();
       renderPages();
       toast('Rebuilt: new people and details from the tree are in, and your changes are kept.');

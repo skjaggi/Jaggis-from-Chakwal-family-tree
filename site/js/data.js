@@ -193,11 +193,77 @@ async function loadPhotoUrls(people) {
     }
   }
   if (branch.length) {
-    const { data } = await store.sb.storage.from('photos-branch').createSignedUrls(branch.map((p) => p.photo_path), 60 * 60 * 6);
+    const { data } = await store.sb.storage.from('photos-branch').createSignedUrls(branch.map((p) => p.photo_path), PHOTO_LINK_HOURS * 3600);
     (data || []).forEach((r, i) => {
       if (r?.signedUrl && !r.error) store.photoUrls.set(branch[i].id, r.signedUrl);
     });
   }
+  photoLinksAt = Date.now();
+}
+
+// "Family branch only" photos are shown through private links that stop
+// working after PHOTO_LINK_HOURS. A page left open longer than that (for
+// example the book maker, open overnight) would show broken photos, so the
+// links are made again before they run out, when the page comes back into
+// view, and straight away if a photo fails to load. Photos already on the
+// screen are switched to the new link in place.
+const PHOTO_LINK_HOURS = 6;
+const PHOTO_LINK_RENEW_MS = 4 * 3600 * 1000;
+let photoLinksAt = 0;
+let renewing = null;
+const renewHooks = new Set();
+// Other parts of the site (the book maker's own photos) renew their links too.
+export function onPhotoLinksRenew(fn) { renewHooks.add(fn); }
+export function photoLinksAge() { return Date.now() - photoLinksAt; }
+
+export function renewPhotoLinks({ force = false } = {}) {
+  if (store.preview || !store.raw) return Promise.resolve(false);
+  if (!force && photoLinksAge() < PHOTO_LINK_RENEW_MS) return Promise.resolve(false);
+  renewing ||= (async () => {
+    const swap = new Map(); // old link -> new link
+    const real = store.real?.photoUrls || store.photoUrls;
+    const signedIn = !!(store.real?.session || store.session);
+    const branch = signedIn ? store.raw.people.filter((p) => p.photo_path && !p.photo_path.startsWith('img/') && p.photo_visibility !== 'public') : [];
+    if (branch.length) {
+      const { data, error } = await store.sb.storage.from('photos-branch').createSignedUrls(branch.map((p) => p.photo_path), PHOTO_LINK_HOURS * 3600);
+      if (error) throw error;
+      (data || []).forEach((r, i) => {
+        if (!r?.signedUrl || r.error) return;
+        const id = branch[i].id;
+        for (const m of new Set([real, store.photoUrls])) {
+          if (m !== real && !m.has(id)) continue; // "View as": only what that member may see
+          const old = m.get(id);
+          if (old && old !== r.signedUrl) swap.set(old, r.signedUrl);
+          m.set(id, r.signedUrl);
+        }
+      });
+    }
+    photoLinksAt = Date.now();
+    for (const fn of renewHooks) await Promise.resolve(fn(swap)).catch((e) => console.warn('renew photo links', e));
+    swapImageLinks(swap);
+    return true;
+  })().catch((e) => { console.warn('renew photo links', e); return false; }).finally(() => { renewing = null; });
+  return renewing;
+}
+
+// Point every photo on the screen that still uses an old link at its new one.
+export function swapImageLinks(swap) {
+  if (!swap.size || typeof document === 'undefined') return;
+  for (const img of document.querySelectorAll('img')) {
+    const now = swap.get(img.getAttribute('src'));
+    if (now) img.setAttribute('src', now);
+  }
+}
+
+if (typeof window !== 'undefined') {
+  setInterval(() => renewPhotoLinks(), 10 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') renewPhotoLinks(); });
+  // A private photo that fails to load has most likely run out: renew now.
+  document.addEventListener('error', (e) => {
+    const t = e.target;
+    // At most once a minute, so a photo that is really missing does not loop.
+    if (t?.tagName === 'IMG' && /\/storage\/v1\/object\/sign\//.test(t.src || '') && photoLinksAge() > 60 * 1000) renewPhotoLinks({ force: true });
+  }, true);
 }
 
 // ------------------------------------------------------------------ auth

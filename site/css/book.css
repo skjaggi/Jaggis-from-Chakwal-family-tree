@@ -110,6 +110,9 @@ body[data-view="book"] .page { max-width: 1280px; }
 .bp-photo.clickable:hover .bp-photo-hint, .bp-photo.empty .bp-photo-hint { opacity: 1; }
 .bp-photo.low-res::after { content: "⚠ may print blurry"; position: absolute; top: 4%; left: 4%; padding: 0.2em 0.6em; border-radius: 999px; background: #e08a00; color: #fff; font: 700 0.62em Inter, system-ui, sans-serif; }
 .bk-doc.printing .bp-photo.low-res::after { display: none; }
+.bp-photo.broken::after { content: "⚠ photo did not load"; position: absolute; top: 4%; left: 4%; padding: 0.2em 0.6em; border-radius: 999px; background: #c0392b; color: #fff; font: 700 0.62em Inter, system-ui, sans-serif; }
+.bp-photo.broken img { visibility: hidden; }
+.bk-doc.printing .bp-photo.broken::after { display: none; }
 
 /* Cover */
 .t-cover .bp-inner { align-items: center; justify-content: center; text-align: center; gap: 0.9em; }

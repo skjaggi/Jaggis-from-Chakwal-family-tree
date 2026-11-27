@@ -239,7 +239,8 @@ export function createClient() {
       remove: async () => ({ error: null }),
       getPublicUrl: p => ({ data: { publicUrl: URL.createObjectURL(files.get(b + '/' + p) || new Blob()) } }),
       createSignedUrl: async p => ({ data: { signedUrl: URL.createObjectURL(files.get(b + '/' + p) || new Blob()) } }),
-      createSignedUrls: async ps => ({ data: ps.map(p => ({ signedUrl: URL.createObjectURL(files.get(b + '/' + p) || new Blob()) })) }),
+      // window.__FAKE_SIGNED__: real-looking private links (tests that make them run out).
+      createSignedUrls: async ps => ({ data: ps.map(p => ({ signedUrl: window.__FAKE_SIGNED__ && b === 'photos-branch' ? `https://x.supabase.co/storage/v1/object/sign/${b}/${p}?token=${++window.__FAKE_SIGNED__}` : URL.createObjectURL(files.get(b + '/' + p) || new Blob()) })) }),
     }) },
   };
 }
