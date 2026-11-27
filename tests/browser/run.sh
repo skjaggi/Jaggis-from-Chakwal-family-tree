@@ -30,6 +30,7 @@ node start-from.cjs
 node book.cjs
 node book-continued.cjs
 node book-frames.cjs
+node book-broken-photos.cjs
 node ai-shots.cjs
 node faces.cjs
 node album-names.cjs
